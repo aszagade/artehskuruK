@@ -1,0 +1,81 @@
+# ==========================================================
+# KURUKSHETRA - Git Ignore
+# ==========================================================
+
+# ---------- Python ----------
+.venv/
+venv/
+ENV/
+env/
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ---------- Environment ----------
+.env
+.env.*
+!.env.example
+
+# ---------- VS Code ----------
+.vscode/
+.history/
+
+# ---------- OS ----------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------- Logs ----------
+logs/
+*.log
+
+# ---------- Temporary ----------
+temp/
+tmp/
+cache/
+*.tmp
+
+# ---------- Jupyter ----------
+.ipynb_checkpoints/
+
+# ---------- RAG / Vector Databases ----------
+vector_store/
+embeddings/
+chroma_db/
+qdrant_storage/
+faiss_index/
+llama_index_storage/
+
+# ---------- Parsed / Generated Knowledge ----------
+extracted_text/
+parsed_docs/
+ocr_output/
+
+# ---------- Generated Reports ----------
+generated/
+exports/
+reports/
+
+# ---------- Model Files ----------
+models/
+*.gguf
+*.bin
+
+# ---------- Archives ----------
+*.zip
+*.7z
+*.rar
+
+# ---------- Roo Local Cache ----------
+.roo/cache/
+
+# ==========================================================
+# KEEP SOURCE KNOWLEDGE
+# ==========================================================
+!KNOWLEDGE/**/*.pdf
+!KNOWLEDGE/**/*.docx
+!KNOWLEDGE/**/*.xlsx
+!KNOWLEDGE/**/*.pptx
+!KNOWLEDGE/**/*.csv
+!KNOWLEDGE/**/*.md
