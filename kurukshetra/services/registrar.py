@@ -12,15 +12,30 @@ from kurukshetra.registry import get_connection
 
 
 class DocumentRegistrar:
-    """
-    Registers knowledge assets into the KURUKSHETRA Registry.
-    """
+    """Registers knowledge assets into the KURUKSHETRA Registry."""
 
     def register(self, file_path: Path) -> DocumentIdentity:
         if not file_path.exists():
             raise FileNotFoundError(file_path)
 
         conn = get_connection()
+        sha = generate_sha256(file_path)
+
+        # Return existing document if already registered
+        existing = conn.execute(
+            "SELECT document_id FROM documents WHERE sha256 = ?",
+            (sha,),
+        ).fetchone()
+
+        if existing:
+            conn.close()
+            return DocumentIdentity(
+                document_id=existing[0],
+                file_name=file_path.name,
+                sha256=sha,
+                file_size=file_path.stat().st_size,
+                created_at=datetime.utcnow(),
+            )
 
         sequence = (
             conn.execute("SELECT COUNT(*) FROM documents").fetchone()[0] + 1
@@ -29,7 +44,7 @@ class DocumentRegistrar:
         identity = DocumentIdentity(
             document_id=create_document_id(sequence),
             file_name=file_path.name,
-            sha256=generate_sha256(file_path),
+            sha256=sha,
             file_size=file_path.stat().st_size,
             created_at=datetime.utcnow(),
         )
