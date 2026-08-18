@@ -1,34 +1,69 @@
 from __future__ import annotations
+
 import math
 from collections import Counter
 
 from kurukshetra.chunking.models import Chunk
+
 from .base import BaseRetriever
 from .models import RetrievalResult
 
 
 class BM25Retriever(BaseRetriever):
-    def __init__(self, chunks: list[Chunk]):
+    """
+    Deterministic BM25 lexical retriever.
+
+    Operates on persisted Chunk objects and returns RetrievalResult.
+    """
+
+    def __init__(self, chunks: list[Chunk]) -> None:
         self.chunks = chunks
-        self.docs = [c.text.lower().split() for c in chunks]
-        self.avgdl = sum(len(d) for d in self.docs) / max(len(self.docs), 1)
+        self.documents = [chunk.text.lower().split() for chunk in chunks]
 
-    def search(self, query: str, top_k: int = 5) -> list[RetrievalResult]:
-        q = query.lower().split()
-        results = []
+        if self.documents:
+            self.avgdl = sum(len(doc) for doc in self.documents) / len(self.documents)
+        else:
+            self.avgdl = 0.0
 
-        for chunk, doc in zip(self.chunks, self.docs):
-            tf = Counter(doc)
+    def search(
+        self,
+        query: str,
+        top_k: int = 5,
+    ) -> list[RetrievalResult]:
+        if not self.chunks:
+            return []
+
+        query_terms = query.lower().split()
+        results: list[RetrievalResult] = []
+
+        total_docs = len(self.documents)
+        k1 = 1.5
+        b = 0.75
+
+        for chunk, doc in zip(self.chunks, self.documents):
+            term_freq = Counter(doc)
             score = 0.0
 
-            for term in q:
-                df = sum(term in d for d in self.docs)
-                if df == 0:
+            for term in query_terms:
+                document_frequency = sum(term in d for d in self.documents)
+
+                if document_frequency == 0:
                     continue
-                idf = math.log((len(self.docs)-df+0.5)/(df+0.5)+1)
-                freq = tf[term]
-                dl = len(doc)
-                score += idf * (freq*2.5)/(freq+1.5*(1-0.75+0.75*dl/self.avgdl))
+
+                idf = math.log(
+                    ((total_docs - document_frequency + 0.5) /
+                     (document_frequency + 0.5)) + 1
+                )
+
+                frequency = term_freq[term]
+                document_length = len(doc)
+
+                denominator = (
+                    frequency +
+                    k1 * (1 - b + b * document_length / max(self.avgdl, 1))
+                )
+
+                score += idf * ((frequency * (k1 + 1)) / denominator)
 
             if score > 0:
                 results.append(
@@ -41,4 +76,5 @@ class BM25Retriever(BaseRetriever):
                     )
                 )
 
-        return sorted(results, key=lambda x: x.score, reverse=True)[:top_k]
+        results.sort(key=lambda item: item.score, reverse=True)
+        return results[:top_k]
