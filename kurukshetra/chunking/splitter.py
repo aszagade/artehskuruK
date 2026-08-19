@@ -35,7 +35,7 @@ class DeterministicSplitter:
 
             chunks.append(
                 Chunk(
-                    chunk_id=f"CH-{sequence:06d}",
+                    chunk_id=f"{document_id}-CH-{sequence:06d}",
                     document_id=document_id,
                     sequence=sequence,
                     text=chunk_text,
