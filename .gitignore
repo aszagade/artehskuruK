@@ -79,3 +79,15 @@ models/
 !KNOWLEDGE/**/*.pptx
 !KNOWLEDGE/**/*.csv
 !KNOWLEDGE/**/*.md
+
+# Kurukshetra generated database
+*.duckdb
+*.wal
+*.db
+
+# Python cache
+__pycache__/
+*.pyc
+
+# HuggingFace cache
+models/
