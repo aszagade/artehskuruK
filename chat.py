@@ -1,33 +1,31 @@
-from pathlib import Path
-
-from kurukshetra.pipeline.bulk_ingest import BulkIngestionPipeline
-from kurukshetra.pipeline.indexer import KnowledgeIndexer
-
-
-KNOWLEDGE_FOLDER = Path("General_Documents")
+from kurukshetra.registry.documents import DocumentRepository
+from kurukshetra.retrieval.hybrid import HybridRetriever
+from kurukshetra.reranking import BGEReranker
 
 
 def build_engine():
-    print("Loading knowledge...")
+    print("Loading KURUKSHETRA Knowledge Base...\n")
 
-    bulk = BulkIngestionPipeline()
-    docs = bulk.ingest_folder(KNOWLEDGE_FOLDER)
+    return (
+        HybridRetriever(),
+        BGEReranker(),
+        DocumentRepository(),
+    )
 
-    indexer = KnowledgeIndexer()
 
-    for doc in docs:
-        indexer.add(doc["chunks"])
-
-    print(f"Loaded {len(docs)} documents.\n")
-
-    return indexer.build()
+def confidence(score: float):
+    if score >= 0.08:
+        return "HIGH"
+    if score >= 0.03:
+        return "MEDIUM"
+    return "LOW"
 
 
 def main():
-    retriever = build_engine()
+    retriever, reranker, docs = build_engine()
 
     print("=" * 60)
-    print("KURUKSHETRA Knowledge Chat")
+    print("KURUKSHETRA Hybrid RAG Chat")
     print("Type 'exit' to quit")
     print("=" * 60)
 
@@ -38,17 +36,24 @@ def main():
             print("Goodbye.")
             break
 
-        results = retriever.search(question)
+        # Hybrid Retrieval
+        results = retriever.search(question, top_k=10)
+
+        # AI Reranking
+        results = reranker.rerank(question, results, top_k=3)
 
         if not results:
             print("\nKURUKSHETRA: No relevant knowledge found.")
             continue
 
         best = results[0]
+        doc = docs.get(best.document_id)
 
         print("\nKURUKSHETRA")
-        print(f"Document : {best.document_id}")
-        print(f"Score    : {best.score:.2f}")
+        print(f"Source     : {doc[1]}")
+        print(f"Document   : {best.document_id}")
+        print(f"Chunk      : {best.chunk_id}")
+        print(f"Confidence : {confidence(best.score)} ({best.score:.3f})")
         print("-" * 60)
         print(best.text[:1500])
         print("-" * 60)
