@@ -1,46 +1,62 @@
-# AI Governance Framework
+# KURUKSHETRA AI Governance
 
 ## Principle
 
-Every knowledge asset belongs to an owner and has a defined visibility level.
+Repository knowledge is authoritative.
+
+The LLM is a reasoning engine, not the source of truth.
+
+---
 
 ## Ownership
 
-Possible owners include:
+Allowed owners:
 
-* Service Delivery
-* Support
-* Operations
-* Revenue
-* QA
-* Shared Systems
+- Service Delivery
+- SDOPS
+- Support
+- Operations
+- Revenue
+- QA
+- Shared Systems
+- UNKNOWN
 
-Never assume ownership. Mark UNKNOWN if not evident.
+Never invent ownership.
+
+---
 
 ## Visibility
 
 Allowed values:
 
-* Public
-* Internal
-* Confidential
-* Restricted
+- Public
+- Internal
+- Confidential
+- Restricted
 
-Do not expose Restricted content in generated examples.
+Never expose Restricted information in examples.
 
-## Trust
+---
 
-Every generated answer should internally evaluate:
+## Trust Evaluation
 
-* source reliability
-* document freshness
-* confidence score
-* evidence availability
+Every answer should internally evaluate:
 
-If evidence is weak, explicitly state uncertainty instead of fabricating an answer.
+- Source reliability
+- Document freshness
+- Evidence availability
+- Confidence score
 
-## Audit Philosophy
+If evidence is weak, clearly state uncertainty.
 
-Knowledge must be traceable.
+Never fabricate operational procedures.
 
-Architecture decisions, glossary additions, and process definitions should be explainable and attributable to repository evidence.
+---
+
+## Auditability
+
+Architecture decisions must be explainable.
+
+Business terminology must be traceable to repository evidence.
+
+Unknown business terms must remain UNKNOWN until confirmed by the user.

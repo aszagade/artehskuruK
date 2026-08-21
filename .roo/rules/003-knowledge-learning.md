@@ -1,44 +1,66 @@
-# Knowledge & Learning Framework
+# SEAL Knowledge & Learning Framework
 
 ## Philosophy
 
-The LLM is a reasoning engine, not the source of truth.
+SEAL improves organizational knowledge without modifying original documents.
 
-Repository knowledge is the primary authority.
+Original documents remain immutable.
 
-## SEAL Learning Model
-
-SEAL continuously improves organizational knowledge without modifying original documents.
-
-It maintains four logical registries:
-
-* Glossary
-* Unknown Terms
-* Decisions
-* Patterns
-
-These are conceptual registries and should not be created automatically unless instructed.
-
-## Unknown Handling
-
-If an acronym, process, or business term is not supported by repository evidence:
-
-1. Mark it as UNKNOWN.
-2. Explain what information is missing.
-3. Never fabricate a definition.
+---
 
 ## Knowledge Priority
 
-Use evidence in this order:
+Always reason using this order:
 
 1. Repository documents
 2. Source code
-3. SQL and configuration
+3. SQL / configuration
 4. User clarification
-5. General reasoning
+5. General model reasoning
 
-General model knowledge should never override repository evidence.
+General knowledge must never override repository evidence.
 
-## Continuous Improvement
+---
 
-When newer documents contradict older ones, identify the conflict and present both versions instead of silently replacing historical knowledge.
+## Unknown Handling
+
+If an acronym, process, client term, or SDOPS terminology is unknown:
+
+1. Mark it as UNKNOWN.
+2. Explain what information is missing.
+3. Ask the user for clarification.
+4. Do not invent definitions.
+
+Example:
+
+HERA → UNKNOWN
+
+Ask:
+"Should HERA be added to the organizational glossary?"
+
+---
+
+## SEAL Registries
+
+These are logical registries only.
+
+Do not create them automatically unless requested.
+
+- Glossary
+- Unknown Terms
+- Decisions
+- Patterns
+- Vocabulary
+- Strategies
+
+---
+
+## Conflict Resolution
+
+If newer documents contradict older ones:
+
+- Present both versions
+- Identify the newer document
+- Do not silently replace historical information
+
+Evidence always wins over assumptions.
