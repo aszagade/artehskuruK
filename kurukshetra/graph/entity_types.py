@@ -5,32 +5,32 @@ Extended Entity & Relationship Types
 The complete type taxonomy for KURUKSHETRA's Knowledge Graph.
 
 Entity Types:
-  DOCUMENT  — ingested knowledge artifact
-  TEAM      — organizational unit (SPM, ICS, SDOPS, etc.)
-  PERSON    — individual within the organization
-  CLIENT    — hotel/property client using IDeaS products
-  PROPERTY  — hotel property (physical location)
-  SYSTEM    — software system (G3 RMS, Opera, OXI, OHIP, etc.)
-  PROCESS   — operational procedure or workflow
-  JOB       — scheduled or ad-hoc operational task
-  INCIDENT  — error, failure, or production issue
-  CONFIGURATION — parameter, setting, or config value
-  METRIC    — measurement or KPI
-  KNOWLEDGE_ARTICLE — reference or knowledge base entry
+  DOCUMENT  ? ingested knowledge artifact
+  TEAM      ? organizational unit (SPM, ICS, SDOPS, etc.)
+  PERSON    ? individual within the organization
+  CLIENT    ? hotel/property client using IDeaS products
+  PROPERTY  ? hotel property (physical location)
+  SYSTEM    ? software system (G3 RMS, Opera, OXI, OHIP, etc.)
+  PROCESS   ? operational procedure or workflow
+  JOB       ? scheduled or ad-hoc operational task
+  INCIDENT  ? error, failure, or production issue
+  CONFIGURATION ? parameter, setting, or config value
+  METRIC    ? measurement or KPI
+  KNOWLEDGE_ARTICLE ? reference or knowledge base entry
 
 Relationship Types:
-  OWNED_BY     — document/team/person owned by team/org
-  BELONGS_TO   — entity belongs to a team/group
-  USES         — entity uses another entity
-  DEPENDS_ON   — entity depends on another entity
-  TRIGGERS     — entity triggers another entity
-  REFERENCES   — entity references another entity
-  RESOLVES     — entity resolves an incident/error
-  GENERATED_FROM — entity derived from another entity
-  MONITORS     — entity monitors another entity
-  CONFIGURES   — entity configures another entity
-  CONTAINS     — entity contains another entity
-  GENERATES    — entity generates another entity
+  OWNED_BY     ? document/team/person owned by team/org
+  BELONGS_TO   ? entity belongs to a team/group
+  USES         ? entity uses another entity
+  DEPENDS_ON   ? entity depends on another entity
+  TRIGGERS     ? entity triggers another entity
+  REFERENCES   ? entity references another entity
+  RESOLVES     ? entity resolves an incident/error
+  GENERATED_FROM ? entity derived from another entity
+  MONITORS     ? entity monitors another entity
+  CONFIGURES   ? entity configures another entity
+  CONTAINS     ? entity contains another entity
+  GENERATES    ? entity generates another entity
 
 Every relationship carries Evidence for provenance.
 """
@@ -82,7 +82,7 @@ class ExtendedRelationType(Enum):
 
 
 # =====================================================================
-# Evidence — provenance for every relationship
+# Evidence ? provenance for every relationship
 # =====================================================================
 
 @dataclass
@@ -97,7 +97,7 @@ class Evidence:
         source_document: document_id that provided this evidence
         source_chunk: optional chunk_id within the document
         source_text: the exact text fragment that justifies the relationship
-        confidence: machine-assessed confidence (0.0–1.0)
+        confidence: machine-assessed confidence (0.0?1.0)
         human_confirmed: whether a human has validated this relationship
         created_at: when this evidence was first recorded
         updated_at: when this evidence was last modified
@@ -218,7 +218,7 @@ class ExtendedRelationship:
 
 
 # =====================================================================
-# Mapping helpers: old types ↔ extended types
+# Mapping helpers: old types ? extended types
 # =====================================================================
 
 # EntityType -> ExtendedEntityType

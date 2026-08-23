@@ -103,19 +103,19 @@ class ValidationReport:
         if self.critical_errors:
             lines.append(f"CRITICAL ERRORS: {len(self.critical_errors)}")
             for err in self.critical_errors:
-                lines.append(f"  ✗ {err}")
+                lines.append(f"  X {err}")
             lines.append("")
 
         if self.warnings:
             lines.append(f"WARNINGS: {len(self.warnings)}")
             for warn in self.warnings:
-                lines.append(f"  ⚠ {warn}")
+                lines.append(f"  ! {warn}")
             lines.append("")
 
         if self.passed:
-            lines.append("RESULT: ✓ PASSED")
+            lines.append("RESULT: PASSED")
         else:
-            lines.append("RESULT: ✗ FAILED")
+            lines.append("RESULT: FAILED")
 
         lines.append("=" * 50)
         return "\n".join(lines)

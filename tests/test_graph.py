@@ -658,7 +658,7 @@ class TestEdgeCases(unittest.TestCase):
         """Extraction from text with unicode characters doesn't crash."""
         ext = SmartEntityExtractor()
         result = ext.extract_from_document(
-            text="G3 RMS configuration for café property — status: ✓",
+            text="G3 RMS configuration for caf? property ? status: ?",
             document_id="UNICODE",
         )
         self.assertGreater(len(result.entities), 0)

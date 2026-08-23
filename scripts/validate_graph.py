@@ -54,7 +54,7 @@ def validate_database(db_path: str) -> None:
     if doc_report.warnings:
         print(f"Document warnings: {len(doc_report.warnings)}")
         for w in doc_report.warnings[:20]:
-            print(f"  ⚠ {w}")
+            print(f"  ! {w}")
         if len(doc_report.warnings) > 20:
             print(f"  ... and {len(doc_report.warnings) - 20} more")
         print()
@@ -65,13 +65,13 @@ def validate_database(db_path: str) -> None:
 
     print("Entities by type:")
     for etype, count in sorted(summary["entities_by_type"].items()):
-        bar = "█" * min(count, 40)
+        bar = "#" * min(count, 40)
         print(f"  {etype:20s} {count:5d}  {bar}")
 
     print()
     print("Relationships by type:")
     for rtype, count in sorted(summary["relationships_by_type"].items()):
-        bar = "█" * min(count, 40)
+        bar = "#" * min(count, 40)
         print(f"  {rtype:20s} {count:5d}  {bar}")
 
     print()
@@ -102,14 +102,14 @@ def validate_extraction_sample(text: str) -> None:
     validator = GraphValidator()
     doc_val = validator.validate_extraction(result)
 
-    print(f"Document entity:      {'✓' if doc_val.has_document_entity else '✗'}")
-    print(f"Team relationship:    {'✓' if doc_val.has_team_relationship else '✗'}")
+    print(f"Document entity:      {'?' if doc_val.has_document_entity else '?'}")
+    print(f"Team relationship:    {'?' if doc_val.has_team_relationship else '?'}")
     print(f"Systems detected:     {doc_val.systems_detected}")
     print(f"Processes detected:   {doc_val.processes_detected}")
     print(f"Jobs detected:        {doc_val.jobs_detected}")
     print(f"Incidents detected:   {doc_val.incidents_detected}")
     print(f"Configs detected:     {doc_val.configs_detected}")
-    print(f"Evidence attached:    {'✓' if doc_val.evidence_attached else '✗'}")
+    print(f"Evidence attached:    {'?' if doc_val.evidence_attached else '?'}")
     print(f"Total entities:       {doc_val.entity_count}")
     print(f"Total relationships:  {doc_val.relationship_count}")
     print(f"Extraction confidence: {result.extraction_confidence:.3f}")
@@ -118,9 +118,9 @@ def validate_extraction_sample(text: str) -> None:
     if doc_val.errors:
         print(f"Errors: {len(doc_val.errors)}")
         for e in doc_val.errors:
-            print(f"  ✗ {e}")
+            print(f"  ? {e}")
     else:
-        print("Errors: 0 ✓")
+        print("Errors: 0 ?")
 
 
 def print_summary_only(db_path: str) -> None:
