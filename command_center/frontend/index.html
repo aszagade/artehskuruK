@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KURUKSHETRA Command Center</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #0a0e17;
+            color: #e0e0e0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1a1f36 0%, #0d1117 100%);
+            border-bottom: 1px solid #21262d;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            font-size: 20px;
+            color: #58a6ff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header h1 .icon { font-size: 24px; }
+        .status-badge {
+            background: #238636;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Main layout */
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: #161b22;
+            border-right: 1px solid #21262d;
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+        }
+        .sidebar h3 {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #8b949e;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+        }
+        .metric-card {
+            background: #0d1117;
+            border: 1px solid #21262d;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+        }
+        .metric-card .label {
+            font-size: 11px;
+            color: #8b949e;
+        }
+        .metric-card .value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #58a6ff;
+        }
+        .agent-list {
+            margin-top: 16px;
+        }
+        .agent-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 4px;
+            font-size: 13px;
+        }
+        .agent-item:hover { background: #21262d; }
+        .agent-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #238636;
+        }
+        .agent-dot.inactive { background: #8b949e; }
+
+        /* Chat area */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+        .message {
+            max-width: 80%;
+            margin-bottom: 16px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+        .message.user {
+            background: #1f6feb;
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+        .message.assistant {
+            background: #161b22;
+            border: 1px solid #21262d;
+            border-bottom-left-radius: 4px;
+        }
+        .message .source {
+            font-size: 11px;
+            color: #8b949e;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #21262d;
+        }
+        .message .confidence {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .confidence.high { background: #238636; color: white; }
+        .confidence.medium { background: #9e6a03; color: white; }
+        .confidence.low { background: #da3633; color: white; }
+
+        /* Input area */
+        .input-area {
+            padding: 16px 24px;
+            border-top: 1px solid #21262d;
+            background: #161b22;
+        }
+        .input-row {
+            display: flex;
+            gap: 8px;
+        }
+        .input-row input {
+            flex: 1;
+            background: #0d1117;
+            border: 1px solid #21262d;
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: #e0e0e0;
+            font-size: 14px;
+            outline: none;
+        }
+        .input-row input:focus { border-color: #58a6ff; }
+        .input-row button {
+            background: #238636;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .input-row button:hover { background: #2ea043; }
+        .input-row button:disabled { background: #21262d; cursor: not-allowed; }
+
+        /* Follow-ups */
+        .follow-ups {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 12px;
+        }
+        .follow-up-btn {
+            background: #21262d;
+            border: 1px solid #30363d;
+            color: #58a6ff;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .follow-up-btn:hover { background: #1f6feb22; border-color: #58a6ff; }
+
+        /* Loading */
+        .typing {
+            display: flex;
+            gap: 4px;
+            padding: 8px 0;
+        }
+        .typing span {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #58a6ff;
+            animation: bounce 1.4s infinite;
+        }
+        .typing span:nth-child(2) { animation-delay: 0.2s; }
+        .typing span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce {
+            0%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-8px); }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #21262d; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><span class="icon">⚔️</span> KURUKSHETRA v2.1</h1>
+        <span class="status-badge" id="status">Connecting...</span>
+    </div>
+
+    <div class="main">
+        <div class="sidebar">
+            <h3>System Metrics</h3>
+            <div class="metric-card">
+                <div class="label">Documents</div>
+                <div class="value" id="metric-docs">--</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Knowledge Chunks</div>
+                <div class="value" id="metric-chunks">--</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Vectors</div>
+                <div class="value" id="metric-vectors">--</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Glossary Terms</div>
+                <div class="value" id="metric-glossary">--</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Feedback Entries</div>
+                <div class="value" id="metric-feedback">--</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Graph Entities</div>
+                <div class="value" id="metric-graph">--</div>
+            </div>
+
+            <h3 style="margin-top: 16px;">Active Agents</h3>
+            <div class="agent-list" id="agent-list">
+                <div class="agent-item">
+                    <div class="agent-dot"></div>
+                    <span>SANJAYA (Planner)</span>
+                </div>
+                <div class="agent-item">
+                    <div class="agent-dot"></div>
+                    <span>Knowledge RAG</span>
+                </div>
+                <div class="agent-item">
+                    <div class="agent-dot inactive"></div>
+                    <span>Datadog Agent</span>
+                </div>
+                <div class="agent-item">
+                    <div class="agent-dot inactive"></div>
+                    <span>SQL Agent</span>
+                </div>
+                <div class="agent-item">
+                    <div class="agent-dot inactive"></div>
+                    <span>Smartsheet Agent</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-area">
+            <div class="chat-messages" id="chat-messages">
+                <div class="message assistant">
+                    <strong>⚔️ SANJAYA v2.1</strong><br><br>
+                    Welcome to KURUKSHETRA Command Center. I am SANJAYA — your knowledge orchestrator.<br><br>
+                    I can help you with:
+                    <ul style="margin: 8px 0; padding-left: 20px;">
+                        <li>G3 RMS process documentation</li>
+                        <li>Troubleshooting and error resolution</li>
+                        <li>Property installation and configuration</li>
+                        <li>Monitoring and operational queries</li>
+                    </ul>
+                    How can I assist you today?
+                </div>
+            </div>
+
+            <div class="input-area">
+                <div class="input-row">
+                    <input type="text" id="query-input"
+                           placeholder="Ask about G3 RMS, troubleshooting, installation..."
+                           autocomplete="off">
+                    <button id="send-btn" onclick="sendMessage()">Send</button>
+                </div>
+                <div class="follow-ups" id="follow-ups"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/api';
+        let isLoading = false;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            checkHealth();
+            loadMetrics();
+            document.getElementById('query-input').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !isLoading) sendMessage();
+            });
+        });
+
+        async function checkHealth() {
+            try {
+                const res = await fetch(`${API_BASE}/health`);
+                const data = await res.json();
+                document.getElementById('status').textContent = '● Online';
+                document.getElementById('status').style.background = '#238636';
+            } catch (e) {
+                document.getElementById('status').textContent = '● Offline';
+                document.getElementById('status').style.background = '#da3633';
+            }
+        }
+
+        async function loadMetrics() {
+            try {
+                const res = await fetch(`${API_BASE}/metrics`);
+                const data = await res.json();
+                document.getElementById('metric-docs').textContent = data.documents;
+                document.getElementById('metric-chunks').textContent = data.chunks;
+                document.getElementById('metric-vectors').textContent = data.vectors;
+                document.getElementById('metric-glossary').textContent = data.glossary_terms;
+                document.getElementById('metric-feedback').textContent = data.feedback_entries;
+                document.getElementById('metric-graph').textContent = data.graph_entities;
+            } catch (e) {
+                console.log('Metrics unavailable');
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('query-input');
+            const query = input.value.trim();
+            if (!query || isLoading) return;
+
+            isLoading = true;
+            document.getElementById('send-btn').disabled = true;
+
+            // Add user message
+            addMessage(query, 'user');
+            input.value = '';
+
+            // Show typing indicator
+            const typingId = addTyping();
+
+            try {
+                const res = await fetch(`${API_BASE}/query`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query, top_k: 3 }),
+                });
+                const data = await res.json();
+
+                removeTyping(typingId);
+
+                if (data.results && data.results.length > 0) {
+                    const best = data.results[0];
+                    const confClass = best.score > 0.7 ? 'high' : best.score > 0.4 ? 'medium' : 'low';
+
+                    let responseText = best.text;
+                    if (data.results.length > 1) {
+                        responseText += `<br><br><em>Also found ${data.results.length - 1} other relevant result(s).</em>`;
+                    }
+
+                    addMessage(
+                        `<strong>📖 ${data.total_results} result(s) found</strong> ` +
+                        `<span class="confidence ${confClass}">Score: ${best.score.toFixed(3)}</span><br><br>` +
+                        responseText +
+                        `<div class="source">Source: ${best.document_id} | Chunk: ${best.chunk_id} | Time: ${data.execution_time_ms}ms</div>`,
+                        'assistant'
+                    );
+                } else {
+                    addMessage(
+                        "I couldn't find relevant information for that query. " +
+                        "Could you rephrase or provide more details?",
+                        'assistant'
+                    );
+                }
+
+                // Generate follow-ups
+                generateFollowUps(query);
+
+            } catch (e) {
+                removeTyping(typingId);
+                addMessage(
+                    `⚠️ Error: Could not connect to the knowledge base. ${e.message}`,
+                    'assistant'
+                );
+            }
+
+            isLoading = false;
+            document.getElementById('send-btn').disabled = false;
+            loadMetrics(); // Refresh metrics
+        }
+
+        function addMessage(content, role) {
+            const container = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            div.className = `message ${role}`;
+            div.innerHTML = content;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function addTyping() {
+            const container = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            div.className = 'message assistant';
+            div.id = 'typing-' + Date.now();
+            div.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+            return div.id;
+        }
+
+        function removeTyping(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        }
+
+        function generateFollowUps(query) {
+            const container = document.getElementById('follow-ups');
+            container.innerHTML = '';
+
+            const suggestions = [
+                'Show me the troubleshooting steps',
+                'What are the prerequisites?',
+                'Are there related errors?',
+            ];
+
+            suggestions.forEach(text => {
+                const btn = document.createElement('button');
+                btn.className = 'follow-up-btn';
+                btn.textContent = text;
+                btn.onclick = () => {
+                    document.getElementById('query-input').value = text;
+                    sendMessage();
+                };
+                container.appendChild(btn);
+            });
+        }
+    </script>
+</body>
+</html>

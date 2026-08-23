@@ -117,10 +117,15 @@ class GraphRepository:
         if row is None:
             return None
 
+        try:
+            etype = EntityType(row[2])
+        except (ValueError, KeyError):
+            etype = EntityType.DOCUMENT  # fallback for extended types
+
         return Entity(
             id=row[0],
             name=row[1],
-            entity_type=EntityType(row[2]),
+            entity_type=etype,
             description=row[3],
             metadata=json.loads(row[4]) if row[4] else {},
             owner=row[5],
@@ -147,14 +152,20 @@ class GraphRepository:
                 "SELECT * FROM graph_entities"
             ).fetchall()
 
+
         entities: List[Entity] = []
 
         for row in rows:
+            try:
+                etype = EntityType(row[2])
+            except (ValueError, KeyError):
+                etype = EntityType.DOCUMENT  # fallback for extended types
+
             entities.append(
                 Entity(
                     id=row[0],
                     name=row[1],
-                    entity_type=EntityType(row[2]),
+                    entity_type=etype,
                     description=row[3],
                     metadata=json.loads(row[4]) if row[4] else {},
                     owner=row[5],
