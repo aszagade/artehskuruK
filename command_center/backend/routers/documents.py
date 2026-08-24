@@ -1,4 +1,4 @@
-"""Documents Router — Ingestion, metrics, and document management."""
+"""Documents Router — Ingestion, metrics, status, and document management."""
 
 from __future__ import annotations
 
@@ -18,16 +18,19 @@ router = APIRouter(prefix="/api", tags=["Documents"])
 class IngestRequest(BaseModel):
     """Document ingestion request."""
     file_path: str = Field(..., description="Path to document file")
-    team_owner: str = Field(default="UNKNOWN", description="Team owner")
-    auto_classify: bool = Field(default=True, description="Auto-classify document")
 
 
 class IngestResponse(BaseModel):
     """Document ingestion response."""
     document_id: str
     title: str
-    chunks_created: int
-    metadata: dict
+    status: str
+    chunks_stored: int
+    entities_extracted: int
+    relationships_extracted: int
+    unknown_terms: int
+    team_id: str
+    stages: dict
     execution_time_ms: float
 
 
@@ -44,6 +47,13 @@ class MetricsResponse(BaseModel):
     graph_relationships: int
 
 
+class ActivityResponse(BaseModel):
+    """Ingestion activity response."""
+    pending: list[dict]
+    recent: list[dict]
+    stats: dict
+
+
 # -----------------------------------------------------------------------
 # Routes
 # -----------------------------------------------------------------------
@@ -55,34 +65,24 @@ async def ingest_document(request: IngestRequest):
 
     try:
         from kurukshetra.pipeline.ingest import IngestionPipeline
-        from kurukshetra.services.content_enricher import ContentEnricher
 
-        pipeline = IngestionPipeline()
-        enricher = ContentEnricher()
-
+        pipeline = IngestionPipeline(use_semantic_chunking=False)
         file_path = Path(request.file_path)
         result = pipeline.ingest(file_path)
-
-        # Enrich metadata if auto_classify
-        metadata = {}
-        if request.auto_classify:
-            # Read text for classification
-            text = "\n".join(c.text for c in result["chunks"])
-            content_meta = enricher.enrich(text, file_path.name)
-            metadata = {
-                "team_owner": content_meta.team_owner.value,
-                "product": content_meta.product.value,
-                "classification": content_meta.doc_classification.value,
-                "confidence": content_meta.confidence,
-            }
+        pipeline.close()
 
         execution_time = (time.time() - start) * 1000
 
         return IngestResponse(
-            document_id=result["document"].document_id,
-            title=file_path.name,
-            chunks_created=len(result["chunks"]),
-            metadata=metadata,
+            document_id=result.document_id,
+            title=result.title,
+            status="error" if result.error else "ok",
+            chunks_stored=result.chunks_stored,
+            entities_extracted=result.entities_extracted,
+            relationships_extracted=result.relationships_extracted,
+            unknown_terms=result.unknown_terms,
+            team_id=result.team_id,
+            stages=result.stages,
             execution_time_ms=round(execution_time, 1),
         )
 
@@ -102,7 +102,6 @@ async def get_metrics():
         chunks = conn.execute("SELECT COUNT(*) FROM chunks").fetchone()[0]
         vectors = conn.execute("SELECT COUNT(*) FROM vectors").fetchone()[0]
 
-        # Optional tables that may not exist yet
         try:
             glossary = conn.execute("SELECT COUNT(*) FROM glossary").fetchone()[0]
         except Exception:
@@ -144,3 +143,57 @@ async def get_metrics():
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/activity", response_model=ActivityResponse)
+async def get_activity():
+    """Get ingestion activity status."""
+    from kurukshetra.runtime.status import get_tracker
+
+    tracker = get_tracker()
+    return ActivityResponse(
+        pending=[a.to_dict() for a in tracker.get_pending()],
+        recent=tracker.get_recent(),
+        stats=tracker.get_stats(),
+    )
+
+
+@router.get("/activity/{filename}")
+async def get_document_activity(filename: str):
+    """Get status for a specific document."""
+    from kurukshetra.runtime.status import get_tracker
+
+    tracker = get_tracker()
+    activity = tracker.get_activity(filename)
+    if activity is None:
+        raise HTTPException(status_code=404, detail=f"No activity for {filename}")
+    return activity.to_dict()
+
+
+@router.post("/ingest/inbox")
+async def ingest_from_inbox():
+    """Ingest all documents from the knowledge inbox."""
+    from kurukshetra.runtime.watcher import InboxWatcher
+
+    start = time.time()
+    watcher = InboxWatcher()
+    results = watcher.ingest_all()
+    watcher.close()
+
+    return {
+        "documents_processed": len(results),
+        "successful": sum(1 for r in results if not r.error),
+        "failed": sum(1 for r in results if r.error),
+        "execution_time_ms": round((time.time() - start) * 1000, 1),
+        "results": [
+            {
+                "document_id": r.document_id,
+                "title": r.title,
+                "status": "error" if r.error else "ok",
+                "chunks_stored": r.chunks_stored,
+                "entities_extracted": r.entities_extracted,
+                "unknown_terms": r.unknown_terms,
+            }
+            for r in results
+        ],
+    }
