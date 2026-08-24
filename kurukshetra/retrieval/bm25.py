@@ -14,6 +14,8 @@ class BM25Retriever(BaseRetriever):
     Deterministic BM25 lexical retriever.
 
     Operates on persisted Chunk objects and returns RetrievalResult.
+    Precomputes document frequency and token frequencies on init
+    so that search() is O(k * n) instead of O(k * n^2).
     """
 
     def __init__(self, chunks: list[Chunk]) -> None:
@@ -24,6 +26,17 @@ class BM25Retriever(BaseRetriever):
             self.avgdl = sum(len(doc) for doc in self.documents) / len(self.documents)
         else:
             self.avgdl = 0.0
+
+        # Precompute document frequency for all terms (O(n * avg_len))
+        self.total_docs = len(self.documents)
+        self._df: dict[str, int] = {}
+        for doc in self.documents:
+            seen = set(doc)
+            for term in seen:
+                self._df[term] = self._df.get(term, 0) + 1
+
+        # Precompute term frequency per document
+        self._tf: list[Counter] = [Counter(doc) for doc in self.documents]
 
     def search(
         self,
@@ -36,31 +49,30 @@ class BM25Retriever(BaseRetriever):
         query_terms = query.lower().split()
         results: list[RetrievalResult] = []
 
-        total_docs = len(self.documents)
         k1 = 1.5
         b = 0.75
 
-        for chunk, doc in zip(self.chunks, self.documents):
-            term_freq = Counter(doc)
+        for i, chunk in enumerate(self.chunks):
+            doc = self.documents[i]
+            doc_len = len(doc)
             score = 0.0
 
             for term in query_terms:
-                document_frequency = sum(term in d for d in self.documents)
+                document_frequency = self._df.get(term, 0)
 
                 if document_frequency == 0:
                     continue
 
                 idf = math.log(
-                    ((total_docs - document_frequency + 0.5) /
+                    ((self.total_docs - document_frequency + 0.5) /
                      (document_frequency + 0.5)) + 1
                 )
 
-                frequency = term_freq[term]
-                document_length = len(doc)
+                frequency = self._tf[i][term]
 
                 denominator = (
                     frequency +
-                    k1 * (1 - b + b * document_length / max(self.avgdl, 1))
+                    k1 * (1 - b + b * doc_len / max(self.avgdl, 1))
                 )
 
                 score += idf * ((frequency * (k1 + 1)) / denominator)

@@ -408,6 +408,31 @@ class SmartEntityExtractor:
             confidence=confidence,
         )
 
+    @staticmethod
+    def _is_valid_entity_name(name: str) -> bool:
+        """Return True if the name is a valid entity (not an artifact)."""
+        if len(name) < 3:
+            return False
+        # Reject NaN/None artifacts from spreadsheets
+        lower = name.lower()
+        if lower in ("nan", "none", "null", "n/a", "na", "--", "-"):
+            return False
+        if "nan" in lower and len(name) < 30:
+            # Allow names that contain nan as part of a real word (e.g. "Nano")
+            # but reject "NaN NaN NaN" patterns
+            words = lower.split()
+            nan_count = sum(1 for w in words if w.strip("\n\r") in ("nan", ""))
+            if nan_count > 0 and nan_count / max(len(words), 1) > 0.3:
+                return False
+        # Reject names with newlines (spreadsheet row artifacts)
+        if "\n" in name or "\r" in name:
+            return False
+        # Reject names that are just numbers/special chars
+        stripped = re.sub(r"[^a-zA-Z0-9]", "", name)
+        if len(stripped) < 2:
+            return False
+        return True
+
     def _extract_by_patterns(
         self,
         patterns: list[re.Pattern],
@@ -427,8 +452,8 @@ class SmartEntityExtractor:
                 else:
                     name = match.group(0).strip()
 
-                # Skip very short names
-                if len(name) < 3:
+                # Skip invalid names
+                if not self._is_valid_entity_name(name):
                     continue
 
                 entity_id = f"{id_prefix}-{name.upper().replace(' ', '-')[:50]}"
@@ -463,7 +488,7 @@ class SmartEntityExtractor:
                 else:
                     name = match.group(0).strip()
 
-                if len(name) < 4:
+                if not self._is_valid_entity_name(name) or len(name) < 4:
                     continue
 
                 entity_id = f"INC-{name.upper().replace(' ', '-')[:50]}"
@@ -509,7 +534,7 @@ class SmartEntityExtractor:
                 else:
                     name = match.group(0).strip()
 
-                if len(name) < 3:
+                if not self._is_valid_entity_name(name):
                     continue
 
                 # Determine if it's a CLIENT or PROPERTY
