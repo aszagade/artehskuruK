@@ -2,31 +2,44 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from kurukshetra.pipeline.ingest import IngestionPipeline
-from kurukshetra.registry.chunks import ChunkRepository
+from kurukshetra.extractors.text_extractor import TextExtractor
+from kurukshetra.pipeline.ingest import IngestionPipeline, IngestionResult
 
 
 class BulkIngestionPipeline:
-    def __init__(self):
-        self.pipeline = IngestionPipeline()
-        self.chunk_repo = ChunkRepository()
+    """
+    Bulk ingestion for folders of documents.
 
-    def ingest_folder(self, folder: Path, limit: int | None = None):
-        results = []
+    Supports all file types the TextExtractor handles.
+    """
 
-        pdfs = sorted(folder.glob("*.pdf"))
+    def __init__(self, build_embeddings: bool = False):
+        self.pipeline = IngestionPipeline(build_embeddings=build_embeddings)
+        self.supported = TextExtractor.supported_extensions()
+
+    def ingest_folder(
+        self, folder: Path, limit: int | None = None
+    ) -> list[IngestionResult]:
+        """Ingest all supported files from a folder."""
+        files = sorted(
+            f for f in folder.iterdir()
+            if f.is_file() and f.suffix.lower() in self.supported
+        )
 
         if limit:
-            pdfs = pdfs[:limit]
+            files = files[:limit]
 
-        for i, pdf in enumerate(pdfs, start=1):
-            print(f"[{i}] {pdf.name}")
+        results: list[IngestionResult] = []
 
-            result = self.pipeline.ingest(pdf)
-
-            # SAVE CHUNKS TO DUCKDB
-            self.chunk_repo.insert(result["chunks"])
-
+        for i, file_path in enumerate(files, start=1):
+            print(f"[{i}/{len(files)}] {file_path.name}")
+            result = self.pipeline.ingest(file_path)
             results.append(result)
+
+            if result.error:
+                print(f"  ERROR: {result.error}")
+            else:
+                print(f"  OK: {result.chunks_stored} chunks, "
+                      f"{result.entities_extracted} entities")
 
         return results
