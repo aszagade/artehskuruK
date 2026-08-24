@@ -91,3 +91,6 @@ __pycache__/
 
 # HuggingFace cache
 models/
+# Local enterprise share inventories
+ina6fs01_inventory.csv
+ina6fs01_folder_access.csv
