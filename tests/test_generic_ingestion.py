@@ -304,5 +304,53 @@ class TestGenericIngestionContract(unittest.TestCase):
         print(f"  [OK] Structured result: {ok_stages}/{len(r.stages)} stages OK")
 
 
+class TestLegacyXlsExtraction(unittest.TestCase):
+    """Prove .xls (OLE2) extraction works via xlrd."""
+
+    def test_01_xls_extraction(self):
+        """TextExtractor extracts text from a legacy .xls file."""
+        from kurukshetra.extractors.text_extractor import TextExtractor
+
+        xls_path = Path(__file__).parent / "fixtures" / "test_legacy.xls"
+        if not xls_path.exists():
+            self.skipTest("test fixture not found")
+
+        ext = TextExtractor()
+        text = ext.extract(xls_path)
+
+        self.assertIsNotNone(text)
+        self.assertGreater(len(text), 0)
+        self.assertIn("G3 RMS", text)
+        self.assertIn("Datadog", text)
+        self.assertIn("Active", text)
+        self.assertIn("--- Sheet:", text)
+        print(f"  [OK] XLS extraction: {len(text)} chars")
+
+    def test_02_xlsx_still_works(self):
+        """TextExtractor still extracts .xlsx via openpyxl."""
+        from kurukshetra.extractors.text_extractor import TextExtractor
+
+        ext = TextExtractor()
+        # Use the synthetic doc from the main test class
+        doc_path = Path(__file__).parent / "fixtures"
+        xlsx_files = list(doc_path.glob("*.xlsx")) if doc_path.exists() else []
+        if not xlsx_files:
+            self.skipTest("no .xlsx fixtures available")
+
+        text = ext.extract(xlsx_files[0])
+        self.assertIsNotNone(text)
+        self.assertGreater(len(text), 0)
+        print(f"  [OK] XLSX still works: {len(text)} chars")
+
+    def test_03_supported_extensions_include_xls(self):
+        """supported_extensions includes both .xls and .xlsx."""
+        from kurukshetra.extractors.text_extractor import TextExtractor
+
+        supported = TextExtractor.supported_extensions()
+        self.assertIn(".xls", supported)
+        self.assertIn(".xlsx", supported)
+        print(f"  [OK] Supported extensions: {sorted(supported)}")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

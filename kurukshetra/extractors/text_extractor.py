@@ -11,6 +11,7 @@ Supported:
   .md   -> plain text read (Markdown is just text)
   .docx -> DOCXExtractor (python-docx)
   .xlsx -> ExcelExtractor (openpyxl + pandas)
+  .xls  -> Legacy ExcelExtractor (xlrd + pandas)
   .csv  -> CSVExtractor (pandas)
 
 Unsupported extensions return None (caller decides fallback).
@@ -49,8 +50,10 @@ class TextExtractor:
             return self._extract_text(file_path)
         elif suffix == ".docx":
             return self._extract_docx(file_path)
-        elif suffix in (".xlsx", ".xls"):
+        elif suffix == ".xlsx":
             return self._extract_excel(file_path)
+        elif suffix == ".xls":
+            return self._extract_xls(file_path)
         elif suffix == ".csv":
             return self._extract_csv(file_path)
         else:
@@ -101,8 +104,20 @@ class TextExtractor:
 
     @staticmethod
     def _extract_excel(file_path: Path) -> str:
+        """Extract from .xlsx using openpyxl."""
         import pandas as pd
         frames = pd.read_excel(str(file_path), sheet_name=None, engine="openpyxl")
+        parts: list[str] = []
+        for sheet_name, df in frames.items():
+            parts.append(f"--- Sheet: {sheet_name} ---")
+            parts.append(df.to_string(index=False))
+        return "\n".join(parts)
+
+    @staticmethod
+    def _extract_xls(file_path: Path) -> str:
+        """Extract from legacy .xls using xlrd."""
+        import pandas as pd
+        frames = pd.read_excel(str(file_path), sheet_name=None, engine="xlrd")
         parts: list[str] = []
         for sheet_name, df in frames.items():
             parts.append(f"--- Sheet: {sheet_name} ---")
