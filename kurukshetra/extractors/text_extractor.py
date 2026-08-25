@@ -19,6 +19,7 @@ Unsupported extensions return None (caller decides fallback).
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import Optional
 
@@ -103,14 +104,29 @@ class TextExtractor:
         return "\n".join(paragraphs)
 
     @staticmethod
+    def _clean_excel_text(text: str) -> str:
+        """Remove NaN and Unnamed artifacts from extracted spreadsheet text.
+
+        Preserves cell content and structure while removing noise.
+        """
+        text = re.sub(r"Unnamed:\s*\d+", "", text)
+        text = re.sub(r"\bNaN\b", "", text)
+        return text
+
+    @staticmethod
     def _extract_excel(file_path: Path) -> str:
         """Extract from .xlsx using openpyxl."""
         import pandas as pd
         frames = pd.read_excel(str(file_path), sheet_name=None, engine="openpyxl")
         parts: list[str] = []
         for sheet_name, df in frames.items():
+            df_clean = df.dropna(how="all")
+            if df_clean.empty:
+                continue
+            text = df_clean.to_string(index=False)
+            text = TextExtractor._clean_excel_text(text)
             parts.append(f"--- Sheet: {sheet_name} ---")
-            parts.append(df.to_string(index=False))
+            parts.append(text)
         return "\n".join(parts)
 
     @staticmethod
@@ -120,8 +136,13 @@ class TextExtractor:
         frames = pd.read_excel(str(file_path), sheet_name=None, engine="xlrd")
         parts: list[str] = []
         for sheet_name, df in frames.items():
+            df_clean = df.dropna(how="all")
+            if df_clean.empty:
+                continue
+            text = df_clean.to_string(index=False)
+            text = TextExtractor._clean_excel_text(text)
             parts.append(f"--- Sheet: {sheet_name} ---")
-            parts.append(df.to_string(index=False))
+            parts.append(text)
         return "\n".join(parts)
 
     @staticmethod
