@@ -123,5 +123,80 @@ class TestExtractionFiltersArtifacts(unittest.TestCase):
         self.assertTrue(found_sfdc, f"SFDC not found in: {entity_names}")
 
 
+
+
+class TestUnknownTermNoiseFilter(unittest.TestCase):
+    """Prove the GlossaryManager filters noise from unknown terms."""
+
+    def setUp(self):
+        from kurukshetra.services.glossary import GlossaryManager
+        self.gm = GlossaryManager()
+
+    def test_known_acronyms_filtered(self):
+        """Known IDeaS acronyms should not appear as unknown terms."""
+        text = "CARE handles ICS cases. CPM and ISM verify EDF SFTP connections."
+        unknown = self.gm.detect_unknown_terms(text, "test-known")
+        terms = {u.term for u in unknown}
+        for known in ["CARE", "ICS", "CPM", "ISM", "EDF", "SFTP", "BDE", "RRA", "OCIM"]:
+            self.assertNotIn(known, terms, f"{known} should not be unknown")
+
+    def test_common_english_filtered(self):
+        """Common English words should not appear as unknown terms."""
+        text = "OPEN the CASE in PHASE 2. VENDOR status is OLDER."
+        unknown = self.gm.detect_unknown_terms(text, "test-english")
+        terms = {u.term for u in unknown}
+        for word in ["OPEN", "CASE", "PHASE", "VENDOR", "OLDER"]:
+            self.assertNotIn(word, terms, f"{word} should not be unknown")
+
+    def test_field_names_filtered(self):
+        """Spreadsheet column headers should not appear as unknown terms."""
+        text = "Case Owner: John. Case Opens: Jan 1. Date Assigned: Feb 2."
+        unknown = self.gm.detect_unknown_terms(text, "test-fields")
+        terms = {u.term for u in unknown}
+        for field in ["Case Owner", "Case Opens", "Date Assigned"]:
+            self.assertNotIn(field, terms, f"{field} should not be unknown")
+
+    def test_multi_line_garbage_filtered(self):
+        """Terms containing newlines should be rejected."""
+        text = "Team\nPricing Troubleshooting Process"
+        unknown = self.gm.detect_unknown_terms(text, "test-multiline")
+        terms = {u.term for u in unknown}
+        for t in terms:
+            self.assertNotIn("\n", t, f"Multi-line term leaked: {t!r}")
+
+    def test_date_patterns_filtered(self):
+        """Date patterns should not appear as unknown terms."""
+        text = "YYYY-MM-DD format. DD-MM-YYYY. HH:MM timestamp."
+        unknown = self.gm.detect_unknown_terms(text, "test-dates")
+        terms = {u.term for u in unknown}
+        for pattern in ["YYYY-MM-DD", "DD-MM-YYYY", "HH:MM"]:
+            self.assertNotIn(pattern, terms, f"{pattern} should not be unknown")
+
+    def test_real_terms_detected(self):
+        """Real unknown terms should still be detected."""
+        text = "Data Feed Configuration Client setup uses QuantumBridge."
+        unknown = self.gm.detect_unknown_terms(text, "test-real")
+        terms = {u.term for u in unknown}
+        self.assertTrue(len(terms) > 0, "Should detect at least one real unknown term")
+
+    def test_noise_term_checker(self):
+        """_is_noise_term should reject known noise patterns."""
+        from kurukshetra.services.glossary import GlossaryManager
+        self.assertTrue(GlossaryManager._is_noise_term("YYYY-MM-DD"))
+        self.assertTrue(GlossaryManager._is_noise_term("TRUE"))
+        self.assertTrue(GlossaryManager._is_noise_term("NaN"))
+        self.assertTrue(GlossaryManager._is_noise_term("--- Sheet1 ---"))
+        self.assertTrue(GlossaryManager._is_noise_term("line1\nline2"))
+        self.assertFalse(GlossaryManager._is_noise_term("QuantumBridge"))
+        self.assertFalse(GlossaryManager._is_noise_term("G3 RMS"))
+
+    def test_is_noise_term_date_variants(self):
+        """Various date placeholder patterns should be noise."""
+        from kurukshetra.services.glossary import GlossaryManager
+        self.assertTrue(GlossaryManager._is_noise_term("YYYY"))
+        self.assertTrue(GlossaryManager._is_noise_term("MM-DD"))
+        self.assertTrue(GlossaryManager._is_noise_term("HH:MM:SS"))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+
+from kurukshetra.security.deps import get_current_user, require_team
+from kurukshetra.security.identity import UserIdentity
 
 router = APIRouter(prefix="/api/graph", tags=["Knowledge Graph"])
 
@@ -123,7 +126,10 @@ async def get_team_subgraph(team_id: str):
 
 
 @router.post("/entity/{entity_id}/confirm")
-async def confirm_entity(entity_id: str):
+async def confirm_entity(
+    entity_id: str,
+    user: UserIdentity = Depends(require_team("spm", "ics", "sdops", "cpm", "roa", "hr", "it")),
+):
     """Mark an entity as human-confirmed (for SEAL learning)."""
     try:
         from kurukshetra.graph.registry import GraphRegistry

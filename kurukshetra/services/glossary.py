@@ -64,6 +64,18 @@ KNOWN_TERMS: set[str] = {
     "server", "database", "table", "query", "job", "step", "process",
     "system", "property", "client", "hotel", "config", "error", "log",
     "file", "data", "code", "test", "user", "role", "team", "group",
+    # ICS / IDeaS operational acronyms (observed leaking through)
+    "CARE", "ICS", "CPM", "ISM", "STR", "EDF", "SFTP", "BDE", "RRA",
+    "OCIM", "SSF", "SSD", "SRP", "ROA",
+    # Common spreadsheet field labels
+    "Case Owner", "Case Opens", "Case Open Date", "Case Open",
+    "Date Assigned", "Previous Task Closes", "Task Subject",
+    "Task Comments", "Due Date", "Assigned to", "Any other",
+    "Room Types", "Exclude Room Types", "Trigger",
+    # Common English words that appear as ALL CAPS in workflows
+    "OPEN", "CLOSED", "MISSING", "CONFIGURATION", "PHASE", "CASE",
+    "VENDOR", "OLDER", "RAW", "NOTE", "PAUSED", "DONE",
+    "TRUE", "FALSE", "UPLOAD", "ONLY",
 }
 
 
@@ -225,10 +237,48 @@ class GlossaryManager:
                     suggested_category="technical",
                 ))
 
+        # Filter noise: multi-line, date patterns, common English
+        unknown = [
+            t for t in unknown
+            if not self._is_noise_term(t.term)
+        ]
+
         # Store unknown terms in database
         self._store_unknown_terms(unknown)
 
         return unknown
+
+    @staticmethod
+    def _is_noise_term(term: str) -> bool:
+        """Reject terms that are spreadsheet artifacts, date patterns,
+        common English words, or multi-line garbage."""
+        import re as _re
+        t = term.strip()
+        # Multi-line garbage from spreadsheet cells
+        if "\n" in t:
+            return True
+        # Date placeholder patterns (YYYY, MM-DD, HH:MM, etc.)
+        if _re.fullmatch(r"(?:YYYY|MM|DD|HH|SS|[/:\-])+", t):
+            return True
+        if all(p in {"YYYY", "MM", "DD", "HH", "SS", ""}
+               for p in _re.split(r"[-/:. ]", t)):
+            return True
+        # Terms with 'Unnamed' or 'NaN'
+        if "Unnamed" in t or "NaN" in t:
+            return True
+        # Terms that are common English (2-5 chars, all alpha)
+        _common = {
+            "TRUE", "FALSE", "DONE", "RAW", "NOTE", "ONLY", "OPEN",
+            "MISSING", "CONFIGURATION", "PHASE", "CASE", "VENDOR",
+            "OLDER", "PAUSED", "UPLOAD", "N/A", "TEXT", "CODE",
+            "VIEW", "EDIT", "COPY", "MOVE", "BACK", "NEXT",
+        }
+        if t.upper() in _common:
+            return True
+        # Sheet header fragments
+        if t.startswith("--- ") and t.endswith(" ---"):
+            return True
+        return False
 
     def _extract_context(
         self, text: str, start: int, end: int, window: int = 100

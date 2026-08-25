@@ -65,9 +65,21 @@ async def ingest_document(request: IngestRequest):
 
     try:
         from kurukshetra.pipeline.ingest import IngestionPipeline
+        from kurukshetra.security.config import SecurityConfig
+
+        # Path traversal protection (defense-in-depth)
+        security = SecurityConfig()
+        file_path = Path(request.file_path)
+        if not security.is_path_allowed(file_path):
+            raise HTTPException(
+                status_code=403,
+                detail=(
+                    f"Path '{request.file_path}' is outside allowed "
+                    f"ingest directories: {[str(d) for d in security.allowed_ingest_dirs]}"
+                ),
+            )
 
         pipeline = IngestionPipeline(use_semantic_chunking=False)
-        file_path = Path(request.file_path)
         result = pipeline.ingest(file_path)
         pipeline.close()
 
