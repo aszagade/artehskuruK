@@ -1,9 +1,14 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from kurukshetra.registry.chunks import ChunkRepository
 
 from .bm25 import BM25Retriever
 from .models import RetrievalResult
+
+if TYPE_CHECKING:
+    from .access_control import VisibilityFilter
 
 
 class DatabaseBM25Retriever:
@@ -13,10 +18,11 @@ class DatabaseBM25Retriever:
     when new documents are ingested (detected by chunk count change).
     """
 
-    def __init__(self) -> None:
+    def __init__(self, vis_filter: VisibilityFilter | None = None) -> None:
         self.repository = ChunkRepository()
         self._retriever: BM25Retriever | None = None
         self._chunk_count: int = 0
+        self.vis_filter = vis_filter
 
     def _ensure_index(self) -> BM25Retriever:
         """Build or refresh the BM25 index if chunks changed."""
@@ -46,4 +52,7 @@ class DatabaseBM25Retriever:
         top_k: int = 5,
     ) -> list[RetrievalResult]:
         retriever = self._ensure_index()
-        return retriever.search(query, top_k)
+        results = retriever.search(query, top_k)
+        if self.vis_filter is not None:
+            results = self.vis_filter.filter(results)
+        return results

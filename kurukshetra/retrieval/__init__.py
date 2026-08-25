@@ -6,6 +6,7 @@ from .multi_query import MultiQueryRetriever
 from .parent_child import ParentChildRetriever
 from .contextual import ContextualRetriever
 from .cross_verifier import CrossVerifier, CrossVerifiedResult, CrossVerificationReport
+from .access_control import VisibilityLevel, VisibilityFilter, FilteredRetriever
 
 __all__ = [
     "BaseRetriever",
@@ -18,4 +19,7 @@ __all__ = [
     "CrossVerifier",
     "CrossVerifiedResult",
     "CrossVerificationReport",
+    "VisibilityLevel",
+    "VisibilityFilter",
+    "FilteredRetriever",
 ]

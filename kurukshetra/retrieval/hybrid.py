@@ -1,13 +1,19 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from .database_bm25 import DatabaseBM25Retriever
 from .vector import VectorRetriever
 
+if TYPE_CHECKING:
+    from .access_control import VisibilityFilter
+
 
 class HybridRetriever:
-    def __init__(self):
-        self.bm25 = DatabaseBM25Retriever()
-        self.vector = VectorRetriever()
+    def __init__(self, vis_filter: VisibilityFilter | None = None):
+        self.bm25 = DatabaseBM25Retriever(vis_filter=vis_filter)
+        self.vector = VectorRetriever(vis_filter=vis_filter)
+        self.vis_filter = vis_filter
 
     def search(self, query: str, top_k: int = 5):
         scores = {}
@@ -32,6 +38,9 @@ class HybridRetriever:
             result = item["result"]
             result.score = item["score"]
             merged.append(result)
+
+        if self.vis_filter is not None:
+            merged = self.vis_filter.filter(merged)
 
         return sorted(
             merged,

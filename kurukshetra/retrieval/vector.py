@@ -1,18 +1,23 @@
 from __future__ import annotations
 
 import math
+from typing import TYPE_CHECKING
 
 from kurukshetra.embeddings import BGEEmbedding
 from kurukshetra.registry.chunks import ChunkRepository
 from kurukshetra.registry.vectors import VectorRepository
 from .models import RetrievalResult
 
+if TYPE_CHECKING:
+    from .access_control import VisibilityFilter
+
 
 class VectorRetriever:
-    def __init__(self):
+    def __init__(self, vis_filter: VisibilityFilter | None = None):
         self.embedder = BGEEmbedding()
         self.chunk_repo = ChunkRepository()
         self.vector_repo = VectorRepository()
+        self.vis_filter = vis_filter
 
     def _cosine(self, a, b):
         dot = sum(x * y for x, y in zip(a, b))
@@ -45,8 +50,9 @@ class VectorRetriever:
                     )
                 )
 
-        return sorted(
-            results,
-            key=lambda x: x.score,
-            reverse=True,
-        )[:top_k]
+        results.sort(key=lambda x: x.score, reverse=True)
+
+        if self.vis_filter is not None:
+            results = self.vis_filter.filter(results)
+
+        return results[:top_k]
