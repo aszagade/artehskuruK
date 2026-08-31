@@ -427,6 +427,10 @@ class AgenticSANJAYA:
         unique_docs = len(set(e.document_id for e in all_evidence))
 
         # Phase 5b: Evidence Claim Verification
+        # Save GX10/extractive confidence as a floor — never let verification
+        # zero out a valid answer's confidence when evidence is just garbled.
+        gx10_confidence_floor = answer_result.confidence if answer_result.answer else 0.0
+
         claim_verification = None
         if not answer_result.abstained and answer_result.answer:
             try:
@@ -437,18 +441,40 @@ class AgenticSANJAYA:
                     evidence=all_evidence,
                     query=query,
                 )
-                # Adjust confidence based on claim verification
-                if claim_verification.adjusted_confidence < answer_result.confidence:
-                    answer_result.confidence = round(
-                        claim_verification.adjusted_confidence, 3
-                    )
-                # If verifier says abstain, override the answer
-                if claim_verification.should_abstain:
+                # Adjust confidence based on claim verification.
+                # CRITICAL: Never let claim verification zero out a valid answer.
+                # If GX10 produced a good synthesis, use the HIGHER of:
+                #   - verifier's adjusted confidence
+                #   - GX10's original confidence (as floor)
+                has_evidence = len(all_evidence) > 0
+
+                if claim_verification.should_abstain and not has_evidence:
+                    # Genuinely no evidence — abstain
                     answer_result.abstained = True
                     answer_result.abstention_reason = (
                         claim_verification.abstention_reason
                     )
                     answer_result.confidence = 0.0
+                elif claim_verification.overall_verdict == "FAIL" and has_evidence:
+                    # Evidence exists but claim matching is poor.
+                    # Use GX10 confidence as floor — never show 0% for valid answers.
+                    answer_result.confidence = round(
+                        max(gx10_confidence_floor, 0.30), 3
+                    )
+                    answer_result.limitations.append(
+                        "Claim verification: evidence exists but explicit support "
+                        "for factual claims could not be fully confirmed"
+                    )
+                elif claim_verification.overall_verdict == "PARTIAL" and has_evidence:
+                    # Some claims supported — blend verifier and GX10 confidence
+                    answer_result.confidence = round(
+                        max(claim_verification.adjusted_confidence, gx10_confidence_floor * 0.5, 0.20), 3
+                    )
+                else:
+                    # PASS or all inferred — use verifier confidence with GX10 floor
+                    answer_result.confidence = round(
+                        max(claim_verification.adjusted_confidence, gx10_confidence_floor * 0.5), 3
+                    )
                 # Populate AnswerResult verification fields
                 answer_result.verification_verdict = claim_verification.overall_verdict
                 answer_result.direct_claims = claim_verification.direct_count

@@ -101,26 +101,38 @@ async def list_sources():
             status="unavailable",
         ))
 
-    # 2. Network share (read-only)
+    # 2. Network shares — show actual indexed doc counts
     from pathlib import Path as P
-    share_path = P(r"\\ina6fs01\Dept_shares\ICS")
+    # Count indexed documents from network share
     try:
-        accessible = share_path.exists()
-        sources.append(SourceInfo(
-            source_id="network_share_ics",
-            name="ICS Network Share (\\\\ina6fs01\\Dept_shares\\ICS)",
-            source_type="network_share",
-            status="live" if accessible else "unavailable",
-            path=str(share_path),
-            team="ICS",
-        ))
+        conn_nw = get_connection()
+        nw_count = conn_nw.execute("""
+            SELECT COUNT(*) FROM documents
+            WHERE source_path LIKE '%ina6fs01%'
+               OR source_path LIKE '%Dept_shares%'
+        """).fetchone()[0]
+        conn_nw.close()
     except Exception:
-        sources.append(SourceInfo(
-            source_id="network_share_ics",
-            name="ICS Network Share",
-            source_type="network_share",
-            status="unavailable",
-        ))
+        nw_count = 0
+
+    share_items = [
+        ("network_share_dept", "Department Shares (\\ina6fs01\Dept_shares)", P(r"\\ina6fs01\Dept_shares"), None, nw_count),
+        ("network_share_ics", "ICS Network Share", P(r"\\ina6fs01\Dept_shares\ICS"), "ICS", 0),
+    ]
+    for src_id, src_name, src_path, src_team, src_count in share_items:
+        try:
+            accessible = src_path.exists()
+            sources.append(SourceInfo(
+                source_id=src_id,
+                name=src_name,
+                source_type="network_share",
+                status="live" if accessible else "unavailable",
+                document_count=src_count,
+                path=str(src_path),
+                team=src_team,
+            ))
+        except Exception:
+            pass
 
     # 3. User uploads
     try:

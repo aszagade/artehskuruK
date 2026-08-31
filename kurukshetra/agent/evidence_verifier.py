@@ -396,7 +396,32 @@ class EvidenceClaimVerifier:
                     ),
                 )
 
-        # --- Step 4: No support (UNSUPPORTED) ---
+        # --- Step 4: Check for partial token coverage (INFERRED) ---
+        # If the claim's key content tokens appear in evidence text even
+        # without explicit support language, this is at least INFERRED
+        # (not UNSUPPORTED). Only truly absent claims should be UNSUPPORTED.
+        if claim_content_no_stop:
+            partial_count = sum(
+                1 for tok in claim_content_no_stop
+                if tok in all_evidence_tokens
+            )
+            partial_ratio = partial_count / len(claim_content_no_stop)
+            if partial_ratio >= 0.3:
+                return ClaimVerification(
+                    claim_text=claim,
+                    classification="INFERRED",
+                    supporting_evidence_ids=[],
+                    supporting_document_ids=[],
+                    evidence_type="textual_co-occurrence",
+                    explicit_patterns_found=[],
+                    confidence=0.35,
+                    reasoning=(
+                        f"Claim tokens appear in evidence ({partial_ratio:.0%}) " +
+                        f"but explicit support language not found — likely garbled/chunked text"
+                    ),
+                )
+
+        # --- Step 5: No support (UNSUPPORTED) ---
         return ClaimVerification(
             claim_text=claim,
             classification="UNSUPPORTED",
@@ -501,20 +526,25 @@ class EvidenceClaimVerifier:
 
         Rules:
         - Each DIRECT claim adds confidence
-        - Each INFERRED claim adds less confidence
-        - Each UNSUPPORTED claim reduces confidence significantly
-        - All UNSUPPORTED = confidence 0
+        - Each INFERRED claim adds moderate confidence
+        - Each UNSUPPORTED claim reduces confidence
+        - Only truly ALL UNSUPPORTED = confidence 0
+        - Mixed results get a moderate score
         """
         if total == 0:
             return 0.0
-        if unsupported > 0 and direct == 0:
+        if unsupported == total:
             return 0.0
 
         # Base confidence from claim types
-        direct_score = direct * 0.3
-        inferred_score = inferred * 0.1
-        unsupported_penalty = unsupported * 0.25
+        direct_score = direct * 0.30
+        inferred_score = inferred * 0.15
+        unsupported_penalty = unsupported * 0.15
 
         raw = (direct_score + inferred_score - unsupported_penalty) / max(total, 1)
-        # Normalize to 0-1 range
-        return max(0.0, min(1.0, raw * 2))
+        # Normalize to 0-1 range with a minimum for mixed results
+        confidence = max(0.0, min(1.0, raw * 2))
+        # Floor: if we have evidence and some non-unsupported claims, at least 0.20
+        if (direct + inferred) > 0 and unsupported < total:
+            confidence = max(confidence, 0.20)
+        return confidence
