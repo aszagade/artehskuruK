@@ -263,6 +263,11 @@ class AgenticSANJAYA:
         self.llm_client = llm_client
         self.max_rounds = max_rounds
         self.generator = AnswerGenerator()
+        try:
+            from kurukshetra.agent.sufficiency_gate import EvidenceSufficiencyGate
+            self.sufficiency_gate = EvidenceSufficiencyGate()
+        except ImportError:
+            self.sufficiency_gate = None
         self.sufficiency_checker = EvidenceSufficiencyChecker()
 
     def _wrap_with_feedback(self, retriever):
@@ -316,8 +321,17 @@ class AgenticSANJAYA:
                 seen_doc_ids.add(e.document_id)
                 seen_chunk_ids.add(e.chunk_id)
 
-            # Check sufficiency
-            sufficiency, mva_flag = self.sufficiency_checker.check(query, all_evidence)
+            # Check sufficiency using the new gate
+            gate_result = None
+            if self.sufficiency_gate is not None:
+                try:
+                    gate_result = self.sufficiency_gate.check(query, all_evidence)
+                    sufficiency = gate_result.score
+                    mva_flag = gate_result.should_abstain
+                except Exception:
+                    sufficiency, mva_flag = self.sufficiency_checker.check(query, all_evidence)
+            else:
+                sufficiency, mva_flag = self.sufficiency_checker.check(query, all_evidence)
             if mva_flag:
                 mention_vs_answer_detected = True
 
@@ -342,7 +356,15 @@ class AgenticSANJAYA:
             )
 
             # Phase 3: Evaluate — is evidence sufficient?
-            if sufficiency >= 0.5 and not mva_flag:
+            from kurukshetra.agent.sufficiency_gate import SufficiencyLevel
+            if gate_result is not None and gate_result.level == SufficiencyLevel.INSUFFICIENT:
+                # Evidence is insufficient — abort retrieval, abstain
+                logger.info(
+                    f"Evidence sufficiency gate: INSUFFICIENT for '{query[:50]}...' — "
+                    f"{gate_result.reasoning}"
+                )
+                break
+            elif sufficiency >= 0.5 and not mva_flag:
                 # Evidence is sufficient — proceed to synthesis
                 break
 
@@ -354,17 +376,36 @@ class AgenticSANJAYA:
         # Phase 4: Generate answer using accumulated evidence
         total_retrieval_ms = (time.time() - total_start) * 1000
 
-        # Use the AnswerGenerator with the accumulated evidence
-        # We need to reconstruct RetrievalResult from EvidenceItem for the generator
-        accumulated_results = self._evidence_to_results(all_evidence)
+        # Check if gate determined INSUFFICIENT — abstain without generating
+        gate_abstained = False
+        if gate_result is not None and gate_result.level == SufficiencyLevel.INSUFFICIENT:
+            # Build abstention answer directly
+            answer_result = AnswerResult(
+                answer="",
+                abstained=True,
+                abstention_reason=(
+                    f"I don't have sufficient organizational evidence to answer this question. "
+                    f"The retrieved documents mention related topics but do not contain "
+                    f"information that directly answers: {query[:100]}"
+                ),
+                confidence=0.0,
+                strategy=f"{plan.initial_strategy}+agentic",
+                evidence_count=len(all_evidence),
+                document_count=len(set(e.document_id for e in all_evidence)),
+                limitations=["Evidence sufficiency gate: INSUFFICIENT"],
+            )
+            gate_abstained = True
+        else:
+            # Use the AnswerGenerator with the accumulated evidence
+            accumulated_results = self._evidence_to_results(all_evidence)
 
-        answer_result = self.generator.generate(
-            query=query,
-            results=accumulated_results,
-            strategy=f"{plan.initial_strategy}+agentic",
-            authorization_status="authorized",
-            llm_client=self.llm_client,
-        )
+            answer_result = self.generator.generate(
+                query=query,
+                results=accumulated_results,
+                strategy=f"{plan.initial_strategy}+agentic",
+                authorization_status="authorized",
+                llm_client=self.llm_client,
+            )
 
         # Phase 5: Verification
         verification_passed = self._verify_answer(query, answer_result, all_evidence)
