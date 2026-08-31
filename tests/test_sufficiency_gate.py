@@ -322,3 +322,184 @@ class TestSufficiencyResult:
         assert 0.0 <= result.topical_relevance <= 1.0
         assert 0.0 <= result.evidence_quality <= 1.0
         assert result.reasoning
+
+    def test_v2_fields_present(self):
+        """V2 adds semantic_match and topic_coverage fields."""
+        gate = EvidenceSufficiencyGate()
+        evidence = [
+            MockEv(chunk_id="C50", document_id="D50", text="G3 is a revenue management system."),
+        ]
+        result = gate.check("What is G3?", evidence)
+        assert hasattr(result, 'semantic_match')
+        assert hasattr(result, 'topic_coverage')
+        assert 0.0 <= result.semantic_match <= 1.0
+        assert 0.0 <= result.topic_coverage <= 1.0
+
+
+class TestAspectMismatchPenalty:
+    """Test that aspect-mismatched evidence is penalized."""
+
+    def test_programming_language_aspect_mismatch(self):
+        """'What programming language is G3 written in?' — evidence discusses G3 but no programming info."""
+        gate = EvidenceSufficiencyGate()
+        evidence = [
+            MockEv(
+                chunk_id="C60", document_id="D60",
+                text="G3 RMS processes rate decisions and sends them to the PMS. "
+                     "The system handles data feeds from multiple sources.",
+            ),
+        ]
+        result = gate.check("What programming language is G3 written in?", evidence)
+        assert result.level == SufficiencyLevel.INSUFFICIENT
+        assert result.should_abstain is True
+
+    def test_cost_aspect_mismatch(self):
+        """'What is the cost of OHIP installation?' — evidence mentions OHIP but no cost."""
+        gate = EvidenceSufficiencyGate()
+        evidence = [
+            MockEv(
+                chunk_id="C61", document_id="D61",
+                text="OHIP installation requires configuring the PMS interface and "
+                     "setting up the connection between Opera and IDeaS systems.",
+            ),
+        ]
+        result = gate.check("What is the cost of OHIP installation?", evidence)
+        assert result.level == SufficiencyLevel.INSUFFICIENT
+        assert result.should_abstain is True
+
+    def test_cost_aspect_match(self):
+        """'What is the cost of OHIP installation?' — evidence DOES mention cost."""
+        gate = EvidenceSufficiencyGate()
+        evidence = [
+            MockEv(
+                chunk_id="C62", document_id="D62",
+                text="OHIP installation costs approximately $5,000 per property. "
+                     "The setup fee includes interface configuration and testing.",
+            ),
+        ]
+        result = gate.check("What is the cost of OHIP installation?", evidence)
+        assert result.level in (SufficiencyLevel.SUFFICIENT, SufficiencyLevel.PARTIAL)
+        assert result.should_abstain is False
+
+
+class TestCountQuestionPenalty:
+    """Test that count questions without numbers are penalized."""
+
+    def test_count_without_numbers(self):
+        """'How many properties use G3 RMS?' — evidence mentions G3 but no numbers."""
+        gate = EvidenceSufficiencyGate()
+        evidence = [
+            MockEv(
+                chunk_id="C70", document_id="D70",
+                text="G3 RMS is installed at various hotel properties worldwide. "
+                     "The system supports rate management and pricing optimization.",
+            ),
+        ]
+        result = gate.check("How many properties use G3 RMS globally?", evidence)
+        assert result.level == SufficiencyLevel.INSUFFICIENT
+        assert result.should_abstain is True
+
+    def test_count_with_numbers(self):
+        """'How many HR policy documents are there?' — evidence has count."""
+        gate = EvidenceSufficiencyGate()
+        evidence = [
+            MockEv(
+                chunk_id="C71", document_id="D71",
+                text="There are 28 HR policy documents in the knowledge base, "
+                     "covering adoption, benefits, performance review, and more.",
+            ),
+        ]
+        result = gate.check("How many HR policy documents are there?", evidence)
+        assert result.level in (SufficiencyLevel.SUFFICIENT, SufficiencyLevel.PARTIAL)
+        assert result.should_abstain is False
+
+
+class TestTopicCoverage:
+    """Test that topic coverage across evidence chunks works."""
+
+    def test_cross_document_coverage(self):
+        """Evidence from multiple documents covers different aspects."""
+        gate = EvidenceSufficiencyGate()
+        evidence = [
+            MockEv(
+                chunk_id="C80", document_id="D80",
+                text="G3 Data Feed Configuration: The G3 data feed connects to RMS systems.",
+            ),
+            MockEv(
+                chunk_id="C81", document_id="D81",
+                text="The configuration process involves setting up rate codes and "
+                     "pricing rules for data synchronization.",
+            ),
+        ]
+        result = gate.check("What is G3 Data Feed Configuration?", evidence)
+        assert result.topic_coverage > 0.3
+        assert result.level in (SufficiencyLevel.SUFFICIENT, SufficiencyLevel.PARTIAL)
+
+    def test_single_term_coverage(self):
+        """Evidence only covers one key term."""
+        gate = EvidenceSufficiencyGate()
+        evidence = [
+            MockEv(
+                chunk_id="C82", document_id="D82",
+                text="The RMS system processes rate decisions.",
+            ),
+        ]
+        result = gate.check("What is G3 Data Feed Configuration?", evidence)
+        assert result.topic_coverage <= 0.5
+
+
+class TestDefinitionBroadening:
+    """Test that V2 definition patterns are broader."""
+
+    def test_definition_with_colon_heading(self):
+        """Evidence with term followed by colon (section heading style)."""
+        gate = EvidenceSufficiencyGate()
+        evidence = [
+            MockEv(
+                chunk_id="C90", document_id="D90",
+                text="G3 Data Feed Configuration: Connects the G3 system to RMS "
+                     "for rate synchronization and pricing management.",
+            ),
+        ]
+        result = gate.check("What is G3 Data Feed Configuration?", evidence)
+        assert result.level in (SufficiencyLevel.SUFFICIENT, SufficiencyLevel.PARTIAL)
+        assert result.should_abstain is False
+
+    def test_definition_with_substantive_discussion(self):
+        """Evidence discusses a topic without 'is a' language."""
+        gate = EvidenceSufficiencyGate()
+        evidence = [
+            MockEv(
+                chunk_id="C91", document_id="D91",
+                text="OHIP provides a bridge between Opera PMS and IDeaS RMS. "
+                     "It enables real-time data synchronization for reservations "
+                     "and room information.",
+            ),
+        ]
+        result = gate.check("What is OHIP?", evidence)
+        assert result.level in (SufficiencyLevel.SUFFICIENT, SufficiencyLevel.PARTIAL)
+        assert result.should_abstain is False
+
+
+class TestAdversarialQuestions:
+    """Test adversarial/out-of-scope questions."""
+
+    def test_irrelevant_question_with_frequent_words(self):
+        """Question with words that exist in corpus but don't form a real question."""
+        gate = EvidenceSufficiencyGate()
+        evidence = [
+            MockEv(
+                chunk_id="C100", document_id="D100",
+                text="The process involves configuring rate codes for the property.",
+            ),
+        ]
+        result = gate.check("What is the process for doing the process?", evidence)
+        # Should recognize this is not a meaningful question or abstain
+        assert result.level != SufficiencyLevel.SUFFICIENT or result.score < 0.7
+
+    def test_empty_evidence(self):
+        gate = EvidenceSufficiencyGate()
+        result = gate.check("What is G3 Data Feed Configuration?", [])
+        assert result.level == SufficiencyLevel.INSUFFICIENT
+        assert result.should_abstain is True
+        assert result.reasoning == "No evidence provided"

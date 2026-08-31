@@ -117,7 +117,8 @@ class AgenticResult:
     multi_document_synthesis: bool
     mention_vs_answer_detected: bool
     verification_passed: bool
-    claim_verification = None  # VerificationResult from EvidenceClaimVerifier
+    claim_verification: object = None  # VerificationResult from EvidenceClaimVerifier
+    sufficiency_gate: object = None  # GateResult from EvidenceSufficiencyGate
 
 
 class EvidenceSufficiencyChecker:
@@ -381,6 +382,7 @@ class AgenticSANJAYA:
         if gate_result is not None and gate_result.level == SufficiencyLevel.INSUFFICIENT:
             # Build abstention answer directly
             answer_result = AnswerResult(
+                query=query,
                 answer="",
                 abstained=True,
                 abstention_reason=(
@@ -389,10 +391,14 @@ class AgenticSANJAYA:
                     f"information that directly answers: {query[:100]}"
                 ),
                 confidence=0.0,
-                strategy=f"{plan.initial_strategy}+agentic",
-                evidence_count=len(all_evidence),
-                document_count=len(set(e.document_id for e in all_evidence)),
+                evidence=[],
+                citations=[],
+                source_documents=[],
+                retrieval_strategy=f"{plan.initial_strategy}+agentic",
+                authorization_status="authorized",
                 limitations=["Evidence sufficiency gate: INSUFFICIENT"],
+                conflicts=[],
+                evidence_count=len(all_evidence),
             )
             gate_abstained = True
         else:

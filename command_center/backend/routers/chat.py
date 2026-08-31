@@ -205,6 +205,15 @@ class EvidenceResponse(BaseModel):
     rank: int
 
 
+class ClaimVerificationResponse(BaseModel):
+    """Claim-level verification result."""
+    claim_text: str
+    classification: str  # "DIRECT", "INFERRED", "UNSUPPORTED"
+    supporting_documents: list[str] = []
+    evidence_type: str = ""
+    reasoning: str = ""
+
+
 class AskResponse(BaseModel):
     """Evidence-grounded answer response."""
     query: str
@@ -226,6 +235,11 @@ class AskResponse(BaseModel):
     unique_documents: int = 1
     mention_vs_answer_detected: bool = False
     verification_passed: bool = True
+    verification_verdict: str = ""
+    direct_claims: int = 0
+    inferred_claims: int = 0
+    unsupported_claims: int = 0
+    claim_verifications: list[ClaimVerificationResponse] = []
 
 
 @router.post("/ask", response_model=AskResponse)
@@ -291,7 +305,7 @@ async def ask_evidence_grounded(
         execution_time = (time.time() - start) * 1000
 
         # 4. Build response with agentic diagnostics
-        return AskResponse(
+        resp = AskResponse(
             query=answer_result.query,
             answer=answer_result.answer,
             confidence=answer_result.confidence,
@@ -332,6 +346,27 @@ async def ask_evidence_grounded(
             mention_vs_answer_detected=agentic_result.mention_vs_answer_detected,
             verification_passed=agentic_result.verification_passed,
         )
+
+        # Add claim-level verification data
+        cv = getattr(agentic_result, 'claim_verification', None)
+        if cv is not None:
+            resp.verification_verdict = getattr(cv, 'overall_verdict', '')
+            resp.direct_claims = getattr(cv, 'direct_count', 0)
+            resp.inferred_claims = getattr(cv, 'inferred_count', 0)
+            resp.unsupported_claims = getattr(cv, 'unsupported_count', 0)
+            claims = getattr(cv, 'claims', [])
+            resp.claim_verifications = [
+                ClaimVerificationResponse(
+                    claim_text=getattr(c, 'claim_text', ''),
+                    classification=getattr(c, 'classification', ''),
+                    supporting_documents=getattr(c, 'supporting_document_ids', []),
+                    evidence_type=getattr(c, 'evidence_type', ''),
+                    reasoning=getattr(c, 'reasoning', ''),
+                )
+                for c in claims
+            ]
+
+        return resp
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

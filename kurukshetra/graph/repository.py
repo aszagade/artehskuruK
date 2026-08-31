@@ -72,20 +72,33 @@ class GraphRepository:
     # Entity Operations
     # ------------------------------------------------------------------
 
-    def upsert_entity(self, entity: Entity) -> None:
+    def upsert_entity(
+        self,
+        entity: Entity,
+        quality_score: float = 0.5,
+        quality_label: str = "MEDIUM",
+    ) -> None:
         conn = self.get_connection()
 
         conn.execute(
             """
             INSERT INTO graph_entities
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            (id, name, entity_type, description, metadata, owner, visibility,
+             quality_score, quality_label)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 name = excluded.name,
                 entity_type = excluded.entity_type,
                 description = excluded.description,
                 metadata = excluded.metadata,
                 owner = excluded.owner,
-                visibility = excluded.visibility
+                visibility = excluded.visibility,
+                quality_score = GREATEST(excluded.quality_score, graph_entities.quality_score),
+                quality_label = CASE
+                    WHEN excluded.quality_label = 'HIGH' THEN 'HIGH'
+                    WHEN excluded.quality_label = 'MEDIUM' AND graph_entities.quality_label != 'HIGH' THEN 'MEDIUM'
+                    ELSE graph_entities.quality_label
+                END
             """,
             [
                 entity.id,
@@ -95,6 +108,8 @@ class GraphRepository:
                 json.dumps(entity.metadata),
                 entity.owner,
                 entity.visibility,
+                quality_score,
+                quality_label,
             ],
         )
 

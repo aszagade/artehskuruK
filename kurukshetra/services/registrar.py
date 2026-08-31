@@ -37,9 +37,14 @@ class DocumentRegistrar:
                 created_at=datetime.utcnow(),
             )
 
-        sequence = (
-            conn.execute("SELECT COUNT(*) FROM documents").fetchone()[0] + 1
-        )
+        # Use MAX(id) instead of COUNT(*) to avoid collisions when
+        # the table has gaps (e.g. from prior ingestion paths that
+        # wrote directly to document_state or during pilot ingestion).
+        max_seq = conn.execute(
+            "SELECT MAX(CAST(SUBSTR(document_id, 5) AS INTEGER)) "
+            "FROM documents WHERE document_id LIKE 'DOC-%'"
+        ).fetchone()[0]
+        sequence = (max_seq or 0) + 1
 
         identity = DocumentIdentity(
             document_id=create_document_id(sequence),

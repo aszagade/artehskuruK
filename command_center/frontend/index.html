@@ -1061,11 +1061,29 @@ async function sendMessage(){
         });
         evHtml+='</div>';
       }
+      let claimHtml='';
+      if(d.claim_verifications&&d.claim_verifications.length){
+        const vBadge=d.verification_verdict==='PASS'?'confident':d.verification_verdict==='PARTIAL'?'moderate':'low';
+        claimHtml='<div style="margin-top:8px;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;font-size:11px">';
+        claimHtml+='<div style="color:var(--text3);margin-bottom:6px;font-weight:600">📋 Claim Verification: <span class="badge '+vBadge+'">'+(d.verification_verdict||'—')+'</span>';
+        if(d.direct_claims||d.inferred_claims||d.unsupported_claims) claimHtml+=' <span style="color:var(--text2)">('+d.direct_claims+' direct, '+d.inferred_claims+' inferred, '+d.unsupported_claims+' unsupported)</span>';
+        claimHtml+='</div>';
+        d.claim_verifications.forEach(cv=>{
+          const cls=cv.classification||'UNKNOWN';
+          const clsC=cls==='DIRECT'?'var(--green)':cls==='INFERRED'?'var(--yellow)':'var(--red)';
+          const clsBg=cls==='DIRECT'?'rgba(0,255,136,0.1)':cls==='INFERRED'?'rgba(255,170,0,0.1)':'rgba(255,68,102,0.1)';
+          claimHtml+='<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:4px;padding:5px 8px;background:'+clsBg+';border-radius:4px;border-left:3px solid '+clsC+'">';
+          claimHtml+='<span style="font-weight:700;color:'+clsC+';white-space:nowrap;font-size:10px">'+cls+'</span>';
+          claimHtml+='<span style="color:var(--text2)">'+esc((cv.claim_text||'').substring(0,120))+'</span>';
+          claimHtml+='</div>';
+        });
+        claimHtml+='</div>';
+      }
       addAssistantMsg(`<div class="msg-header"><span class="agent">⚔️ SANJAYA</span>
         <span class="badge ${cc}">${(conf*100).toFixed(0)}%</span>
         <span class="badge ${d.knowledge_source==='uploaded'?'uploaded':'org'}">${d.knowledge_source||'organization'}</span>
         <span class="badge strategy">${d.retrieval_strategy||'hybrid'}</span></div>
-        <div class="msg-bubble">${d.answer}${evHtml}
+        <div class="msg-bubble">${d.answer}${evHtml}${claimHtml}
         <div class="feedback-row">
           <button class="fb-btn" onclick="sendFB(this,true)">👍 Helpful</button>
           <button class="fb-btn" onclick="sendFB(this,false)">👎 Not helpful</button>

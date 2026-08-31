@@ -171,16 +171,25 @@ class GraphRegistry:
             product_scope=product_scope,
         )
 
-        # 2. Persist entities
+        # 2. Score and filter entities — reject NOISE at ingestion time
+        from kurukshetra.graph.entity_quality import score_entity
+        persisted_entity_ids: set[str] = set()
         for entity in result.entities:
+            qs, ql = score_entity(entity.name, entity.entity_type.value, 0, 0)
+            if ql == 'NOISE':
+                continue  # Do not persist noise entities
             self._upsert_extended_entity(entity)
+            persisted_entity_ids.add(entity.id)
 
-        # 3. Persist relationships
+        # 3. Persist relationships — only if both endpoints survived filtering
         for rel in result.relationships:
-            self._upsert_extended_relationship(rel)
+            if rel.source_id in persisted_entity_ids and rel.target_id in persisted_entity_ids:
+                self._upsert_extended_relationship(rel)
 
-        # 4. Persist evidence
+        # 4. Persist evidence — only for persisted entities
         for entity in result.entities:
+            if entity.id not in persisted_entity_ids:
+                continue
             for ev in entity.evidence:
                 self._persist_evidence(entity.id, ev)
 

@@ -87,15 +87,16 @@ class ConceptTeamsResponse(BaseModel):
 
 
 class UploadResponse(BaseModel):
-    """Document upload response."""
+    """Document upload response with ingestion status tracking."""
     document_id: str
     filename: str
-    status: str  # "ok", "duplicate", "error"
+    status: str  # "received", "processing", "indexed", "partial", "duplicate", "error"
     message: str
     chunks_stored: int = 0
     entities_extracted: int = 0
     team_id: str = "unknown"
     execution_time_ms: float = 0.0
+    stages: dict = {}  # stage -> status for partial failures
 
 
 @router.get("/state", response_model=KnowledgeStateResponse)
@@ -230,21 +231,26 @@ async def upload_document(file: UploadFile = File(...)):
         execution_time = (time.time() - start) * 1000
         team_id = result.teams_detected[0] if result.teams_detected else "unknown"
 
+        # Determine ingestion status
         if result.error:
-            return UploadResponse(
-                document_id=result.document_id or "",
-                filename=safe_name,
-                status="error",
-                message=str(result.error),
-                execution_time_ms=round(execution_time, 1),
-            )
+            status = "error"
+            message = str(result.error)
+        elif result.change_type and str(result.change_type) == "ChangeType.NONE":
+            status = "duplicate"
+            message = "Document already indexed with identical content"
+        elif result.chunks_stored > 0:
+            status = "indexed"
+            message = (f"Document ingested successfully: {result.chunks_stored} chunks, "
+                       f"{result.entities_extracted} entities")
+        else:
+            status = "partial"
+            message = "Document processed but no chunks were stored"
 
         return UploadResponse(
-            document_id=result.document_id,
+            document_id=result.document_id or "",
             filename=safe_name,
-            status="ok",
-            message=f"Document ingested successfully: {result.chunks_stored} chunks, "
-                    f"{result.entities_extracted} entities",
+            status=status,
+            message=message,
             chunks_stored=result.chunks_stored,
             entities_extracted=result.entities_extracted,
             team_id=team_id,

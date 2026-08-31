@@ -1,0 +1,1 @@
+G3 system uses SFDC for data feed. SPM team manages configuration. ICS handles installation.
