@@ -191,18 +191,29 @@ class GraphRegistry:
 
     def _upsert_extended_entity(self, entity: ExtendedEntity) -> None:
         """Persist an ExtendedEntity to both entity tables."""
+        # Compute quality score for the new entity
+        try:
+            from kurukshetra.graph.entity_quality import score_entity
+            quality_score, quality_label = score_entity(
+                entity.name, entity.entity_type.value, 0, 0
+            )
+        except Exception:
+            quality_score, quality_label = 0.5, 'MEDIUM'
+
         # Base entity
         conn = self.repository.get_connection()
         conn.execute("""
-            INSERT INTO graph_entities (id, name, entity_type, description, metadata, owner, visibility)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO graph_entities (id, name, entity_type, description, metadata, owner, visibility, quality_score, quality_label)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 name = excluded.name,
                 entity_type = excluded.entity_type,
                 description = excluded.description,
                 metadata = excluded.metadata,
                 owner = excluded.owner,
-                visibility = excluded.visibility
+                visibility = excluded.visibility,
+                quality_score = excluded.quality_score,
+                quality_label = excluded.quality_label
         """, [
             entity.id,
             entity.name,
@@ -211,6 +222,8 @@ class GraphRegistry:
             json.dumps(entity.metadata),
             entity.team_id,
             entity.visibility,
+            quality_score,
+            quality_label,
         ])
 
         # Extended metadata

@@ -47,7 +47,9 @@ class GraphRepository:
                 description VARCHAR,
                 metadata JSON,
                 owner VARCHAR,
-                visibility VARCHAR
+                visibility VARCHAR,
+                quality_score DOUBLE DEFAULT 0.5,
+                quality_label VARCHAR DEFAULT 'MEDIUM'
             )
             """
         )

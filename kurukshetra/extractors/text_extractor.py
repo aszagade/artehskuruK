@@ -13,6 +13,10 @@ Supported:
   .xlsx -> ExcelExtractor (openpyxl + pandas)
   .xls  -> Legacy ExcelExtractor (xlrd + pandas)
   .csv  -> CSVExtractor (pandas)
+  .pptx -> PPTXExtractor (python-pptx)
+  .html -> HTML extractor (html.parser)
+  .json -> JSON text extraction
+  .xml  -> XML text extraction (xml.etree)
 
 Unsupported extensions return None (caller decides fallback).
 """
@@ -57,6 +61,14 @@ class TextExtractor:
             return self._extract_xls(file_path)
         elif suffix == ".csv":
             return self._extract_csv(file_path)
+        elif suffix == ".pptx":
+            return self._extract_pptx(file_path)
+        elif suffix in (".html", ".htm"):
+            return self._extract_html(file_path)
+        elif suffix == ".json":
+            return self._extract_json(file_path)
+        elif suffix == ".xml":
+            return self._extract_xml(file_path)
         else:
             return None
 
@@ -64,7 +76,8 @@ class TextExtractor:
     def supported_extensions() -> set[str]:
         """Return the set of supported file extensions."""
         return {".pdf", ".txt", ".md", ".markdown", ".rst",
-                ".docx", ".xlsx", ".xls", ".csv"}
+                ".docx", ".xlsx", ".xls", ".csv",
+                ".pptx", ".html", ".htm", ".json", ".xml"}
 
     # ---- Private extractors ----
 
@@ -150,3 +163,91 @@ class TextExtractor:
         import pandas as pd
         df = pd.read_csv(str(file_path))
         return df.to_string(index=False)
+
+    @staticmethod
+    def _extract_pptx(file_path: Path) -> str:
+        """Extract text from PowerPoint (.pptx) files."""
+        from pptx import Presentation
+        prs = Presentation(str(file_path))
+        parts: list[str] = []
+        for slide_num, slide in enumerate(prs.slides, 1):
+            slide_texts: list[str] = []
+            for shape in slide.shapes:
+                if shape.has_text_frame:
+                    for paragraph in shape.text_frame.paragraphs:
+                        text = paragraph.text.strip()
+                        if text:
+                            slide_texts.append(text)
+                if shape.has_table:
+                    for row in shape.table.rows:
+                        row_text = " | ".join(
+                            cell.text.strip() for cell in row.cells if cell.text.strip()
+                        )
+                        if row_text:
+                            slide_texts.append(row_text)
+            if slide_texts:
+                parts.append(f"--- Slide {slide_num} ---")
+                parts.append("\n".join(slide_texts))
+        return "\n".join(parts)
+
+    @staticmethod
+    def _extract_html(file_path: Path) -> str:
+        """Extract text from HTML files using html.parser."""
+        from html.parser import HTMLParser
+        import io
+
+        class HTMLTextExtractor(HTMLParser):
+            def __init__(self):
+                super().__init__()
+                self._result: list[str] = []
+                self._skip = False
+
+            def handle_starttag(self, tag, attrs):
+                if tag in ("script", "style", "noscript"):
+                    self._skip = True
+
+            def handle_endtag(self, tag):
+                if tag in ("script", "style", "noscript"):
+                    self._skip = False
+
+            def handle_data(self, data):
+                if not self._skip:
+                    text = data.strip()
+                    if text:
+                        self._result.append(text)
+
+            def get_text(self) -> str:
+                return " ".join(self._result)
+
+        content = TextExtractor._extract_text(file_path)
+        extractor = HTMLTextExtractor()
+        extractor.feed(content)
+        return extractor.get_text()
+
+    @staticmethod
+    def _extract_json(file_path: Path) -> str:
+        """Extract readable text from JSON files."""
+        import json
+        content = TextExtractor._extract_text(file_path)
+        try:
+            data = json.loads(content)
+            return json.dumps(data, indent=2, ensure_ascii=False)
+        except json.JSONDecodeError:
+            return content
+
+    @staticmethod
+    def _extract_xml(file_path: Path) -> str:
+        """Extract text content from XML files."""
+        import xml.etree.ElementTree as ET
+        content = TextExtractor._extract_text(file_path)
+        try:
+            root = ET.fromstring(content)
+            texts: list[str] = []
+            for elem in root.iter():
+                if elem.text and elem.text.strip():
+                    texts.append(elem.text.strip())
+                if elem.tail and elem.tail.strip():
+                    texts.append(elem.tail.strip())
+            return " ".join(texts)
+        except ET.ParseError:
+            return content

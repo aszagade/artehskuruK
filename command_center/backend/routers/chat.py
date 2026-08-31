@@ -124,10 +124,19 @@ async def query_knowledge(
 
 @router.post("/feedback", response_model=FeedbackResponse)
 async def submit_feedback(request: FeedbackRequest):
-    """Submit feedback for a retrieval result."""
+    """Submit feedback for a retrieval result.
+
+    This is the PRIMARY feedback entry point for the closed-loop learning system.
+    Feedback is recorded in:
+    1. FeedbackLoop (rag_feedback + chunk_score_history) — drives retrieval adjustment
+    2. EvaluationSignalTracker (query_signals + document_signals) — drives evaluation
+    3. EpisodicMemory (if applicable) — drives conversation memory
+    """
     try:
         from kurukshetra.services.feedback import FeedbackLoop
+        from kurukshetra.retrieval.evaluation_tracker import EvaluationSignalTracker
 
+        # 1. Record in FeedbackLoop (drives retrieval score adjustment)
         loop = FeedbackLoop()
         entry = loop.record_feedback(
             query=request.query,
@@ -138,6 +147,19 @@ async def submit_feedback(request: FeedbackRequest):
             user_id=request.user_id,
             comments=request.comments,
         )
+
+        # 2. Record in EvaluationSignalTracker (drives evaluation patterns)
+        try:
+            tracker = EvaluationSignalTracker()
+            tracker.record_feedback_signal(
+                query=request.query,
+                document_id=request.document_id,
+                is_correct=request.is_correct,
+                confidence=request.score,
+                user_id=request.user_id,
+            )
+        except Exception:
+            pass  # Evaluation tracking is non-critical
 
         return FeedbackResponse(
             feedback_id=entry.feedback_id,
@@ -200,6 +222,10 @@ class AskResponse(BaseModel):
     evidence_count: int
     evidence_quality: str
     execution_time_ms: float
+    retrieval_rounds: int = 1
+    unique_documents: int = 1
+    mention_vs_answer_detected: bool = False
+    verification_passed: bool = True
 
 
 @router.post("/ask", response_model=AskResponse)
@@ -226,14 +252,10 @@ async def ask_evidence_grounded(
         from kurukshetra.retrieval.access_control import (
             VisibilityFilter, VisibilityLevel,
         )
-        from kurukshetra.agent.answer_generator import AnswerGenerator
+        from kurukshetra.agent.orchestrator import AgenticSANJAYA
         from kurukshetra.agent.planner import SANJAYAPlanner
 
-        # 1. SANJAYA plan: classify query type and select strategy
-        planner = SANJAYAPlanner()
-        plan = planner.create_plan(request.query)
-
-        # 2. Set up authorized retrieval with SANJAYA-selected strategy
+        # 1. Set up authorized retrieval
         # SECURITY: In open mode (anonymous), use request max_level.
         # In auth mode, use min(user clearance, request max).
         user_max = VisibilityLevel.from_string(user.max_visibility)
@@ -244,42 +266,31 @@ async def ask_evidence_grounded(
             # Open mode: use request max_level (default INTERNAL)
             max_level = request_max
         vf = VisibilityFilter(max_level=max_level)
+        retriever_obj = vf.wrap(HybridRetriever())
 
-        strategy = plan.recommended_strategy
-        if strategy == "bm25":
-            retriever_obj = vf.wrap(DatabaseBM25Retriever())
-        elif strategy == "vector":
-            retriever_obj = vf.wrap(VectorRetriever())
-        elif strategy == "graph_aug":
-            try:
-                from kurukshetra.retrieval.graph_retriever import GraphAugmentedRetriever
-                retriever_obj = GraphAugmentedRetriever()
-            except Exception:
-                retriever_obj = vf.wrap(HybridRetriever())
-                strategy = "hybrid_fallback"
-        else:
-            retriever_obj = vf.wrap(HybridRetriever())
+        # 2. Optionally use GX10 LLM for natural-language answer
+        llm_client = None
+        try:
+            from kurukshetra.llm.client import get_llm_client
+            llm_client = get_llm_client()
+            if not llm_client.is_available:
+                llm_client = None
+        except Exception:
+            pass
 
-        # 3. Retrieve authorized evidence
-        results = retriever_obj.search(request.query, top_k=request.top_k * 2)
-
-        # 4. Check authorization status
-        auth_status = "authorized"
-        if not results:
-            auth_status = "no_evidence"
-
-        # 5. Generate evidence-grounded answer
-        generator = AnswerGenerator()
-        answer_result = generator.generate(
-            query=request.query,
-            results=results,
-            strategy=strategy,
-            authorization_status=auth_status,
+        # 3. Agentic SANJAYA: iterative retrieval + multi-document synthesis
+        agentic = AgenticSANJAYA(
+            retriever=retriever_obj,
+            llm_client=llm_client,
+            max_rounds=2,
         )
+        agentic_result = agentic.ask(request.query)
+        answer_result = agentic_result.answer_result
+        strategy = agentic_result.rounds[0].strategy if agentic_result.rounds else "hybrid"
 
         execution_time = (time.time() - start) * 1000
 
-        # 6. Build response with SANJAYA plan info
+        # 4. Build response with agentic diagnostics
         return AskResponse(
             query=answer_result.query,
             answer=answer_result.answer,
@@ -309,13 +320,17 @@ async def ask_evidence_grounded(
                 for c in answer_result.citations
             ],
             source_documents=answer_result.source_documents,
-            retrieval_strategy=f"{strategy} (query_type={plan.query_type})",
+            retrieval_strategy=f"{strategy} (agentic)",
             authorization_status=answer_result.authorization_status,
             limitations=answer_result.limitations,
             conflicts=answer_result.conflicts,
             evidence_count=answer_result.evidence_count,
             evidence_quality=answer_result.evidence_quality,
             execution_time_ms=round(execution_time, 1),
+            retrieval_rounds=len(agentic_result.rounds),
+            unique_documents=agentic_result.unique_documents,
+            mention_vs_answer_detected=agentic_result.mention_vs_answer_detected,
+            verification_passed=agentic_result.verification_passed,
         )
 
     except Exception as e:

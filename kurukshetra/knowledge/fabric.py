@@ -148,6 +148,7 @@ class FabricIngestResult:
     document_id: str
     source_path: str
     change_type: ChangeType
+    title: str = ""
     chunks_stored: int = 0
     entities_extracted: int = 0
     relationships_extracted: int = 0
@@ -158,6 +159,7 @@ class FabricIngestResult:
     version: str = "1.0.0"
     error: Optional[str] = None
     execution_time_ms: float = 0.0
+    stages: dict = field(default_factory=dict)
 
 
 @dataclass(slots=True)
@@ -492,6 +494,7 @@ class KnowledgeFabric:
             document_id=result.document_id,
             source_path=str(source_path),
             change_type=ChangeType.NEW_FILE,
+            title=result.title or source_path.stem,
             chunks_stored=result.chunks_stored,
             entities_extracted=result.entities_extracted,
             relationships_extracted=result.relationships_extracted,
@@ -499,6 +502,7 @@ class KnowledgeFabric:
             teams_detected=[result.team_id] if result.team_id != "unknown" else [],
             version="1.0.0",
             error=result.error,
+            stages=result.stages,
             execution_time_ms=round((time.time() - start) * 1000, 1),
         )
 
@@ -567,6 +571,7 @@ class KnowledgeFabric:
             document_id=document_id,
             source_path=str(source_path),
             change_type=ChangeType.CONTENT_CHANGED,
+            title=result.title or source_path.stem,
             chunks_stored=result.chunks_stored,
             entities_extracted=result.entities_extracted,
             relationships_extracted=result.relationships_extracted,
@@ -574,6 +579,7 @@ class KnowledgeFabric:
             teams_detected=[result.team_id] if result.team_id != "unknown" else [],
             version=new_version,
             error=result.error,
+            stages=result.stages,
             execution_time_ms=round((time.time() - start) * 1000, 1),
         )
 
@@ -636,24 +642,25 @@ class KnowledgeFabric:
 
         conn = get_connection()
 
-        # Get entities from this document
+        # Get entities linked to this document via graph_evidence
         try:
             rows = conn.execute(
-                """SELECT ge.name, ge.entity_type, gem.team_id
-                FROM graph_entities ge
-                LEFT JOIN graph_entity_meta gem ON ge.id = gem.entity_id
-                WHERE gem.document_id = ? OR ge.owner = ?""",
-                (document_id, document_id),
+                """SELECT DISTINCT ge.name, ge.entity_type
+                FROM graph_evidence gev
+                LEFT JOIN graph_entities ge ON gev.entity_id = ge.id
+                WHERE gev.source_document = ?
+                  AND gev.entity_id IS NOT NULL
+                  AND ge.name IS NOT NULL AND ge.name != ''""",
+                (document_id,),
             ).fetchall()
 
-            for row in rows:
-                entity_name = row[0]
-                entity_type = row[1] or "unknown"
-                existing_team = row[2] or team_id
+            for entity_name, entity_type in rows:
+                entity_type = entity_type or "unknown"
+                entity_name = entity_name.lower().strip()
 
                 # Check if concept already has this team association
                 existing = conn.execute(
-                    """SELECT id FROM concept_teams
+                    """SELECT concept_name FROM concept_teams
                     WHERE concept_name = ? AND team_id = ?""",
                     (entity_name, team_id),
                 ).fetchone()
@@ -939,6 +946,374 @@ class KnowledgeFabric:
             {"version": r[0], "sha256": r[1][:16] if r[1] else "",
              "ingested_at": str(r[2]), "source_path": r[3],
              "chunks_count": r[4], "is_current": bool(r[5])}
+            for r in rows
+        ]
+
+    # ------------------------------------------------------------------
+    # Source Adapter Integration
+    # ------------------------------------------------------------------
+
+    def ingest_source_document(
+        self, source_doc, pipeline=None
+    ) -> FabricIngestResult:
+        """
+        Ingest a SourceDocument from any source adapter.
+
+        This bridges the adapter contract to the canonical ingestion pipeline.
+        SourceDocuments carry their own text content, so extraction is bypassed.
+
+        Args:
+            source_doc: SourceDocument from any adapter
+            pipeline: Optional IngestionPipeline instance
+
+        Returns:
+            FabricIngestResult with ingestion details
+        """
+        import time as _time
+        start = _time.time()
+
+        # Handle deleted documents — route to removal path
+        if source_doc.status == "deleted":
+            external_id = source_doc.provenance.external_id
+            if external_id:
+                # Find existing document by external_id in source_path
+                conn = get_connection()
+                row = conn.execute(
+                    "SELECT document_id FROM document_state WHERE source_path LIKE ?",
+                    (f"%{external_id}%",),
+                ).fetchone()
+                conn.close()
+                if row:
+                    change = ChangeDetection(
+                        change_type=ChangeType.REMOVED,
+                        document_id=row[0],
+                        source_path=source_doc.provenance.source_path,
+                        details=f"Deleted by source adapter: {external_id}",
+                    )
+                    return self._handle_removed(change)
+            return FabricIngestResult(
+                document_id="", source_path=source_doc.provenance.source_path,
+                change_type=ChangeType.REMOVED,
+            )
+
+        # Check deduplication via content hash
+        content_hash = source_doc.provenance.content_hash
+        conn = get_connection()
+        existing = conn.execute(
+            "SELECT document_id FROM document_state WHERE sha256 = ?",
+            (content_hash,),
+        ).fetchone()
+        conn.close()
+
+        if existing:
+            return FabricIngestResult(
+                document_id=existing[0],
+                source_path=source_doc.provenance.source_path,
+                change_type=ChangeType.NONE,
+            )
+
+        # Write content to a temporary file for the existing pipeline
+        import tempfile
+        from pathlib import Path
+
+        suffix = ".md" if source_doc.format_hint in ("markdown", "md") else ".txt"
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=suffix, delete=False, encoding="utf-8"
+        ) as tmp:
+            tmp.write(source_doc.text_content)
+            tmp_path = Path(tmp.name)
+
+        try:
+            if pipeline is None:
+                from kurukshetra.pipeline.ingest import IngestionPipeline
+                pipeline = IngestionPipeline(use_semantic_chunking=False)
+
+            result = pipeline.ingest(tmp_path)
+
+            # Update document metadata with adapter-provided information
+            if result.document_id:
+                conn = get_connection()
+                try:
+                    # Update team info from adapter
+                    team_ids = source_doc.team_ids or ["unknown"]
+                    primary_team = team_ids[0] if team_ids else "unknown"
+
+                    conn.execute(
+                        """UPDATE documents SET
+                        team_owner = ?,
+                        visibility = ?,
+                        source_path = ?
+                        WHERE document_id = ?""",
+                        (
+                            primary_team.upper(),
+                            source_doc.visibility,
+                            source_doc.provenance.source_path,
+                            result.document_id,
+                        ),
+                    )
+
+                    # Update document state in fabric
+                    conn.execute(
+                        """INSERT OR REPLACE INTO document_state
+                        (document_id, source_path, sha256, file_size, last_modified,
+                         last_ingested, state, version, team_ids)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                        (
+                            result.document_id,
+                            source_doc.provenance.source_path,
+                            content_hash,
+                            len(source_doc.text_content),
+                            source_doc.provenance.last_modified_at,
+                            datetime.utcnow(),
+                            DocumentState.INDEXED.value,
+                            "1.0.0",
+                            f"{team_ids}",
+                        ),
+                    )
+
+                    # Record version
+                    conn.execute(
+                        """INSERT INTO document_versions
+                        (document_id, version, sha256, ingested_at, source_path,
+                         chunks_count, is_current)
+                        VALUES (?, ?, ?, ?, ?, ?, TRUE)""",
+                        (
+                            result.document_id, "1.0.0", content_hash,
+                            datetime.utcnow(),
+                            source_doc.provenance.source_path,
+                            result.chunks_stored,
+                        ),
+                    )
+
+                    # Track concepts
+                    self._track_concepts(
+                        result.document_id, primary_team,
+                        result.entities_extracted > 0,
+                    )
+                finally:
+                    conn.close()
+
+            return FabricIngestResult(
+                document_id=result.document_id,
+                source_path=source_doc.provenance.source_path,
+                change_type=ChangeType.NEW_FILE,
+                chunks_stored=result.chunks_stored,
+                entities_extracted=result.entities_extracted,
+                relationships_extracted=result.relationships_extracted,
+                unknown_terms=result.unknown_terms,
+                teams_detected=source_doc.team_ids,
+                version="1.0.0",
+                error=result.error,
+                execution_time_ms=round((_time.time() - start) * 1000, 1),
+            )
+        finally:
+            # Clean up temp file
+            try:
+                tmp_path.unlink(missing_ok=True)
+            except Exception:
+                pass
+
+    # ------------------------------------------------------------------
+    # File-Based Ingestion (bridges API/Watcher to Fabric)
+    # ------------------------------------------------------------------
+
+    def ingest_file(self, file_path: Path, pipeline=None) -> FabricIngestResult:
+        """
+        Ingest a single file through the KnowledgeFabric.
+
+        Handles change detection, version tracking, concept-team association,
+        and all fabric bookkeeping. This is the canonical entry point for
+        file-based ingestion (API, watcher, CLI).
+
+        Args:
+            file_path: Path to the file to ingest.
+            pipeline: Optional pre-configured IngestionPipeline.
+
+        Returns:
+            FabricIngestResult with ingestion details.
+        """
+        source_path = Path(file_path)
+        if not source_path.exists():
+            return FabricIngestResult(
+                document_id="", source_path=str(source_path),
+                change_type=ChangeType.NEW_FILE,
+                error=f"File not found: {source_path}",
+            )
+
+        # Check if document already exists by source_path
+        sha256 = generate_sha256(source_path)
+        conn = get_connection()
+        existing = conn.execute(
+            "SELECT document_id, sha256 FROM document_state WHERE source_path = ?",
+            (str(source_path),),
+        ).fetchone()
+        conn.close()
+
+        if existing:
+            existing_doc_id, existing_sha = existing
+            if existing_sha == sha256:
+                # Unchanged
+                return FabricIngestResult(
+                    document_id=existing_doc_id,
+                    source_path=str(source_path),
+                    change_type=ChangeType.NONE,
+                )
+            else:
+                # Changed
+                change = ChangeDetection(
+                    change_type=ChangeType.CONTENT_CHANGED,
+                    document_id=existing_doc_id,
+                    source_path=str(source_path),
+                    details="Content hash changed",
+                )
+                return self._handle_changed(source_path, change, pipeline)
+
+        # New file — full ingestion
+        return self._handle_new_file(source_path, pipeline)
+
+    def backfill_existing_documents(self, pipeline=None) -> dict:
+        """
+        Populate concept_teams and document_versions for documents
+        that were ingested before the Fabric was wired in.
+
+        Iterates all documents in the documents table, creates
+        document_state and document_versions entries, and calls
+        _track_concepts() for each.
+
+        Returns dict with counts.
+        """
+        conn = get_connection()
+        docs = conn.execute(
+            "SELECT document_id, title, team_owner, source_path, sha256 "
+            "FROM documents"
+        ).fetchall()
+        conn.close()
+
+        backfilled = 0
+        skipped = 0
+        errors = 0
+
+        for doc_id, title, team_owner, source_path, sha256 in docs:
+            try:
+                conn = get_connection()
+
+                # Check if already has document_state
+                existing_state = conn.execute(
+                    "SELECT document_id FROM document_state WHERE document_id = ?",
+                    (doc_id,),
+                ).fetchone()
+
+                if not existing_state:
+                    # Insert document_state
+                    team_ids = f'["{team_owner or "unknown"}"]'
+                    conn.execute(
+                        """INSERT OR IGNORE INTO document_state
+                        (document_id, source_path, sha256, file_size,
+                         last_modified, last_ingested, state, version, team_ids)
+                        VALUES (?, ?, ?, 0, ?, ?, ?, ?, ?)""",
+                        (doc_id, source_path or "", sha256 or "",
+                         datetime.utcnow(), datetime.utcnow(),
+                         DocumentState.INDEXED.value, "1.0.0", team_ids),
+                    )
+
+                # Check if already has document_versions
+                existing_ver = conn.execute(
+                    "SELECT document_id FROM document_versions WHERE document_id = ?",
+                    (doc_id,),
+                ).fetchone()
+
+                if not existing_ver:
+                    # Count chunks for this document
+                    chunk_count = conn.execute(
+                        "SELECT COUNT(*) FROM chunks WHERE document_id = ?",
+                        (doc_id,),
+                    ).fetchone()[0]
+
+                    conn.execute(
+                        """INSERT INTO document_versions
+                        (document_id, version, sha256, ingested_at,
+                         source_path, chunks_count, is_current)
+                        VALUES (?, ?, ?, ?, ?, ?, TRUE)""",
+                        (doc_id, "1.0.0", sha256 or "",
+                         datetime.utcnow(), source_path or "", chunk_count),
+                    )
+
+                conn.close()
+
+                # Track concepts
+                team = team_owner or "unknown"
+                if team != "unknown":
+                    self._track_concepts(doc_id, team, True)
+
+                backfilled += 1
+
+            except Exception:
+                errors += 1
+                try:
+                    conn.close()
+                except Exception:
+                    pass
+
+        return {
+            "total_documents": len(docs),
+            "backfilled": backfilled,
+            "skipped": skipped,
+            "errors": errors,
+        }
+
+    # ------------------------------------------------------------------
+    # Source Adapter Cursor Management
+    # ------------------------------------------------------------------
+
+    def ensure_source_cursors_table(self) -> None:
+        """Create the source_cursors table if it doesn't exist."""
+        conn = get_connection()
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS source_cursors (
+                source_id TEXT PRIMARY KEY,
+                cursor_type TEXT,
+                cursor_value TEXT,
+                last_run TIMESTAMP,
+                items_processed INTEGER DEFAULT 0
+            )
+        """)
+        conn.close()
+
+    def load_source_cursor(self, source_id: str) -> Optional[str]:
+        """Load persisted cursor for a source adapter."""
+        self.ensure_source_cursors_table()
+        conn = get_connection()
+        row = conn.execute(
+            "SELECT cursor_value FROM source_cursors WHERE source_id = ?",
+            (source_id,),
+        ).fetchone()
+        conn.close()
+        return row[0] if row else None
+
+    def save_source_cursor(self, source_id: str, cursor_value: str) -> None:
+        """Persist cursor for a source adapter."""
+        self.ensure_source_cursors_table()
+        conn = get_connection()
+        conn.execute(
+            """INSERT OR REPLACE INTO source_cursors
+            (source_id, cursor_type, cursor_value, last_run)
+            VALUES (?, 'adapter', ?, ?)""",
+            (source_id, cursor_value, datetime.utcnow()),
+        )
+        conn.close()
+
+    def get_source_cursors(self) -> list[dict]:
+        """List all persisted source cursors."""
+        self.ensure_source_cursors_table()
+        conn = get_connection()
+        rows = conn.execute(
+            """SELECT source_id, cursor_type, cursor_value, last_run, items_processed
+            FROM source_cursors ORDER BY last_run DESC"""
+        ).fetchall()
+        conn.close()
+        return [
+            {"source_id": r[0], "cursor_type": r[1], "cursor_value": r[2],
+             "last_run": str(r[3]), "items_processed": r[4]}
             for r in rows
         ]
 

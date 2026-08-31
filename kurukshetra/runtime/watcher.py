@@ -56,21 +56,50 @@ class InboxWatcher:
         )
 
     def ingest_one(self, file_path: Path) -> IngestionResult:
-        """Ingest a single file through the full pipeline."""
+        """Ingest a single file through the KnowledgeFabric.
+
+        Routes through KnowledgeFabric for version tracking,
+        concept-team association, and provenance preservation.
+        Falls back to direct pipeline if Fabric is unavailable.
+        """
         filename = file_path.name
         self.tracker.detect(filename)
         self.tracker.update(filename, IngestStatus.EXTRACTING)
 
+        # Try routing through KnowledgeFabric first
         try:
-            result = self.pipeline.ingest(file_path)
-        except Exception as e:
-            self.tracker.update(
-                filename, IngestStatus.FAILED, error=str(e)
+            from kurukshetra.knowledge.fabric import KnowledgeFabric
+            fabric = KnowledgeFabric()
+            try:
+                fabric_result = fabric.ingest_file(file_path)
+            finally:
+                fabric.close()
+
+            # Map Fabric result to IngestionResult for compatibility
+            team_id = fabric_result.teams_detected[0] if fabric_result.teams_detected else "unknown"
+            result = IngestionResult(
+                document_id=fabric_result.document_id,
+                title=fabric_result.title or filename,
+                error=fabric_result.error,
             )
-            self._move(file_path, self.failed)
-            return IngestionResult(
-                document_id="", title=filename, error=str(e)
-            )
+            result.chunks_stored = fabric_result.chunks_stored
+            result.entities_extracted = fabric_result.entities_extracted
+            result.relationships_extracted = fabric_result.relationships_extracted
+            result.unknown_terms = fabric_result.unknown_terms
+            result.team_id = team_id
+            result.stages = fabric_result.stages
+        except Exception:
+            # Fallback: direct pipeline ingestion
+            try:
+                result = self.pipeline.ingest(file_path)
+            except Exception as e:
+                self.tracker.update(
+                    filename, IngestStatus.FAILED, error=str(e)
+                )
+                self._move(file_path, self.failed)
+                return IngestionResult(
+                    document_id="", title=filename, error=str(e)
+                )
 
         # Update tracker with results
         if result.error:

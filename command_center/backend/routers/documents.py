@@ -60,11 +60,15 @@ class ActivityResponse(BaseModel):
 
 @router.post("/ingest", response_model=IngestResponse)
 async def ingest_document(request: IngestRequest):
-    """Ingest a document into the knowledge base."""
+    """Ingest a document into the knowledge base.
+
+    Routes through KnowledgeFabric for version tracking,
+    concept-team association, and provenance preservation.
+    """
     start = time.time()
 
     try:
-        from kurukshetra.pipeline.ingest import IngestionPipeline
+        from kurukshetra.knowledge.fabric import KnowledgeFabric
         from kurukshetra.security.config import SecurityConfig
 
         # Path traversal protection (defense-in-depth)
@@ -79,21 +83,24 @@ async def ingest_document(request: IngestRequest):
                 ),
             )
 
-        pipeline = IngestionPipeline(use_semantic_chunking=False)
-        result = pipeline.ingest(file_path)
-        pipeline.close()
+        fabric = KnowledgeFabric()
+        try:
+            result = fabric.ingest_file(file_path)
+        finally:
+            fabric.close()
 
         execution_time = (time.time() - start) * 1000
+        team_id = result.teams_detected[0] if result.teams_detected else "unknown"
 
         return IngestResponse(
             document_id=result.document_id,
-            title=result.title,
+            title=result.title or file_path.stem,
             status="error" if result.error else "ok",
             chunks_stored=result.chunks_stored,
             entities_extracted=result.entities_extracted,
             relationships_extracted=result.relationships_extracted,
             unknown_terms=result.unknown_terms,
-            team_id=result.team_id,
+            team_id=team_id,
             stages=result.stages,
             execution_time_ms=round(execution_time, 1),
         )

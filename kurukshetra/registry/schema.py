@@ -32,4 +32,14 @@ def initialize_schema() -> None:
     );
     """)
 
+    # Ensure quality columns exist on graph_entities (migration)
+    for col_def in [
+        "ALTER TABLE graph_entities ADD COLUMN quality_score DOUBLE DEFAULT 0.5",
+        "ALTER TABLE graph_entities ADD COLUMN quality_label VARCHAR DEFAULT 'MEDIUM'",
+    ]:
+        try:
+            conn.execute(col_def)
+        except Exception:
+            pass  # column already exists
+
     conn.close()

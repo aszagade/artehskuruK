@@ -47,6 +47,8 @@ class APIKeyAuth(BaseHTTPMiddleware):
         "/docs",
         "/openapi.json",
         "/redoc",
+        "/auth/login",
+        "/auth/callback",
     }
 
     def __init__(self, app, config: SecurityConfig | None = None) -> None:

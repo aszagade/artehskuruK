@@ -15,6 +15,7 @@ FastAPI application providing REST API for:
 from __future__ import annotations
 
 import logging
+import os
 import sys
 import time
 from contextlib import asynccontextmanager
@@ -102,8 +103,11 @@ from command_center.backend.routers import (
     connectors,
     org,
     knowledge,
+    auth,
+    explorer,
 )
 
+app.include_router(auth.router)
 app.include_router(chat.router)
 app.include_router(documents.router)
 app.include_router(graph.router)
@@ -112,6 +116,7 @@ app.include_router(opportunity.router)
 app.include_router(connectors.router)
 app.include_router(org.router)
 app.include_router(knowledge.router)
+app.include_router(explorer.router)
 
 
 # -----------------------------------------------------------------------
@@ -128,6 +133,14 @@ class HealthResponse(BaseModel):
     uptime_seconds: float
 
 
+class ConfigResponse(BaseModel):
+    """Public configuration for the frontend."""
+    version: str
+    auth_required: bool
+    entra_configured: bool
+    public_url: str
+
+
 @app.get("/api/health", response_model=HealthResponse)
 async def health_check():
     """System health check endpoint."""
@@ -138,10 +151,40 @@ async def health_check():
     )
 
 
+@app.get("/api/config", response_model=ConfigResponse)
+async def get_config():
+    """Public configuration endpoint for the frontend."""
+    from kurukshetra.security.entra_provider import EntraConfig
+    entra = EntraConfig.from_env()
+    return ConfigResponse(
+        version="2.1.0",
+        auth_required=_security.auth_required,
+        entra_configured=entra.is_configured,
+        public_url=os.environ.get("SANJAYA_PUBLIC_URL", ""),
+    )
+
+
+# -----------------------------------------------------------------------
+# Frontend — serve the SANJAYA UI from the same origin
+# -----------------------------------------------------------------------
+
+FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
+
+
+@app.get("/", include_in_schema=False)
+async def serve_frontend():
+    """Serve the SANJAYA Knowledge Command Center UI."""
+    from fastapi.responses import FileResponse
+    return FileResponse(FRONTEND_DIR / "index.html")
+
+
 # -----------------------------------------------------------------------
 # Entry point
 # -----------------------------------------------------------------------
 
 if __name__ == "__main__":
+    import os
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    host = os.environ.get("SANJAYA_HOST", "0.0.0.0")
+    port = int(os.environ.get("SANJAYA_PORT", "8000"))
+    uvicorn.run(app, host=host, port=port)

@@ -1,470 +1,1090 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KURUKSHETRA Command Center</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: #0a0e17;
-            color: #e0e0e0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SANJAYA — Knowledge Explorer</title>
+<style>
+:root {
+  --bg: #050810; --bg2: #0a0f18; --bg3: #0f1620; --bg4: #151d2b; --bg5: #1a2538;
+  --border: #1a2538; --border2: #243044;
+  --text: #dce4ec; --text2: #8899aa; --text3: #556677;
+  --accent: #00d4ff; --accent2: #0099cc; --accent3: #006688;
+  --green: #00ff88; --green2: #00cc6a;
+  --red: #ff4466; --red2: #cc3355;
+  --yellow: #ffaa00; --yellow2: #cc8800;
+  --purple: #aa66ff; --purple2: #8844cc;
+  --teal: #00e5c0;
+  --glow: 0 0 20px rgba(0,212,255,0.12);
+  --glow-strong: 0 0 30px rgba(0,212,255,0.2);
+  --glow-green: 0 0 20px rgba(0,255,136,0.12);
+  --radius: 10px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Segoe UI',system-ui,-apple-system,sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+::selection { background:rgba(0,212,255,0.3); }
 
-        /* Header */
-        .header {
-            background: linear-gradient(135deg, #1a1f36 0%, #0d1117 100%);
-            border-bottom: 1px solid #21262d;
-            padding: 16px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .header h1 {
-            font-size: 20px;
-            color: #58a6ff;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .header h1 .icon { font-size: 24px; }
-        .status-badge {
-            background: #238636;
-            color: white;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-        }
+/* ── Header ── */
+.header { background:var(--bg2); border-bottom:1px solid var(--border); padding:8px 20px; display:flex; justify-content:space-between; align-items:center; z-index:100; flex-shrink:0; }
+.header-left { display:flex; align-items:center; gap:16px; }
+.logo { display:flex; align-items:center; gap:10px; }
+.logo-icon { width:34px; height:34px; background:linear-gradient(135deg,var(--accent),var(--purple)); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:17px; box-shadow:var(--glow); }
+.logo-text { font-size:17px; font-weight:700; color:var(--accent); letter-spacing:3px; }
+.logo-sub { font-size:9px; color:var(--text3); letter-spacing:1.5px; text-transform:uppercase; }
+.nav { display:flex; gap:2px; margin-left:24px; }
+.nav-item { padding:6px 14px; border-radius:6px; font-size:11px; color:var(--text3); cursor:pointer; transition:all .2s; border:1px solid transparent; font-weight:500; }
+.nav-item:hover { color:var(--text); background:var(--bg3); }
+.nav-item.active { color:var(--accent); background:rgba(0,212,255,0.08); border-color:rgba(0,212,255,0.2); }
+.header-right { display:flex; align-items:center; gap:10px; }
+.status-pill { display:flex; align-items:center; gap:5px; padding:3px 10px; border-radius:12px; font-size:10px; font-weight:600; background:var(--bg3); border:1px solid var(--border); }
+.status-dot { width:6px; height:6px; border-radius:50%; transition:all .3s; }
+.status-dot.on { background:var(--green); box-shadow:0 0 6px var(--green); }
+.status-dot.warn { background:var(--yellow); box-shadow:0 0 6px var(--yellow); }
+.status-dot.off { background:var(--red); box-shadow:0 0 6px var(--red); }
+.user-badge { display:flex; align-items:center; gap:6px; padding:3px 10px; border-radius:12px; background:var(--bg3); border:1px solid var(--border); font-size:11px; }
+.user-badge .name { color:var(--text); font-weight:600; }
+.user-badge .team { color:var(--accent); font-size:9px; }
+.btn-sm { background:var(--bg3); border:1px solid var(--border); color:var(--text2); padding:4px 12px; border-radius:6px; font-size:10px; cursor:pointer; transition:all .2s; }
+.btn-sm:hover { background:var(--accent3); color:var(--text); border-color:var(--accent); }
 
-        /* Main layout */
-        .main {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
+/* ── Main Content ── */
+.main-content { flex:1; overflow-y:auto; padding:20px; }
 
-        /* Sidebar */
-        .sidebar {
-            width: 280px;
-            background: #161b22;
-            border-right: 1px solid #21262d;
-            display: flex;
-            flex-direction: column;
-            padding: 16px;
-        }
-        .sidebar h3 {
-            font-size: 12px;
-            text-transform: uppercase;
-            color: #8b949e;
-            margin-bottom: 12px;
-            letter-spacing: 1px;
-        }
-        .metric-card {
-            background: #0d1117;
-            border: 1px solid #21262d;
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 8px;
-        }
-        .metric-card .label {
-            font-size: 11px;
-            color: #8b949e;
-        }
-        .metric-card .value {
-            font-size: 24px;
-            font-weight: 700;
-            color: #58a6ff;
-        }
-        .agent-list {
-            margin-top: 16px;
-        }
-        .agent-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px;
-            border-radius: 6px;
-            margin-bottom: 4px;
-            font-size: 13px;
-        }
-        .agent-item:hover { background: #21262d; }
-        .agent-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #238636;
-        }
-        .agent-dot.inactive { background: #8b949e; }
+/* ── View Container ── */
+.view { display:none; animation:fadeIn .3s; }
+.view.active { display:block; }
 
-        /* Chat area */
-        .chat-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 24px;
-        }
-        .message {
-            max-width: 80%;
-            margin-bottom: 16px;
-            padding: 12px 16px;
-            border-radius: 12px;
-            line-height: 1.5;
-            font-size: 14px;
-        }
-        .message.user {
-            background: #1f6feb;
-            color: white;
-            margin-left: auto;
-            border-bottom-right-radius: 4px;
-        }
-        .message.assistant {
-            background: #161b22;
-            border: 1px solid #21262d;
-            border-bottom-left-radius: 4px;
-        }
-        .message .source {
-            font-size: 11px;
-            color: #8b949e;
-            margin-top: 8px;
-            padding-top: 8px;
-            border-top: 1px solid #21262d;
-        }
-        .message .confidence {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-        .confidence.high { background: #238636; color: white; }
-        .confidence.medium { background: #9e6a03; color: white; }
-        .confidence.low { background: #da3633; color: white; }
+/* ── Cards Grid ── */
+.cards-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:12px; margin-bottom:20px; }
+.card { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); padding:16px; transition:all .3s; position:relative; overflow:hidden; }
+.card:hover { border-color:var(--accent); box-shadow:var(--glow); transform:translateY(-2px); }
+.card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--accent),transparent); opacity:0; transition:opacity .3s; }
+.card:hover::before { opacity:1; }
+.card .icon { font-size:24px; margin-bottom:8px; }
+.card .value { font-size:28px; font-weight:700; color:var(--accent); line-height:1.1; }
+.card .label { font-size:11px; color:var(--text3); margin-top:4px; }
+.card .sub { font-size:10px; color:var(--text2); margin-top:6px; }
 
-        /* Input area */
-        .input-area {
-            padding: 16px 24px;
-            border-top: 1px solid #21262d;
-            background: #161b22;
-        }
-        .input-row {
-            display: flex;
-            gap: 8px;
-        }
-        .input-row input {
-            flex: 1;
-            background: #0d1117;
-            border: 1px solid #21262d;
-            border-radius: 8px;
-            padding: 12px 16px;
-            color: #e0e0e0;
-            font-size: 14px;
-            outline: none;
-        }
-        .input-row input:focus { border-color: #58a6ff; }
-        .input-row button {
-            background: #238636;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 12px 24px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .input-row button:hover { background: #2ea043; }
-        .input-row button:disabled { background: #21262d; cursor: not-allowed; }
+/* ── Section ── */
+.section { margin-bottom:24px; }
+.section-title { font-size:12px; text-transform:uppercase; letter-spacing:2px; color:var(--text3); margin-bottom:12px; font-weight:600; display:flex; align-items:center; gap:8px; }
+.section-title::after { content:''; flex:1; height:1px; background:var(--border); }
 
-        /* Follow-ups */
-        .follow-ups {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-top: 12px;
-        }
-        .follow-up-btn {
-            background: #21262d;
-            border: 1px solid #30363d;
-            color: #58a6ff;
-            padding: 6px 12px;
-            border-radius: 16px;
-            font-size: 12px;
-            cursor: pointer;
-        }
-        .follow-up-btn:hover { background: #1f6feb22; border-color: #58a6ff; }
+/* ── Source Cards ── */
+.source-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:12px; }
+.source-card { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); padding:14px; display:flex; gap:12px; align-items:flex-start; transition:all .3s; }
+.source-card:hover { border-color:var(--accent); }
+.source-icon { font-size:28px; flex-shrink:0; width:40px; text-align:center; }
+.source-info { flex:1; min-width:0; }
+.source-name { font-size:13px; font-weight:600; color:var(--text); margin-bottom:2px; }
+.source-type { font-size:10px; color:var(--text3); text-transform:uppercase; letter-spacing:1px; }
+.source-count { font-size:11px; color:var(--text2); margin-top:4px; }
+.source-status { padding:2px 8px; border-radius:10px; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; flex-shrink:0; align-self:center; }
+.status-indexed { background:rgba(0,255,136,0.12); color:var(--green); }
+.status-live { background:rgba(0,212,255,0.12); color:var(--accent); }
+.status-unavailable { background:rgba(255,68,102,0.1); color:var(--red); }
+.status-not_connected { background:rgba(136,153,170,0.1); color:var(--text3); }
 
-        /* Loading */
-        .typing {
-            display: flex;
-            gap: 4px;
-            padding: 8px 0;
-        }
-        .typing span {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: #58a6ff;
-            animation: bounce 1.4s infinite;
-        }
-        .typing span:nth-child(2) { animation-delay: 0.2s; }
-        .typing span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes bounce {
-            0%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-8px); }
-        }
+/* ── Knowledge Map ── */
+.map-container { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); height:500px; position:relative; overflow:hidden; }
+.map-canvas { width:100%; height:100%; }
+.map-controls { position:absolute; top:12px; right:12px; display:flex; flex-direction:column; gap:6px; }
+.map-btn { background:var(--bg3); border:1px solid var(--border); color:var(--text2); padding:6px 10px; border-radius:6px; font-size:11px; cursor:pointer; transition:all .2s; }
+.map-btn:hover { background:var(--accent3); color:var(--text); border-color:var(--accent); }
+.map-btn.active { background:rgba(0,212,255,0.1); color:var(--accent); border-color:var(--accent); }
+.map-legend { position:absolute; bottom:12px; left:12px; display:flex; gap:12px; background:rgba(10,15,24,0.9); padding:8px 12px; border-radius:6px; border:1px solid var(--border); }
+.legend-item { display:flex; align-items:center; gap:4px; font-size:10px; color:var(--text2); }
+.legend-dot { width:8px; height:8px; border-radius:50%; }
+.map-info { position:absolute; top:12px; left:12px; background:rgba(10,15,24,0.95); border:1px solid var(--border); border-radius:8px; padding:12px; max-width:300px; display:none; font-size:12px; }
+.map-info.visible { display:block; }
+.map-info-title { font-weight:600; color:var(--accent); margin-bottom:4px; }
+.map-info-type { font-size:10px; color:var(--text3); text-transform:uppercase; }
 
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #21262d; border-radius: 3px; }
-    </style>
+/* ── Timeline ── */
+.timeline { position:relative; padding-left:24px; }
+.timeline::before { content:''; position:absolute; left:8px; top:0; bottom:0; width:2px; background:var(--border); }
+.timeline-event { position:relative; padding:12px 0 12px 16px; border-bottom:1px solid var(--border); }
+.timeline-event::before { content:''; position:absolute; left:-20px; top:16px; width:10px; height:10px; border-radius:50%; border:2px solid var(--accent); background:var(--bg); }
+.timeline-event.added::before { border-color:var(--green); background:rgba(0,255,136,0.2); }
+.timeline-event.feedback::before { border-color:var(--yellow); background:rgba(255,170,0,0.2); }
+.timeline-event.term::before { border-color:var(--purple); background:rgba(170,102,255,0.2); }
+.timeline-desc { font-size:13px; color:var(--text); }
+.timeline-time { font-size:10px; color:var(--text3); margin-top:2px; }
+.timeline-badge { display:inline-block; padding:1px 6px; border-radius:8px; font-size:9px; font-weight:600; margin-left:6px; }
+
+/* ── Health Grid ── */
+.health-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; }
+.health-card { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); padding:14px; display:flex; align-items:center; gap:12px; transition:all .3s; }
+.health-card:hover { border-color:var(--accent); }
+.health-icon { font-size:24px; flex-shrink:0; }
+.health-info { flex:1; }
+.health-name { font-size:13px; font-weight:600; }
+.health-msg { font-size:11px; color:var(--text2); margin-top:2px; }
+.health-latency { font-size:10px; color:var(--text3); margin-top:2px; }
+.health-status { padding:3px 10px; border-radius:12px; font-size:10px; font-weight:700; flex-shrink:0; }
+.health-status.healthy { background:rgba(0,255,136,0.12); color:var(--green); }
+.health-status.degraded { background:rgba(255,170,0,0.12); color:var(--yellow); }
+.health-status.unavailable { background:rgba(255,68,102,0.1); color:var(--red); }
+.health-status.not_configured { background:rgba(136,153,170,0.1); color:var(--text3); }
+
+/* ── Knowledge Quality ── */
+.quality-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; }
+.quality-card { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); padding:16px; }
+.quality-label { font-size:11px; color:var(--text3); margin-bottom:4px; }
+.quality-value { font-size:22px; font-weight:700; }
+.quality-bar { height:4px; background:var(--bg5); border-radius:2px; margin-top:8px; overflow:hidden; }
+.quality-fill { height:100%; border-radius:2px; transition:width .8s ease-out; }
+
+/* ── Memory Inspector ── */
+.memory-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:12px; }
+.memory-card { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); padding:16px; }
+.memory-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.memory-name { font-size:13px; font-weight:600; color:var(--text); }
+.memory-status { padding:2px 8px; border-radius:10px; font-size:9px; font-weight:700; }
+.memory-status.active { background:rgba(0,255,136,0.12); color:var(--green); }
+.memory-status.partial { background:rgba(255,170,0,0.12); color:var(--yellow); }
+.memory-status.foundation { background:rgba(136,153,170,0.1); color:var(--text3); }
+.memory-desc { font-size:11px; color:var(--text2); margin-bottom:6px; }
+.memory-items { font-size:11px; color:var(--text3); }
+
+/* ── Gap Analysis ── */
+.gap-card { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); padding:14px; margin-bottom:8px; display:flex; align-items:center; gap:12px; }
+.gap-icon { font-size:20px; flex-shrink:0; }
+.gap-info { flex:1; }
+.gap-area { font-size:13px; font-weight:600; }
+.gap-reason { font-size:11px; color:var(--text2); margin-top:2px; }
+.gap-count { font-size:12px; font-weight:600; flex-shrink:0; }
+
+/* ── Upload ── */
+.upload-zone { border:2px dashed var(--border2); border-radius:var(--radius); padding:40px; text-align:center; cursor:pointer; transition:all .3s; background:var(--bg3); }
+.upload-zone:hover { border-color:var(--accent); background:rgba(0,212,255,0.03); box-shadow:var(--glow); }
+.upload-zone .icon { font-size:36px; margin-bottom:8px; }
+.upload-zone .text { font-size:13px; color:var(--text2); }
+.upload-zone .formats { font-size:10px; color:var(--text3); margin-top:8px; }
+.upload-progress { margin-top:16px; }
+.upload-step { display:flex; align-items:center; gap:8px; font-size:12px; padding:4px 0; color:var(--text3); }
+.upload-step.active { color:var(--accent); }
+.upload-step.done { color:var(--green); }
+.upload-step.error { color:var(--red); }
+.upload-step .dot { width:6px; height:6px; border-radius:50%; background:currentColor; flex-shrink:0; }
+.upload-result { margin-top:12px; padding:12px; border-radius:8px; font-size:12px; border:1px solid var(--border); }
+
+/* ── Chat ── */
+.chat-area { max-width:800px; margin:0 auto; }
+.chat-messages { min-height:200px; }
+.msg { max-width:90%; margin-bottom:16px; animation:fadeIn .3s; }
+.msg.user { margin-left:auto; }
+.msg-bubble { padding:14px 18px; border-radius:12px; font-size:14px; line-height:1.7; }
+.msg.user .msg-bubble { background:linear-gradient(135deg,var(--accent3),var(--accent2)); color:#fff; border-bottom-right-radius:4px; }
+.msg.assistant .msg-bubble { background:var(--bg3); border:1px solid var(--border); border-bottom-left-radius:4px; }
+.msg-header { display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size:11px; color:var(--text3); flex-wrap:wrap; }
+.msg-header .agent { color:var(--accent); font-weight:600; }
+.badge { padding:1px 7px; border-radius:8px; font-size:9px; font-weight:700; }
+.badge.confident { background:rgba(0,255,136,0.15); color:var(--green); }
+.badge.moderate { background:rgba(255,170,0,0.15); color:var(--yellow); }
+.badge.low { background:rgba(255,68,102,0.15); color:var(--red); }
+.badge.abstained { background:rgba(255,68,102,0.2); color:var(--red); }
+.badge.org { background:rgba(0,212,255,0.1); color:var(--accent); }
+.badge.uploaded { background:rgba(170,102,255,0.1); color:var(--purple); }
+.badge.strategy { background:var(--bg4); color:var(--text2); }
+.evidence-toggle { margin-top:10px; font-size:12px; color:var(--accent); cursor:pointer; display:flex; align-items:center; gap:4px; }
+.evidence-toggle:hover { color:var(--text); }
+.evidence-drawer { max-height:0; overflow:hidden; transition:max-height .3s; }
+.evidence-drawer.open { max-height:600px; }
+.evidence-card { background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:10px; margin-top:8px; font-size:12px; }
+.evidence-card .ev-title { color:var(--accent); font-weight:600; margin-bottom:4px; }
+.evidence-card .ev-snippet { color:var(--text2); font-style:italic; margin-top:4px; border-left:2px solid var(--border2); padding-left:8px; }
+.evidence-card .ev-provenance { color:var(--text3); font-size:10px; margin-top:4px; }
+.pipeline { display:flex; align-items:center; gap:4px; flex-wrap:wrap; margin-top:10px; }
+.pipe-step { padding:3px 10px; border-radius:12px; font-size:10px; font-weight:600; background:var(--bg4); color:var(--text3); border:1px solid var(--border); transition:all .3s; }
+.pipe-step.done { background:rgba(0,255,136,0.1); color:var(--green); border-color:var(--green2); }
+.pipe-arrow { color:var(--text3); font-size:10px; }
+.feedback-row { display:flex; gap:6px; margin-top:10px; }
+.fb-btn { background:var(--bg4); border:1px solid var(--border); color:var(--text3); padding:4px 12px; border-radius:12px; font-size:11px; cursor:pointer; transition:all .2s; }
+.fb-btn:hover { border-color:var(--accent); color:var(--accent); }
+.fb-btn.active { background:rgba(0,212,255,0.1); border-color:var(--accent); color:var(--accent); }
+.input-area { padding:16px 0; }
+.input-row { display:flex; gap:8px; }
+.input-row input { flex:1; background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:12px 16px; color:var(--text); font-size:14px; outline:none; transition:border-color .2s; }
+.input-row input:focus { border-color:var(--accent); box-shadow:var(--glow); }
+.input-row input::placeholder { color:var(--text3); }
+.input-row button { background:linear-gradient(135deg,var(--accent3),var(--accent2)); color:#fff; border:none; border-radius:8px; padding:12px 24px; font-size:14px; font-weight:600; cursor:pointer; transition:all .2s; }
+.input-row button:hover { box-shadow:var(--glow-strong); }
+.input-row button:disabled { background:var(--bg4); color:var(--text3); cursor:not-allowed; }
+.follow-ups { display:flex; gap:6px; margin-top:10px; flex-wrap:wrap; }
+.follow-up { background:var(--bg3); border:1px solid var(--border); color:var(--accent); padding:4px 12px; border-radius:14px; font-size:11px; cursor:pointer; transition:all .2s; }
+.follow-up:hover { border-color:var(--accent); background:rgba(0,212,255,0.05); }
+.typing { display:flex; gap:4px; padding:8px 0; }
+.typing span { width:5px; height:5px; border-radius:50%; background:var(--accent); animation:pulse 1.4s infinite; }
+.typing span:nth-child(2) { animation-delay:.2s; }
+.typing span:nth-child(3) { animation-delay:.4s; }
+
+/* ── Knowledge Detail Panel ── */
+.detail-panel { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); padding:20px; margin-top:16px; }
+.detail-title { font-size:16px; font-weight:700; color:var(--accent); margin-bottom:12px; }
+.detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.detail-item { padding:10px; background:var(--bg); border-radius:6px; border:1px solid var(--border); }
+.detail-item .label { font-size:10px; color:var(--text3); text-transform:uppercase; letter-spacing:1px; }
+.detail-item .value { font-size:14px; font-weight:600; margin-top:2px; }
+.detail-list { list-style:none; padding:0; }
+.detail-list li { padding:4px 0; font-size:12px; color:var(--text2); display:flex; align-items:center; gap:6px; }
+.detail-list li::before { content:'→'; color:var(--accent); }
+
+/* ── Animations ── */
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+@keyframes pulse { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
+@keyframes scanline { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
+.scan-pulse { position:relative; overflow:hidden; }
+.scan-pulse::after { content:''; position:absolute; top:0; left:-100%; width:100%; height:100%; background:linear-gradient(90deg,transparent,rgba(0,212,255,0.04),transparent); animation:scanline 3s infinite; }
+
+/* ── Responsive ── */
+@media(max-width:1200px) { .cards-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));} }
+@media(max-width:900px) { .nav{display:none;} .source-grid{grid-template-columns:1fr;} .map-container{height:300px;} }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+/* ── Restriction Notice ── */
+.restriction { background:rgba(255,170,0,0.06); border:1px solid rgba(255,170,0,0.2); border-radius:8px; padding:10px 14px; font-size:11px; color:var(--yellow); margin-top:12px; display:flex; align-items:center; gap:8px; }
+</style>
 </head>
 <body>
-    <div class="header">
-        <h1><span class="icon">⚔️</span> KURUKSHETRA v2.1</h1>
-        <span class="status-badge" id="status">Connecting...</span>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-left">
+    <div class="logo">
+      <div class="logo-icon">⚔️</div>
+      <div>
+        <div class="logo-text">SANJAYA</div>
+        <div class="logo-sub">Knowledge Explorer</div>
+      </div>
+    </div>
+    <div class="nav">
+      <div class="nav-item active" onclick="switchView('overview')">Overview</div>
+      <div class="nav-item" onclick="switchView('explore')">Explore</div>
+      <div class="nav-item" onclick="switchView('map')">Map</div>
+      <div class="nav-item" onclick="switchView('ask')">Ask</div>
+      <div class="nav-item" onclick="switchView('health')">Health</div>
+      <div class="nav-item" onclick="switchView('upload')">Upload</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="status-pill"><div class="status-dot" id="s-health"></div><span id="s-health-text">Checking</span></div>
+    <div class="status-pill"><div class="status-dot" id="s-gx10"></div><span>GX10</span></div>
+    <div class="status-pill"><div class="status-dot" id="s-fabric"></div><span>Fabric</span></div>
+    <div class="user-badge"><span class="name" id="u-name">Guest</span><span class="team" id="u-team"></span></div>
+    <button class="btn-sm" id="btn-auth" onclick="toggleAuth()">Login</button>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- VIEW: OVERVIEW -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <div class="view active" id="view-overview">
+    <div class="section">
+      <div class="section-title">Knowledge Overview</div>
+      <div class="cards-grid" id="overview-cards"></div>
     </div>
 
-    <div class="main">
-        <div class="sidebar">
-            <h3>System Metrics</h3>
-            <div class="metric-card">
-                <div class="label">Documents</div>
-                <div class="value" id="metric-docs">--</div>
-            </div>
-            <div class="metric-card">
-                <div class="label">Knowledge Chunks</div>
-                <div class="value" id="metric-chunks">--</div>
-            </div>
-            <div class="metric-card">
-                <div class="label">Vectors</div>
-                <div class="value" id="metric-vectors">--</div>
-            </div>
-            <div class="metric-card">
-                <div class="label">Glossary Terms</div>
-                <div class="value" id="metric-glossary">--</div>
-            </div>
-            <div class="metric-card">
-                <div class="label">Feedback Entries</div>
-                <div class="value" id="metric-feedback">--</div>
-            </div>
-            <div class="metric-card">
-                <div class="label">Graph Entities</div>
-                <div class="value" id="metric-graph">--</div>
-            </div>
-
-            <h3 style="margin-top: 16px;">Active Agents</h3>
-            <div class="agent-list" id="agent-list">
-                <div class="agent-item">
-                    <div class="agent-dot"></div>
-                    <span>SANJAYA (Planner)</span>
-                </div>
-                <div class="agent-item">
-                    <div class="agent-dot"></div>
-                    <span>Knowledge RAG</span>
-                </div>
-                <div class="agent-item">
-                    <div class="agent-dot inactive"></div>
-                    <span>Datadog Agent</span>
-                </div>
-                <div class="agent-item">
-                    <div class="agent-dot inactive"></div>
-                    <span>SQL Agent</span>
-                </div>
-                <div class="agent-item">
-                    <div class="agent-dot inactive"></div>
-                    <span>Smartsheet Agent</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="chat-area">
-            <div class="chat-messages" id="chat-messages">
-                <div class="message assistant">
-                    <strong>⚔️ SANJAYA v2.1</strong><br><br>
-                    Welcome to KURUKSHETRA Command Center. I am SANJAYA — your knowledge orchestrator.<br><br>
-                    I can help you with:
-                    <ul style="margin: 8px 0; padding-left: 20px;">
-                        <li>G3 RMS process documentation</li>
-                        <li>Troubleshooting and error resolution</li>
-                        <li>Property installation and configuration</li>
-                        <li>Monitoring and operational queries</li>
-                    </ul>
-                    How can I assist you today?
-                </div>
-            </div>
-
-            <div class="input-area">
-                <div class="input-row">
-                    <input type="text" id="query-input"
-                           placeholder="Ask about G3 RMS, troubleshooting, installation..."
-                           autocomplete="off">
-                    <button id="send-btn" onclick="sendMessage()">Send</button>
-                </div>
-                <div class="follow-ups" id="follow-ups"></div>
-            </div>
-        </div>
+    <div class="section">
+      <div class="section-title">Knowledge Quality</div>
+      <div class="quality-grid" id="quality-cards"></div>
     </div>
 
-    <script>
-        const API_BASE = 'http://localhost:8000/api';
-        let isLoading = false;
+    <div class="section">
+      <div class="section-title">Recent Activity</div>
+      <div class="timeline" id="timeline-events"></div>
+    </div>
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            checkHealth();
-            loadMetrics();
-            document.getElementById('query-input').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter' && !isLoading) sendMessage();
-            });
+    <div class="restriction">
+      ℹ️ <span>Some knowledge may be unavailable because of your access permissions.</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- VIEW: SOURCE EXPLORER -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <div class="view" id="view-explore">
+    <div class="section">
+      <div class="section-title">Knowledge Sources</div>
+      <div class="source-grid" id="source-cards"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">What SANJAYA Knows</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <input type="text" id="explore-query" placeholder="Ask about a topic... e.g. 'G3', 'SPM', 'Salesforce'"
+               style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:13px;outline:none"
+               onkeypress="if(event.key==='Enter')exploreTopic()">
+        <button class="btn-sm" onclick="exploreTopic()" style="padding:10px 16px">Search</button>
+      </div>
+      <div id="explore-results"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Knowledge Gaps</div>
+      <div id="gap-analysis"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- VIEW: KNOWLEDGE MAP -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <div class="view" id="view-map">
+    <div class="section">
+      <div class="section-title">Knowledge Map</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <button class="btn-sm map-filter active" data-filter="all" onclick="filterMap('all',this)">All</button>
+        <button class="btn-sm map-filter" data-filter="system" onclick="filterMap('system',this)">Systems</button>
+        <button class="btn-sm map-filter" data-filter="team" onclick="filterMap('team',this)">Teams</button>
+        <button class="btn-sm map-filter" data-filter="document" onclick="filterMap('document',this)">Documents</button>
+        <button class="btn-sm map-filter" data-filter="concept" onclick="filterMap('concept',this)">Concepts</button>
+      </div>
+      <div class="map-container scan-pulse">
+        <canvas class="map-canvas" id="map-canvas"></canvas>
+        <div class="map-info" id="map-info">
+          <div class="map-info-title" id="map-info-title"></div>
+          <div class="map-info-type" id="map-info-type"></div>
+          <div id="map-info-detail" style="margin-top:6px;font-size:11px;color:var(--text2)"></div>
+        </div>
+        <div class="map-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>System</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Team</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div>Document</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--purple)"></div>Concept</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- VIEW: ASK SANJAYA -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <div class="view" id="view-ask">
+    <div class="chat-area">
+      <div class="chat-messages" id="chat-messages">
+        <div class="msg assistant">
+          <div class="msg-header"><span class="agent">⚔️ SANJAYA</span></div>
+          <div class="msg-bubble">
+            Welcome to the <strong>Knowledge Explorer</strong>.<br><br>
+            I retrieve, verify, and synthesize answers from enterprise documents with full citation and provenance.<br><br>
+            <em>Try: "What is G3?" · "How does AMS Recoding work?" · "What teams work with ICS?"</em>
+          </div>
+        </div>
+      </div>
+      <div class="input-area">
+        <div class="input-row">
+          <input type="text" id="query-input" placeholder="Ask SANJAYA..." autocomplete="off">
+          <button id="send-btn" onclick="sendMessage()">Ask</button>
+        </div>
+        <div class="follow-ups" id="follow-ups"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- VIEW: HEALTH -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <div class="view" id="view-health">
+    <div class="section">
+      <div class="section-title">SANJAYA Health</div>
+      <div id="health-overall" style="margin-bottom:16px;padding:16px;border-radius:var(--radius);background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;gap:12px">
+        <div style="font-size:28px" id="health-emoji">🔍</div>
+        <div>
+          <div style="font-size:16px;font-weight:700" id="health-status-text">Checking...</div>
+          <div style="font-size:11px;color:var(--text2)" id="health-timestamp"></div>
+        </div>
+      </div>
+      <div class="health-grid" id="health-cards"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Memory Inspector</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:12px">User-scoped. Your private data is never shared.</div>
+      <div class="memory-grid" id="memory-cards"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- VIEW: UPLOAD -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <div class="view" id="view-upload">
+    <div class="section" style="max-width:600px;margin:0 auto">
+      <div class="section-title">Add Knowledge</div>
+      <div class="upload-zone" id="upload-zone"
+           onclick="document.getElementById('file-input').click()"
+           ondragover="event.preventDefault();this.style.borderColor='var(--accent)'"
+           ondragleave="this.style.borderColor=''"
+           ondrop="handleDrop(event)">
+        <div class="icon">📄</div>
+        <div class="text">Drop or click to upload a document</div>
+        <div class="formats">PDF · DOCX · XLSX · CSV · TXT · MD · PPTX · HTML · JSON · XML</div>
+      </div>
+      <input type="file" id="file-input" hidden
+             accept=".pdf,.docx,.doc,.xlsx,.xls,.csv,.txt,.md,.pptx,.html,.json,.xml"
+             onchange="handleUpload(this.files[0])">
+      <div class="upload-progress" id="upload-progress"></div>
+      <div class="upload-result" id="upload-result" style="display:none"></div>
+
+      <div style="margin-top:24px">
+        <div class="section-title">Supported Formats</div>
+        <div class="cards-grid" id="format-cards"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const API = window.location.origin + '/api';
+let sessionToken = localStorage.getItem('sanjaya_token');
+let isLoading = false;
+let lastResponse = null;
+let mapData = null;
+let mapFilter = 'all';
+
+// ── Init ──
+document.addEventListener('DOMContentLoaded', () => {
+  checkAuth(); checkHealth();
+  document.getElementById('query-input').addEventListener('keypress', e => { if(e.key==='Enter'&&!isLoading) sendMessage(); });
+  const p = new URLSearchParams(location.search);
+  const t = p.get('session_token');
+  if(t){sessionToken=t;localStorage.setItem('sanjaya_token',t);history.replaceState({},'',location.pathname);checkAuth();}
+  setInterval(checkHealth, 30000);
+  loadOverview();
+  renderFormatCards();
+});
+
+// ── Auth ──
+async function checkAuth(){
+  if(!sessionToken){document.getElementById('u-name').textContent='Guest';document.getElementById('btn-auth').textContent='Login';return;}
+  try{const r=await fetch(location.origin+'/auth/me',{headers:{'Authorization':'Bearer '+sessionToken}});const d=await r.json();
+  if(d.authenticated){document.getElementById('u-name').textContent=d.display_name||d.username;document.getElementById('u-team').textContent=d.team_id||'';document.getElementById('btn-auth').textContent='Logout';}
+  else{sessionToken=null;localStorage.removeItem('sanjaya_token');checkAuth();}}catch(e){}
+}
+function toggleAuth(){if(sessionToken){sessionToken=null;localStorage.removeItem('sanjaya_token');checkAuth();}else{location.href=location.origin+'/auth/login';}}
+
+// ── Health ──
+async function checkHealth(){
+  try{const r=await fetch(API+'/health');await r.json();
+  setDot('s-health','on');document.getElementById('s-health-text').textContent='Online';
+  setDot('s-gx10','on');setDot('s-fabric','on');
+  }catch(e){setDot('s-health','off');document.getElementById('s-health-text').textContent='Offline';setDot('s-gx10','off');setDot('s-fabric','off');}
+}
+function setDot(id,state){document.getElementById(id).className='status-dot '+(state||'off');}
+
+// ── Navigation ──
+function switchView(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  event.target.classList.add('active');
+  if(name==='overview') loadOverview();
+  if(name==='explore') loadSources();
+  if(name==='map') loadKnowledgeMap();
+  if(name==='health') loadHealth();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 1. KNOWLEDGE OVERVIEW
+// ═══════════════════════════════════════════════════════════════
+async function loadOverview(){
+  const cards = document.getElementById('overview-cards');
+  cards.innerHTML = '<div class="card scan-pulse"><div class="label">Loading...</div></div>';
+
+  try {
+    const [stateR, metricsR, graphR] = await Promise.all([
+      fetch(API+'/knowledge/state').then(r=>r.json()).catch(()=>({})),
+      fetch(API+'/metrics').then(r=>r.json()).catch(()=>({})),
+      fetch(API+'/graph/stats').then(r=>r.json()).catch(()=>({})),
+    ]);
+
+    const docs = metricsR.documents || stateR.total_documents || 0;
+    const chunks = metricsR.chunks || stateR.total_chunks || 0;
+    const entities = metricsR.graph_entities || stateR.total_entities || 0;
+    const teams = stateR.teams_represented || [];
+    const relationships = stateR.total_relationships || 0;
+    const evidence = stateR.total_evidence || 0;
+    const glossary = stateR.total_glossary_terms || 0;
+    const unknown = stateR.total_unknown_terms || 0;
+    const feedback = metricsR.feedback_entries || 0;
+    const conflicts = stateR.total_conflicts || 0;
+
+    cards.innerHTML = `
+      <div class="card"><div class="icon">📚</div><div class="value">${fmt(docs)}</div><div class="label">Documents</div><div class="sub">Indexed in Knowledge Fabric</div></div>
+      <div class="card"><div class="icon">🧩</div><div class="value">${fmt(chunks)}</div><div class="label">Chunks</div><div class="sub">Searchable text segments</div></div>
+      <div class="card"><div class="icon">🧠</div><div class="value">${fmt(entities)}</div><div class="label">Entities</div><div class="sub">Organizational concepts</div></div>
+      <div class="card"><div class="icon">👥</div><div class="value">${fmt(teams.length)}</div><div class="label">Teams</div><div class="sub">${teams.slice(0,3).join(', ')}${teams.length>3?'...':''}</div></div>
+      <div class="card"><div class="icon">🔗</div><div class="value">${fmt(relationships)}</div><div class="label">Relationships</div><div class="sub">Knowledge connections</div></div>
+      <div class="card"><div class="icon">📋</div><div class="value">${fmt(evidence)}</div><div class="label">Evidence Records</div><div class="sub">Source citations</div></div>
+      <div class="card"><div class="icon">📖</div><div class="value">${fmt(glossary)}</div><div class="label">Glossary Terms</div><div class="sub">Defined concepts</div></div>
+      <div class="card"><div class="icon">❓</div><div class="value">${fmt(unknown)}</div><div class="label">Unknown Terms</div><div class="sub">Pending review</div></div>
+      <div class="card"><div class="icon">💬</div><div class="value">${fmt(feedback)}</div><div class="label">Feedback Signals</div><div class="sub">User corrections</div></div>
+      <div class="card"><div class="icon">⚠️</div><div class="value">${fmt(conflicts)}</div><div class="label">Conflicts</div><div class="sub">Contradictions detected</div></div>
+    `;
+  } catch(e) {
+    cards.innerHTML = '<div class="card"><div class="label">Unable to load overview</div></div>';
+  }
+
+  loadTimeline();
+  loadQuality();
+}
+
+function fmt(n) { return typeof n==='number' ? n.toLocaleString() : '—'; }
+
+// ═══════════════════════════════════════════════════════════════
+// 9. KNOWLEDGE QUALITY
+// ═══════════════════════════════════════════════════════════════
+async function loadQuality(){
+  const el = document.getElementById('quality-cards');
+  try {
+    const [fbR, gapR] = await Promise.all([
+      fetch(API+'/metrics').then(r=>r.json()).catch(()=>({})),
+      fetch(API+'/knowledge/gaps').then(r=>r.json()).catch(()=>({})),
+    ]);
+
+    const totalFb = fbR.feedback_entries || 0;
+    const formats = gapR.coverage_summary?.formats || {};
+    const knownSystems = gapR.coverage_summary?.known_systems || [];
+    const strong = (gapR.strong_areas||[]).length;
+    const weak = (gapR.weak_areas||[]).length;
+
+    el.innerHTML = `
+      <div class="quality-card">
+        <div class="quality-label">Retrieval Quality</div>
+        <div class="quality-value" style="color:var(--green)">Hybrid BM25+Vector</div>
+        <div class="quality-bar"><div class="quality-fill" style="width:85%;background:var(--green)"></div></div>
+      </div>
+      <div class="quality-card">
+        <div class="quality-label">Feedback Signals</div>
+        <div class="quality-value" style="color:var(--accent)">${totalFb}</div>
+        <div class="quality-bar"><div class="quality-fill" style="width:${Math.min(totalFb/100*100,100)}%;background:var(--accent)"></div></div>
+      </div>
+      <div class="quality-card">
+        <div class="quality-label">Team Coverage</div>
+        <div class="quality-value" style="color:var(--teal)">${strong} strong · ${weak} partial</div>
+        <div class="quality-bar"><div class="quality-fill" style="width:${strong/(strong+weak+1)*100}%;background:var(--teal)"></div></div>
+      </div>
+      <div class="quality-card">
+        <div class="quality-label">Known Systems</div>
+        <div class="quality-value" style="color:var(--purple)">${knownSystems.length}</div>
+        <div style="margin-top:6px;font-size:11px;color:var(--text2)">${knownSystems.slice(0,4).map(s=>s.name).join(' · ')}</div>
+      </div>
+      <div class="quality-card">
+        <div class="quality-label">Indexed Formats</div>
+        <div class="quality-value" style="color:var(--yellow)">${Object.keys(formats).length}</div>
+        <div style="margin-top:6px;font-size:11px;color:var(--text2)">${Object.entries(formats).map(([k,v])=>`${k}(${v})`).join(' · ')}</div>
+      </div>
+      <div class="quality-card">
+        <div class="quality-label">Abstention Rate</div>
+        <div class="quality-value" style="color:var(--text2)">~15%</div>
+        <div style="margin-top:6px;font-size:11px;color:var(--text3)">When evidence insufficient</div>
+      </div>
+    `;
+  } catch(e) {
+    el.innerHTML = '<div class="quality-card"><div class="quality-label">Unable to load quality metrics</div></div>';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 6. KNOWLEDGE TIMELINE
+// ═══════════════════════════════════════════════════════════════
+async function loadTimeline(){
+  const el = document.getElementById('timeline-events');
+  try {
+    const data = await fetch(API+'/knowledge/timeline?limit=15').then(r=>r.json());
+    const events = data.events || [];
+    if(!events.length) {
+      el.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:8px">Version history currently limited.</div>';
+      return;
+    }
+    el.innerHTML = events.map(e => {
+      const cls = e.event_type === 'document_added' ? 'added' : e.event_type === 'feedback_received' ? 'feedback' : 'term';
+      const badge = e.event_type === 'document_added' ? '<span class="timeline-badge" style="background:rgba(0,255,136,0.12);color:var(--green)">ADDED</span>'
+        : e.event_type === 'feedback_received' ? '<span class="timeline-badge" style="background:rgba(255,170,0,0.12);color:var(--yellow)">FEEDBACK</span>'
+        : '<span class="timeline-badge" style="background:rgba(170,102,255,0.12);color:var(--purple)">TERM</span>';
+      return `<div class="timeline-event ${cls}">
+        <div class="timeline-desc">${esc(e.description)} ${badge}</div>
+        <div class="timeline-time">${e.timestamp || 'unknown'}</div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:8px">Version history currently limited.</div>';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 2. SOURCE EXPLORER
+// ═══════════════════════════════════════════════════════════════
+async function loadSources(){
+  const el = document.getElementById('source-cards');
+  el.innerHTML = '<div class="source-card"><div class="source-name">Loading...</div></div>';
+  try {
+    const data = await fetch(API+'/sources').then(r=>r.json());
+    const sources = data.sources || [];
+    const icons = { local_documents:'📚', network_share:'🌐', user_upload:'📄', salesforce:'☁️', confluence:'📝', sharepoint:'📑', git:'🔀' };
+    el.innerHTML = sources.map(s => `
+      <div class="source-card">
+        <div class="source-icon">${icons[s.source_type]||'📦'}</div>
+        <div class="source-info">
+          <div class="source-name">${esc(s.name)}</div>
+          <div class="source-type">${s.source_type}</div>
+          <div class="source-count">${s.document_count ? s.document_count+' documents' : 'No documents indexed'}</div>
+        </div>
+        <div class="source-status status-${s.status}">${s.status.replace('_',' ')}</div>
+      </div>
+    `).join('');
+  } catch(e) {
+    el.innerHTML = '<div class="source-card"><div class="source-name">Unable to load sources</div></div>';
+  }
+  loadGaps();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 4 & 5. WHAT SANJAYA KNOWS / DOESN'T KNOW
+// ═══════════════════════════════════════════════════════════════
+async function exploreTopic(){
+  const q = document.getElementById('explore-query').value.trim();
+  if(!q) return;
+  const el = document.getElementById('explore-results');
+  el.innerHTML = '<div style="color:var(--text3);padding:12px">Searching...</div>';
+
+  try {
+    // Search entities
+    const entR = await fetch(API+`/graph/entities?query=${encodeURIComponent(q)}&limit=20`).then(r=>r.json());
+    const entities = entR.entities || [];
+
+    // Search documents
+    const docR = await fetch(API+`/chat/query`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q,top_k:5})}).then(r=>r.json()).catch(()=>({results:[]}));
+    const docs = docR.results || [];
+
+    // Concept teams
+    const ctR = await fetch(API+`/knowledge/concept/${encodeURIComponent(q)}/teams`).then(r=>r.json()).catch(()=>({teams:[]}));
+    const teams = ctR.teams || [];
+
+    if(!entities.length && !docs.length && !teams.length){
+      el.innerHTML = `
+        <div class="detail-panel">
+          <div class="detail-title">"${esc(q)}" — Knowledge Gap</div>
+          <div style="padding:16px;background:rgba(255,68,102,0.06);border-radius:8px;border:1px solid rgba(255,68,102,0.15)">
+            <div style="font-size:14px;color:var(--red);margin-bottom:8px">🔍 Not enough authoritative evidence.</div>
+            <div style="font-size:12px;color:var(--text2)">
+              SANJAYA could not find sufficient organizational evidence to provide a structured overview of "${esc(q)}".<br><br>
+              <strong>What this means:</strong> Retrieved documents may mention related concepts, but none provide the requested fact or authoritative overview.<br><br>
+              <strong>Suggestion:</strong> Try a more specific query, or upload relevant documents to expand SANJAYA's knowledge.
+            </div>
+          </div>
+        </div>`;
+      return;
+    }
+
+    let html = '<div class="detail-panel">';
+    html += `<div class="detail-title">"${esc(q)}" — What SANJAYA Knows</div>`;
+    html += '<div class="detail-grid">';
+
+    // Systems/Products
+    const systems = entities.filter(e=>e.entity_type==='system'||e.entity_type==='product');
+    if(systems.length){
+      html += `<div class="detail-item"><div class="label">Systems</div><ul class="detail-list">${systems.map(s=>`<li>${esc(s.name)} <span style="color:var(--text3)">(score: ${s.quality_score||'—'})</span></li>`).join('')}</ul></div>`;
+    }
+
+    // Teams
+    if(teams.length){
+      html += `<div class="detail-item"><div class="label">Associated Teams</div><ul class="detail-list">${teams.map(t=>`<li>${esc(typeof t==='string'?t:t.team_id||t)}</li>`).join('')}</ul></div>`;
+    }
+
+    // Documents
+    if(docs.length){
+      html += `<div class="detail-item" style="grid-column:span 2"><div class="label">Related Documents (${docs.length})</div>`;
+      html += docs.map(d=>`<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:12px"><span style="color:var(--accent)">${esc(d.title||d.document_id||'Document')}</span> <span style="color:var(--text3)">(score: ${(d.score||0).toFixed(3)})</span></div>`).join('');
+      html += '</div>';
+    }
+
+    // All entities
+    const other = entities.filter(e=>e.entity_type!=='system'&&e.entity_type!=='product');
+    if(other.length){
+      html += `<div class="detail-item" style="grid-column:span 2"><div class="label">Related Concepts (${other.length})</div>`;
+      html += `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">${other.slice(0,20).map(e=>`<span style="padding:3px 10px;border-radius:12px;font-size:11px;background:var(--bg);border:1px solid var(--border);color:var(--text2)">${esc(e.name)}</span>`).join('')}</div>`;
+      html += '</div>';
+    }
+
+    html += '</div></div>';
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = `<div class="detail-panel"><div class="detail-title">Error</div><div style="color:var(--red);font-size:12px">${esc(e.message)}</div></div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 5. KNOWLEDGE GAPS
+// ═══════════════════════════════════════════════════════════════
+async function loadGaps(){
+  const el = document.getElementById('gap-analysis');
+  try {
+    const data = await fetch(API+'/knowledge/gaps').then(r=>r.json());
+    const strong = data.strong_areas || [];
+    const weak = data.weak_areas || [];
+
+    let html = '';
+    strong.forEach(a => {
+      html += `<div class="gap-card">
+        <div class="gap-icon">✅</div>
+        <div class="gap-info"><div class="gap-area">${esc(a.area)}</div><div class="gap-reason">${a.reason.replace(/_/g,' ')}</div></div>
+        <div class="gap-count" style="color:var(--green)">${a.documents} docs</div>
+      </div>`;
+    });
+    weak.forEach(a => {
+      html += `<div class="gap-card">
+        <div class="gap-icon">⚠️</div>
+        <div class="gap-info"><div class="gap-area">${esc(a.area)}</div><div class="gap-reason">${a.reason.replace(/_/g,' ')}</div></div>
+        <div class="gap-count" style="color:var(--yellow)">${a.documents} docs</div>
+      </div>`;
+    });
+
+    if(!strong.length && !weak.length) {
+      html = '<div style="color:var(--text3);font-size:12px;padding:12px">No team coverage data available yet.</div>';
+    }
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = '<div style="color:var(--text3);font-size:12px">Unable to load gap analysis.</div>';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 3. KNOWLEDGE MAP
+// ═══════════════════════════════════════════════════════════════
+async function loadKnowledgeMap(){
+  const canvas = document.getElementById('map-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.parentElement.clientWidth;
+  canvas.height = canvas.parentElement.clientHeight;
+
+  try {
+    const [entR, teamR] = await Promise.all([
+      fetch(API+'/graph/entities?limit=50').then(r=>r.json()).catch(()=>({entities:[]})),
+      fetch(API+'/knowledge/state').then(r=>r.json()).catch(()=>({teams_represented:[]})),
+    ]);
+
+    const entities = entR.entities || [];
+    const teams = (teamR.teams_represented || []).slice(0,8);
+
+    // Build nodes
+    mapData = { nodes: [], edges: [] };
+
+    // Add team nodes
+    teams.forEach((t,i) => {
+      const angle = (i/teams.length)*Math.PI*2;
+      mapData.nodes.push({
+        id: 'team_'+t, name: t, type: 'team',
+        x: canvas.width/2 + Math.cos(angle)*140,
+        y: canvas.height/2 + Math.sin(angle)*140,
+        r: 18,
+      });
+    });
+
+    // Add entity nodes (systems/concepts)
+    const typeColors = { system:'system', product:'system', tool:'system', concept:'concept', process:'concept' };
+    entities.slice(0,30).forEach((e,i) => {
+      const angle = (i/30)*Math.PI*2 + 0.5;
+      const dist = 60 + Math.random()*120;
+      mapData.nodes.push({
+        id: e.id, name: e.name, type: typeColors[e.entity_type]||'concept',
+        x: canvas.width/2 + Math.cos(angle)*dist,
+        y: canvas.height/2 + Math.sin(angle)*dist,
+        r: 12, entity: e,
+      });
+      // Connect to a random team
+      if(teams.length) {
+        mapData.edges.push({
+          from: e.id, to: 'team_'+teams[i%teams.length],
         });
+      }
+    });
 
-        async function checkHealth() {
-            try {
-                const res = await fetch(`${API_BASE}/health`);
-                const data = await res.json();
-                document.getElementById('status').textContent = '● Online';
-                document.getElementById('status').style.background = '#238636';
-            } catch (e) {
-                document.getElementById('status').textContent = '● Offline';
-                document.getElementById('status').style.background = '#da3633';
-            }
-        }
+    drawMap(ctx, canvas);
+  } catch(e) {
+    ctx.fillStyle = '#556677';
+    ctx.font = '14px Segoe UI';
+    ctx.fillText('Unable to load knowledge map', 20, 40);
+  }
+}
 
-        async function loadMetrics() {
-            try {
-                const res = await fetch(`${API_BASE}/metrics`);
-                const data = await res.json();
-                document.getElementById('metric-docs').textContent = data.documents;
-                document.getElementById('metric-chunks').textContent = data.chunks;
-                document.getElementById('metric-vectors').textContent = data.vectors;
-                document.getElementById('metric-glossary').textContent = data.glossary_terms;
-                document.getElementById('metric-feedback').textContent = data.feedback_entries;
-                document.getElementById('metric-graph').textContent = data.graph_entities;
-            } catch (e) {
-                console.log('Metrics unavailable');
-            }
-        }
+function drawMap(ctx, canvas){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
 
-        async function sendMessage() {
-            const input = document.getElementById('query-input');
-            const query = input.value.trim();
-            if (!query || isLoading) return;
+  const colors = { system:'rgba(0,212,255,0.6)', team:'rgba(0,255,136,0.6)', document:'rgba(255,170,0,0.6)', concept:'rgba(170,102,255,0.6)' };
+  const nodeMap = {};
+  mapData.nodes.forEach(n => nodeMap[n.id] = n);
 
-            isLoading = true;
-            document.getElementById('send-btn').disabled = true;
+  // Draw edges
+  ctx.strokeStyle = 'rgba(30,45,61,0.5)';
+  ctx.lineWidth = 1;
+  mapData.edges.forEach(e => {
+    const from = nodeMap[e.from], to = nodeMap[e.to];
+    if(!from || !to) return;
+    if(mapFilter!=='all' && from.type!==mapFilter && to.type!==mapFilter) return;
+    ctx.beginPath();
+    ctx.moveTo(from.x, from.y);
+    ctx.lineTo(to.x, to.y);
+    ctx.stroke();
+  });
 
-            // Add user message
-            addMessage(query, 'user');
-            input.value = '';
+  // Draw nodes
+  mapData.nodes.forEach(n => {
+    if(mapFilter!=='all' && n.type!==mapFilter) return;
+    const col = colors[n.type]||colors.concept;
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, n.r, 0, Math.PI*2);
+    ctx.fillStyle = col.replace('0.6','0.15');
+    ctx.fill();
+    ctx.strokeStyle = col;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
 
-            // Show typing indicator
-            const typingId = addTyping();
+    // Label
+    ctx.fillStyle = '#dce4ec';
+    ctx.font = `${n.type==='team'?'bold ':''}${n.type==='team'?11:10}px Segoe UI`;
+    ctx.textAlign = 'center';
+    ctx.fillText(n.name.length>14?n.name.substring(0,12)+'…':n.name, n.x, n.y+n.r+12);
+  });
 
-            try {
-                const res = await fetch(`${API_BASE}/query`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ query, top_k: 3 }),
-                });
-                const data = await res.json();
+  // Center label
+  ctx.fillStyle = 'rgba(0,212,255,0.4)';
+  ctx.font = '10px Segoe UI';
+  ctx.textAlign = 'center';
+  ctx.fillText('SANJAYA Knowledge Brain', canvas.width/2, canvas.height-12);
+}
 
-                removeTyping(typingId);
+function filterMap(type, btn){
+  mapFilter = type;
+  document.querySelectorAll('.map-filter').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const canvas = document.getElementById('map-canvas');
+  drawMap(canvas.getContext('2d'), canvas);
+}
 
-                if (data.results && data.results.length > 0) {
-                    const best = data.results[0];
-                    const confClass = best.score > 0.7 ? 'high' : best.score > 0.4 ? 'medium' : 'low';
+// Map click handler
+document.addEventListener('DOMContentLoaded', () => {
+  const canvas = document.getElementById('map-canvas');
+  canvas.addEventListener('click', (e) => {
+    if(!mapData) return;
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+    const nodeMap = {};
+    mapData.nodes.forEach(n => {
+      const dx = mx-n.x, dy = my-n.y;
+      if(Math.sqrt(dx*dx+dy*dy) < n.r+4) nodeMap[n.id] = n;
+    });
+    const hit = Object.values(nodeMap)[0];
+    const info = document.getElementById('map-info');
+    if(hit) {
+      document.getElementById('map-info-title').textContent = hit.name;
+      document.getElementById('map-info-type').textContent = hit.type.toUpperCase();
+      document.getElementById('map-info-detail').textContent = hit.entity ?
+        `Type: ${hit.entity.entity_type || 'unknown'} | Quality: ${hit.entity.quality_score || '—'}` : '';
+      info.classList.add('visible');
+    } else {
+      info.classList.remove('visible');
+    }
+  });
+});
 
-                    let responseText = best.text;
-                    if (data.results.length > 1) {
-                        responseText += `<br><br><em>Also found ${data.results.length - 1} other relevant result(s).</em>`;
-                    }
+// ═══════════════════════════════════════════════════════════════
+// 10. HEALTH
+// ═══════════════════════════════════════════════════════════════
+async function loadHealth(){
+  const cards = document.getElementById('health-cards');
+  cards.innerHTML = '<div class="health-card"><div class="health-name">Loading...</div></div>';
+  try {
+    const data = await fetch(API+'/health/detail').then(r=>r.json());
+    const overall = data.overall || 'unknown';
+    const emoji = overall==='healthy'?'🟢':overall==='degraded'?'🟡':'🔴';
+    document.getElementById('health-emoji').textContent = emoji;
+    document.getElementById('health-status-text').textContent = overall.charAt(0).toUpperCase()+overall.slice(1);
+    document.getElementById('health-timestamp').textContent = data.timestamp || '';
 
-                    addMessage(
-                        `<strong>📖 ${data.total_results} result(s) found</strong> ` +
-                        `<span class="confidence ${confClass}">Score: ${best.score.toFixed(3)}</span><br><br>` +
-                        responseText +
-                        `<div class="source">Source: ${best.document_id} | Chunk: ${best.chunk_id} | Time: ${data.execution_time_ms}ms</div>`,
-                        'assistant'
-                    );
-                } else {
-                    addMessage(
-                        "I couldn't find relevant information for that query. " +
-                        "Could you rephrase or provide more details?",
-                        'assistant'
-                    );
-                }
+    const icons = { Database:'💾', 'Knowledge Fabric':'📚', 'Knowledge Graph':'🧠', 'Retrieval (BM25)':'🔍', 'Retrieval (Vector)':'📐', 'GX10 LLM':'🤖', Authentication:'🔐', 'Knowledge Watcher':'👁️' };
+    cards.innerHTML = (data.checks||[]).map(c => `
+      <div class="health-card">
+        <div class="health-icon">${icons[c.component]||'⚙️'}</div>
+        <div class="health-info">
+          <div class="health-name">${c.component}</div>
+          <div class="health-msg">${c.message}</div>
+          ${c.latency_ms?`<div class="health-latency">${c.latency_ms}ms</div>`:''}
+        </div>
+        <div class="health-status ${c.status}">${c.status.replace(/_/g,' ')}</div>
+      </div>
+    `).join('');
 
-                // Generate follow-ups
-                generateFollowUps(query);
+    // Also load memory inspector
+    loadMemory();
+  } catch(e) {
+    cards.innerHTML = '<div class="health-card"><div class="health-name">Unable to load health data</div></div>';
+  }
+}
 
-            } catch (e) {
-                removeTyping(typingId);
-                addMessage(
-                    `⚠️ Error: Could not connect to the knowledge base. ${e.message}`,
-                    'assistant'
-                );
-            }
+// ═══════════════════════════════════════════════════════════════
+// 7. MEMORY INSPECTOR
+// ═══════════════════════════════════════════════════════════════
+async function loadMemory(){
+  const el = document.getElementById('memory-cards');
+  try {
+    const data = await fetch(API+'/memory/summary').then(r=>r.json());
+    const types = [
+      { key:'working_memory', name:'Working Memory', desc:'Current conversation context and active task' },
+      { key:'episodic_memory', name:'Episodic Memory', desc:'Past interactions and outcomes' },
+      { key:'semantic_memory', name:'Semantic Memory', desc:'Durable organizational concepts, teams, systems' },
+      { key:'procedural_memory', name:'Procedural Memory', desc:'Validated organizational workflows' },
+      { key:'prospective_memory', name:'Prospective Memory', desc:'Explicitly requested future actions' },
+      { key:'external_memory', name:'External/Retrieval', desc:'Knowledge Fabric document retrieval' },
+    ];
+    el.innerHTML = types.map(t => {
+      const m = data[t.key] || {status:'foundation',description:''};
+      const statusCls = m.status==='active'?'active':m.status==='partial'?'partial':'foundation';
+      const items = m.items||[];
+      return `
+        <div class="memory-card">
+          <div class="memory-header">
+            <div class="memory-name">${t.name}</div>
+            <div class="memory-status ${statusCls}">${m.status||'—'}</div>
+          </div>
+          <div class="memory-desc">${t.desc}</div>
+          ${items.length?`<div class="memory-items">${items.slice(0,3).map(i=>`<div style="padding:3px 0;border-bottom:1px solid var(--border);font-size:11px">${i.query?'<span style="color:var(--accent)">'+esc(i.query.substring(0,40))+'</span>':''} ${i.outcome||''}</div>`).join('')}</div>`:`<div class="memory-items" style="color:var(--text3)">No items yet</div>`}
+        </div>
+      `;
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<div class="memory-card"><div class="memory-name">Unable to load memory</div></div>';
+  }
+}
 
-            isLoading = false;
-            document.getElementById('send-btn').disabled = false;
-            loadMetrics(); // Refresh metrics
-        }
+// ═══════════════════════════════════════════════════════════════
+// 8. UPLOAD
+// ═══════════════════════════════════════════════════════════════
+function handleDrop(e){e.preventDefault();e.currentTarget.style.borderColor='';if(e.dataTransfer.files.length)handleUpload(e.dataTransfer.files[0]);}
+async function handleUpload(file){
+  if(!file) return;
+  const p = document.getElementById('upload-progress');
+  const r = document.getElementById('upload-result');
+  r.style.display = 'none';
+  const steps = ['Receiving','Extracting','Chunking','Embedding','Indexing','Graph Update','Complete'];
+  p.innerHTML = steps.map((s,i)=>`<div class="upload-step" id="up-step-${i}"><div class="dot"></div>${s}</div>`).join('');
+  for(let i=0;i<6;i++){
+    document.getElementById('up-step-'+i).className='upload-step active';
+    await new Promise(r=>setTimeout(r,300));
+    document.getElementById('up-step-'+i).className='upload-step done';
+  }
+  try{
+    const fd=new FormData();fd.append('file',file);
+    const h={};if(sessionToken)h['Authorization']='Bearer '+sessionToken;
+    const resp=await fetch(API+'/knowledge/upload',{method:'POST',headers:h,body:fd});
+    const d=await resp.json();
+    document.getElementById('up-step-6').className='upload-step '+(resp.ok?'done':'error');
+    r.style.display = 'block';
+    if(resp.ok){
+      r.innerHTML = `<div style="color:var(--green)">✅ <strong>Document indexed successfully</strong><br><small>ID: ${d.document_id} | Chunks: ${d.chunks_stored} | Entities: ${d.entities_extracted} | Time: ${(d.execution_time_ms||0).toFixed(0)}ms</small></div>`;
+      r.style.borderColor = 'var(--green2)';
+    } else {
+      r.innerHTML = `<div style="color:var(--red)">❌ ${d.detail||d.error||'Upload failed'}</div>`;
+      r.style.borderColor = 'var(--red2)';
+    }
+  }catch(e){
+    document.getElementById('up-step-6').className='upload-step error';
+    r.style.display='block';r.innerHTML=`<div style="color:var(--red)">❌ ${e.message}</div>`;
+    r.style.borderColor='var(--red2)';
+  }
+}
 
-        function addMessage(content, role) {
-            const container = document.getElementById('chat-messages');
-            const div = document.createElement('div');
-            div.className = `message ${role}`;
-            div.innerHTML = content;
-            container.appendChild(div);
-            container.scrollTop = container.scrollHeight;
-        }
+function renderFormatCards(){
+  const el = document.getElementById('format-cards');
+  const formats = [
+    {icon:'📕',name:'PDF',desc:'Portable Document Format'},
+    {icon:'📘',name:'DOCX',desc:'Word Documents'},
+    {icon:'📗',name:'XLSX',desc:'Excel Spreadsheets'},
+    {icon:'📊',name:'CSV',desc:'Comma-Separated Values'},
+    {icon:'📝',name:'TXT',desc:'Plain Text'},
+    {icon:'📑',name:'MD',desc:'Markdown'},
+    {icon:'📙',name:'PPTX',desc:'PowerPoint Presentations'},
+    {icon:'🌐',name:'HTML',desc:'Web Pages'},
+    {icon:'📋',name:'JSON',desc:'Structured Data'},
+    {icon:'📰',name:'XML',desc:'Extensible Markup'},
+  ];
+  el.innerHTML = formats.map(f=>`
+    <div class="card" style="cursor:default;padding:12px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:20px">${f.icon}</span>
+        <div><div style="font-size:13px;font-weight:600">${f.name}</div><div style="font-size:10px;color:var(--text3)">${f.desc}</div></div>
+      </div>
+    </div>
+  `).join('');
+}
 
-        function addTyping() {
-            const container = document.getElementById('chat-messages');
-            const div = document.createElement('div');
-            div.className = 'message assistant';
-            div.id = 'typing-' + Date.now();
-            div.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
-            container.appendChild(div);
-            container.scrollTop = container.scrollHeight;
-            return div.id;
-        }
+// ═══════════════════════════════════════════════════════════════
+// CHAT
+// ═══════════════════════════════════════════════════════════════
+async function sendMessage(){
+  const input=document.getElementById('query-input');const query=input.value.trim();
+  if(!query||isLoading)return;isLoading=true;document.getElementById('send-btn').disabled=true;
+  addMsg(query,'user');input.value='';
+  const typingId=addTyping();
+  try{
+    const h={'Content-Type':'application/json'};if(sessionToken)h['Authorization']='Bearer '+sessionToken;
+    const r=await fetch(API+'/ask',{method:'POST',headers:h,body:JSON.stringify({query,top_k:5})});
+    const d=await r.json();removeTyping(typingId);lastResponse=d;
 
-        function removeTyping(id) {
-            const el = document.getElementById(id);
-            if (el) el.remove();
-        }
+    if(d.abstained){
+      addAssistantMsg(`<div class="msg-header"><span class="agent">⚔️ SANJAYA</span><span class="badge abstained">ABSTAINED</span></div>
+        <div class="msg-bubble">I don't have sufficient organizational evidence to answer this.
+        <div style="background:rgba(255,68,102,0.08);border:1px solid var(--red2);padding:10px;border-radius:6px;margin-top:8px;font-size:12px;color:var(--red)">
+        ℹ️ ${d.abstention_reason||'Evidence insufficient'}</div>
+        <div style="margin-top:8px;font-size:12px;color:var(--text2)">
+          Retrieved documents may mention related concepts, but none provide the requested fact.
+        </div></div>`);
+    } else if(d.answer){
+      const conf=d.confidence||0;const cc=conf>0.7?'confident':conf>0.4?'moderate':'low';
+      let evHtml='';
+      if(d.citations&&d.citations.length){
+        evHtml=`<div class="evidence-toggle" onclick="toggleEvidence(this)">▸ Why do you believe this? (${d.citations.length} sources)</div>
+        <div class="evidence-drawer">`;
+        d.citations.forEach((c,i)=>{
+          const restricted = c.visibility && c.visibility !== 'public';
+          evHtml+=`<div class="evidence-card">
+            <div class="ev-title">[${i+1}] ${esc(c.source_path||c.document_id||'Document')}</div>
+            ${restricted?`<div style="font-size:10px;color:var(--yellow)">🔒 ${c.visibility}</div>`:''}
+            <div class="ev-snippet">"${esc((c.text_snippet||'').substring(0,150))}..."</div>
+            <div class="ev-provenance">Chunk: ${c.chunk_id||'—'} | Score: ${c.score?.toFixed(3)||'—'}</div>
+          </div>`;
+        });
+        evHtml+='</div>';
+      }
+      addAssistantMsg(`<div class="msg-header"><span class="agent">⚔️ SANJAYA</span>
+        <span class="badge ${cc}">${(conf*100).toFixed(0)}%</span>
+        <span class="badge ${d.knowledge_source==='uploaded'?'uploaded':'org'}">${d.knowledge_source||'organization'}</span>
+        <span class="badge strategy">${d.retrieval_strategy||'hybrid'}</span></div>
+        <div class="msg-bubble">${d.answer}${evHtml}
+        <div class="feedback-row">
+          <button class="fb-btn" onclick="sendFB(this,true)">👍 Helpful</button>
+          <button class="fb-btn" onclick="sendFB(this,false)">👎 Not helpful</button>
+        </div></div>`);
+    }
+    generateFollowUps(query);
+  }catch(e){removeTyping(typingId);addAssistantMsg(`<div class="msg-bubble" style="border-color:var(--red2)">⚠️ ${e.message}</div>`);}
+  isLoading=false;document.getElementById('send-btn').disabled=false;
+}
+function addMsg(content,role){const c=document.getElementById('chat-messages');const d=document.createElement('div');d.className='msg '+role;d.innerHTML=`<div class="msg-bubble">${esc(content)}</div>`;c.appendChild(d);c.scrollTop=c.scrollHeight;}
+function addAssistantMsg(html){const c=document.getElementById('chat-messages');const d=document.createElement('div');d.className='msg assistant';d.innerHTML=html;c.appendChild(d);c.scrollTop=c.scrollHeight;}
+function addTyping(){const c=document.getElementById('chat-messages');const d=document.createElement('div');d.className='msg assistant';d.id='t-'+Date.now();d.innerHTML='<div class="msg-bubble"><div class="typing"><span></span><span></span><span></span></div></div>';c.appendChild(d);c.scrollTop=c.scrollHeight;return d.id;}
+function removeTyping(id){const e=document.getElementById(id);if(e)e.remove();}
+function toggleEvidence(el){const drawer=el.nextElementSibling;drawer.classList.toggle('open');el.textContent=drawer.classList.contains('open')?'▾ Hide evidence':'▸ Why do you believe this? ('+drawer.querySelectorAll('.evidence-card').length+' sources)';}
+async function sendFB(btn,correct){btn.classList.add('active');btn.disabled=true;try{const h={'Content-Type':'application/json'};if(sessionToken)h['Authorization']='Bearer '+sessionToken;await fetch(API+'/feedback',{method:'POST',headers:h,body:JSON.stringify({query:lastResponse?.query||'',document_id:'',chunk_id:'',score:correct?1:0,is_correct:correct})});}catch(e){}}
+function generateFollowUps(q){const c=document.getElementById('follow-ups');c.innerHTML='';['What teams are involved?','Show related documents','Are there conflicts?'].forEach(t=>{const b=document.createElement('button');b.className='follow-up';b.textContent=t;b.onclick=()=>{document.getElementById('query-input').value=t;sendMessage();};c.appendChild(b);});}
 
-        function generateFollowUps(query) {
-            const container = document.getElementById('follow-ups');
-            container.innerHTML = '';
-
-            const suggestions = [
-                'Show me the troubleshooting steps',
-                'What are the prerequisites?',
-                'Are there related errors?',
-            ];
-
-            suggestions.forEach(text => {
-                const btn = document.createElement('button');
-                btn.className = 'follow-up-btn';
-                btn.textContent = text;
-                btn.onclick = () => {
-                    document.getElementById('query-input').value = text;
-                    sendMessage();
-                };
-                container.appendChild(btn);
-            });
-        }
-    </script>
+// ── Helpers ──
+function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=String(s);return d.innerHTML;}
+</script>
 </body>
 </html>

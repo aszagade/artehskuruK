@@ -249,6 +249,87 @@ class KnowledgeWatcher:
             "documents_by_state": state.documents_by_state,
         }
 
+    def sync_adapter(self, adapter) -> dict:
+        """
+        Sync a single source adapter through the Knowledge Fabric.
+
+        Calls adapter.discover(), feeds each SourceDocument into
+        the Fabric, and returns a summary.
+
+        Args:
+            adapter: A SourceAdapter instance (must be setup() already)
+
+        Returns:
+            Dict with sync summary: new, updated, deleted, errors
+        """
+        result = {
+            "source_id": "",
+            "new_documents": 0,
+            "updated_documents": 0,
+            "deleted_documents": 0,
+            "skipped": 0,
+            "errors": [],
+            "total_time_ms": 0,
+        }
+
+        start = time.time()
+
+        try:
+            identity = adapter.identify()
+            result["source_id"] = identity.source_id
+
+            # Load persisted cursor
+            cursor = self.fabric.load_source_cursor(identity.source_id)
+
+            # Discover from adapter
+            for doc in adapter.discover(cursor=cursor):
+                try:
+                    ingest_result = self.fabric.ingest_source_document(doc)
+                    if doc.status == "deleted":
+                        result["deleted_documents"] += 1
+                    elif ingest_result.change_type.value == "none":
+                        result["skipped"] += 1
+                    else:
+                        result["new_documents"] += 1
+                except Exception as e:
+                    result["errors"].append(
+                        f"{doc.provenance.external_id}: {e}"
+                    )
+
+            # Refresh caches if anything changed
+            if result["new_documents"] > 0 or result["deleted_documents"] > 0:
+                self._refresh_caches()
+
+        except Exception as e:
+            result["errors"].append(str(e))
+
+        result["total_time_ms"] = round((time.time() - start) * 1000, 1)
+        return result
+
+    def sync_all_adapters(self, registry) -> list[dict]:
+        """
+        Sync all registered adapters.
+
+        Args:
+            registry: A SourceAdapterRegistry instance
+
+        Returns:
+            List of sync results, one per adapter
+        """
+        results = []
+        for identity in registry.list_sources():
+            adapter = registry.get(identity.source_id)
+            if adapter:
+                try:
+                    result = self.sync_adapter(adapter)
+                    results.append(result)
+                except Exception as e:
+                    results.append({
+                        "source_id": identity.source_id,
+                        "errors": [str(e)],
+                    })
+        return results
+
     def close(self) -> None:
         """Clean up resources."""
         if self._pipeline:
