@@ -74,6 +74,41 @@ NUMBER_PATTERN = re.compile(r"\b\d{2,}\b")
 
 TABLE_PATTERN = re.compile(r"\|.*\|.*\|")
 
+# WordPress / HTML template artifacts that pollute chunks from PDFs
+# generated from WordPress-exported HTML pages.
+_ARTIFACT_PATTERNS = [
+    re.compile(r"Tagged on:.*$", re.MULTILINE),
+    re.compile(r"\d{2}/\d{2}/\d{4}\s+\S+\s+No Comments", re.MULTILINE),
+    re.compile(r"←\s+.+\s+→", re.MULTILINE),
+    re.compile(r"Leave a Reply.*", re.DOTALL),
+    re.compile(r"Your email address will not be published\..*", re.DOTALL),
+    re.compile(r"Required fields are marked \*.*", re.DOTALL),
+    re.compile(r"Comment \*.*", re.DOTALL),
+    re.compile(r"Name \*.*", re.DOTALL),
+    re.compile(r"Email \*.*", re.DOTALL),
+    re.compile(r"Website\s*$", re.MULTILINE),
+    re.compile(r"Save my name, email.*", re.DOTALL),
+    re.compile(r"Post Comment\s*$", re.MULTILINE),
+    re.compile(r"Copyright.*All rights reserved.*", re.DOTALL),
+    re.compile(r"Theme\s+\S+\s*by.*", re.DOTALL),
+    re.compile(r"WordPress\.com.*", re.DOTALL),
+]
+
+
+def _clean_chunk_text(text: str) -> str:
+    """Remove WordPress/HTML template artifacts from chunk text.
+
+    These appear in PDFs generated from WordPress-exported HTML pages
+    and pollute retrieval with irrelevant template text.
+    """
+    cleaned = text
+    for pat in _ARTIFACT_PATTERNS:
+        cleaned = pat.sub("", cleaned)
+    # Collapse multiple blank lines
+    cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
+    return cleaned.strip()
+
+
 LIST_ITEM_PATTERN = re.compile(
     r"^\s*(?:[-•►→*]\s+|\d+[.)]\s+)",
     re.MULTILINE,
@@ -321,6 +356,11 @@ class SemanticSplitter:
                 if char_start == -1:
                     char_start = 0
                 char_end = char_start + len(chunk_text)
+
+                # Clean WordPress/HTML artifacts from chunk text
+                chunk_text = _clean_chunk_text(chunk_text)
+                if not chunk_text or len(chunk_text.strip()) < 50:
+                    continue  # Skip chunks that become too short after cleanup
 
                 all_chunks.append(
                     SemanticChunk(
