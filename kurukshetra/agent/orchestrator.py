@@ -117,6 +117,7 @@ class AgenticResult:
     multi_document_synthesis: bool
     mention_vs_answer_detected: bool
     verification_passed: bool
+    claim_verification = None  # VerificationResult from EvidenceClaimVerifier
 
 
 class EvidenceSufficiencyChecker:
@@ -378,6 +379,45 @@ class AgenticSANJAYA:
 
         unique_docs = len(set(e.document_id for e in all_evidence))
 
+        # Phase 5b: Evidence Claim Verification
+        claim_verification = None
+        if not answer_result.abstained and answer_result.answer:
+            try:
+                from kurukshetra.agent.evidence_verifier import EvidenceClaimVerifier
+                verifier = EvidenceClaimVerifier()
+                claim_verification = verifier.verify(
+                    answer=answer_result.answer,
+                    evidence=all_evidence,
+                    query=query,
+                )
+                # Adjust confidence based on claim verification
+                if claim_verification.adjusted_confidence < answer_result.confidence:
+                    answer_result.confidence = round(
+                        claim_verification.adjusted_confidence, 3
+                    )
+                # If verifier says abstain, override the answer
+                if claim_verification.should_abstain:
+                    answer_result.abstained = True
+                    answer_result.abstention_reason = (
+                        claim_verification.abstention_reason
+                    )
+                    answer_result.confidence = 0.0
+                # Populate AnswerResult verification fields
+                answer_result.verification_verdict = claim_verification.overall_verdict
+                answer_result.direct_claims = claim_verification.direct_count
+                answer_result.inferred_claims = claim_verification.inferred_count
+                answer_result.unsupported_claims = claim_verification.unsupported_count
+                # Add verification verdict to limitations
+                if claim_verification.overall_verdict == "PARTIAL":
+                    unsupported = claim_verification.unsupported_count
+                    inferred = claim_verification.inferred_count
+                    answer_result.limitations.append(
+                        f"Claim verification: {unsupported} unsupported, "
+                        f"{inferred} inferred claims"
+                    )
+            except Exception:
+                pass  # Never fail because of verification
+
         return AgenticResult(
             answer_result=answer_result,
             rounds=rounds,
@@ -387,6 +427,7 @@ class AgenticSANJAYA:
             multi_document_synthesis=unique_docs > 1,
             mention_vs_answer_detected=mention_vs_answer_detected,
             verification_passed=verification_passed,
+            claim_verification=claim_verification,
         )
 
     def _record_evaluation_signals(

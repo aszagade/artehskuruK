@@ -67,6 +67,11 @@ class AnswerResult:
     evidence_count: int = 0
     evidence_quality: str = "none"  # "strong", "moderate", "weak", "none"
     knowledge_source: str = "organization"  # "organization", "conversation", "procedure", "model", "mixed"
+    # Claim verification (populated by orchestrator after answer generation)
+    verification_verdict: str = ""  # "PASS", "PARTIAL", "FAIL"
+    direct_claims: int = 0
+    inferred_claims: int = 0
+    unsupported_claims: int = 0
 
 
 # Minimum thresholds for providing an answer

@@ -1,0 +1,3389 @@
+{
+  "corpus": {
+    "documents": 692,
+    "chunks": 49546,
+    "high_quality_entities": 3256
+  },
+  "questions": 55,
+  "results": [
+    {
+      "id": "Q01",
+      "question": "What is G3 Data Feed Configuration?",
+      "category": "direct_factual",
+      "expected_verdict": "DIRECT or MIXED",
+      "actual_verdict": "PASS",
+      "direct_count": 2,
+      "inferred_count": 0,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.6,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000098-CH-000001",
+          "document_id": "DOC-000098",
+          "score": 0.833,
+          "team": "SPM",
+          "text_preview": "G3 \u2013 Data Feeds G3 \u2013 Data Feeds  Below is the full documentation that gives overview of datafeeds an"
+        },
+        {
+          "chunk_id": "DOC-000098-CH-000002",
+          "document_id": "DOC-000098",
+          "score": 0.833,
+          "team": "SPM",
+          "text_preview": "ing Failures Due to of hotel performance, system performance and user engagement. Data Type Mismatch"
+        },
+        {
+          "chunk_id": "DOC-000110-CH-000001",
+          "document_id": "DOC-000110",
+          "score": 0.833,
+          "team": "SPM",
+          "text_preview": "G3 \u2013 How to resolve a rare agent scenario where agent is not triggering the Opera Data Feed Job. Las"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: G3 \u2013 Data Feeds\nG3 \u2013 Data Feeds \nBelow is the full documentation that g",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Data Type Mismatch for\nKey Activities for IDeaS G3 RMS Data Outputs\nMGM Resorts\nSupport enterprise r",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 143.3
+    },
+    {
+      "id": "Q02",
+      "question": "What is the FOLS processing issue?",
+      "category": "direct_factual",
+      "expected_verdict": "DIRECT or MIXED",
+      "actual_verdict": "PASS",
+      "direct_count": 1,
+      "inferred_count": 0,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.6,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000117-CH-000001",
+          "document_id": "DOC-000117",
+          "score": 0.833,
+          "team": "SDOPS",
+          "text_preview": "G3 \u2013 Monitoring \u2013 improvements in Monitoring \u2013 5.3.2 Release 27th Aug 2018 This video illustrates th"
+        },
+        {
+          "chunk_id": "DOC-000118-CH-000001",
+          "document_id": "DOC-000118",
+          "score": 0.833,
+          "team": "SDOPS",
+          "text_preview": "G3 \u2013 Monitoring \u2013 improvements in Monitoring \u2013 5.3.2 Release 27th Aug 2018 This video illustrates th"
+        },
+        {
+          "chunk_id": "DOC-000166-CH-000017",
+          "document_id": "DOC-000166",
+          "score": 0.833,
+          "team": "UNKNOWN",
+          "text_preview": "a client reviews the available Discover courses in advance of the recoding activity, this will put t"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: G3 \u2013 Monitoring \u2013 improvements in Monitoring \u2013 5.3.2 Release 27th Aug 2",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 143.3
+    },
+    {
+      "id": "Q03",
+      "question": "What is the Agent to Agent Migration process?",
+      "category": "direct_factual",
+      "expected_verdict": "DIRECT or MIXED",
+      "actual_verdict": "PASS",
+      "direct_count": 4,
+      "inferred_count": 0,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.6,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000341-CH-000005",
+          "document_id": "DOC-000341",
+          "score": 0.875,
+          "team": "SDOPS",
+          "text_preview": "y make sure that no processing is running like BDE, CDP, any on demand process, decision upload, wha"
+        },
+        {
+          "chunk_id": "DOC-000342-CH-000005",
+          "document_id": "DOC-000342",
+          "score": 0.875,
+          "team": "SDOPS",
+          "text_preview": "y make sure that no processing is running like BDE, CDP, any on demand process, decision upload, wha"
+        },
+        {
+          "chunk_id": "DOC-000573-CH-000012",
+          "document_id": "DOC-000573",
+          "score": 0.875,
+          "team": "UNKNOWN",
+          "text_preview": "  What is PMS Migration? A PMS Migration is the process of moving a hotel from one Property Manageme"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: y make sure that no processing is running like BDE, CDP, any on demand\n",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Please stop all incoming extract pull and decision upload a y make sure that no processing is runnin",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Please stop all incoming extract pull and decision upload a  \nWhat is PMS Migration?",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        },
+        {
+          "text": "A PMS Migration is the process of moving a h...",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 8 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 218.9
+    },
+    {
+      "id": "Q04",
+      "question": "What is OHIP?",
+      "category": "definition",
+      "expected_verdict": "DIRECT or MIXED",
+      "actual_verdict": "PASS",
+      "direct_count": 3,
+      "inferred_count": 0,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.6,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000045-CH-000002",
+          "document_id": "DOC-000045",
+          "score": 1.0,
+          "team": "ICS",
+          "text_preview": "e Hilton/Processing Failure \u2013 non positive offset value for The target audience for this document is"
+        },
+        {
+          "chunk_id": "DOC-000046-CH-000002",
+          "document_id": "DOC-000046",
+          "score": 1.0,
+          "team": "ICS",
+          "text_preview": "e Hilton/Processing Failure \u2013 non positive offset value for The target audience for this document is"
+        },
+        {
+          "chunk_id": "DOC-000047-CH-000002",
+          "document_id": "DOC-000047",
+          "score": 1.0,
+          "team": "ICS",
+          "text_preview": "e Hilton/Processing Failure \u2013 non positive offset value for The target audience for this document is"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: e\nHilton/Processing Failure \u2013\nnon positive offset value for\nThe target ",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        },
+        {
+          "text": "\u2013 Project Manager, Project  e\nHilton/Processing Failure \u2013\nnon positive offset value for\nThe target a",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        },
+        {
+          "text": "\u2013 Project Manager, Project  e\nHilton/Processing Failure \u2013\nnon positive offset value for\nThe targe...",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 93.6
+    },
+    {
+      "id": "Q05",
+      "question": "What is a Component Room in G3 RMS?",
+      "category": "definition",
+      "expected_verdict": "DIRECT or MIXED",
+      "actual_verdict": "PASS",
+      "direct_count": 2,
+      "inferred_count": 2,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.4,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000196-CH-000002",
+          "document_id": "DOC-000196",
+          "score": 0.875,
+          "team": "SPM",
+          "text_preview": "ystem (RMS) Failure \u2013 non positive offset value builds, this introduces some complexity associated w"
+        },
+        {
+          "chunk_id": "DOC-000196-CH-000006",
+          "document_id": "DOC-000196",
+          "score": 0.875,
+          "team": "SPM",
+          "text_preview": "el sold e.g. if a Component Room Type is sold \u2013 On-books Rooms and Revenue are only recorded at this"
+        },
+        {
+          "chunk_id": "DOC-000196-CH-000010",
+          "document_id": "DOC-000196",
+          "score": 0.875,
+          "team": "SPM",
+          "text_preview": "tatistics will be disaggregated S \u2013 based on sold or demanded, regardless of the level e.g. if 1 Com"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: ystem (RMS)\nFailure \u2013 non positive offset value\nbuilds, this introduces",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Ranjit on Hilton/Processi el sold e.g.",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (83%) but no explicit support language found"
+        },
+        {
+          "text": "if a Component Room Type is sold \u2013 On-books\nRooms and Revenue are only recorded at this level\nDouble",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (100%) but no explicit support language found"
+        },
+        {
+          "text": "if a Component Room Type is tatistics\nwill be disaggregated\nS \u2013 based on sold or demanded, regard...",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 233.6
+    },
+    {
+      "id": "Q06",
+      "question": "What does the IDeaS RMS paradigm refer to?",
+      "category": "definition",
+      "expected_verdict": "DIRECT or MIXED",
+      "actual_verdict": "PASS",
+      "direct_count": 7,
+      "inferred_count": 0,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.6,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000356-CH-000006",
+          "document_id": "DOC-000356",
+          "score": 0.75,
+          "team": "ICS",
+          "text_preview": "t these can be configured within the RMS application prior to first data capture. Settings -> Servic"
+        },
+        {
+          "chunk_id": "DOC-000357-CH-000006",
+          "document_id": "DOC-000357",
+          "score": 0.75,
+          "team": "ICS",
+          "text_preview": "t these can be configured within the RMS application prior to first data capture. Settings -> Servic"
+        },
+        {
+          "chunk_id": "DOC-000358-CH-000006",
+          "document_id": "DOC-000358",
+          "score": 0.75,
+          "team": "ICS",
+          "text_preview": "t these can be configured within the RMS application prior to first data capture. Settings -> Servic"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: t these can be configured within the RMS\napplication prior to first dat",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 4 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Settings -> Services -> Bookable services -> Space -> Short name is\nmandatory.",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 4 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Enter without spaces.",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 4 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Important Informa t these can be configured within the RMS\napplication prior to first data capture.",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 4 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Settings -> Services -> Bookable services -> Space -> Short name is\nmandatory.",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 4 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Enter without spaces.",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 4 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Important Informa t these can be configured within the RMS\napplication prior to first d...",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 4 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 201.6
+    },
+    {
+      "id": "Q07",
+      "question": "How does the ACCOR Full Upload Process work?",
+      "category": "procedure",
+      "expected_verdict": "DIRECT or MIXED",
+      "actual_verdict": "PASS",
+      "direct_count": 5,
+      "inferred_count": 0,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.6,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000250-CH-000003",
+          "document_id": "DOC-000250",
+          "score": 0.875,
+          "team": "UNKNOWN",
+          "text_preview": "rocessing list which is configured in CurtisC. Failure \u2013 non positive offset 9. If the count does no"
+        },
+        {
+          "chunk_id": "DOC-000251-CH-000003",
+          "document_id": "DOC-000251",
+          "score": 0.875,
+          "team": "UNKNOWN",
+          "text_preview": "rocessing list which is configured in CurtisC. Failure \u2013 non positive offset 9. If the count does no"
+        },
+        {
+          "chunk_id": "DOC-000020-CH-000002",
+          "document_id": "DOC-000020",
+          "score": 0.75,
+          "team": "SPM",
+          "text_preview": "GM Resorts Dynamic Optimization HLTN/Handling Error for SAS Dataset Encoding Job Recent Comments Pra"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: rocessing\nlist which is configured in CurtisC.",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Failure \u2013 non positive offset",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        },
+        {
+          "text": "If the count does not match for a certain date or dates, please follow the below\nvalue for Product\ns",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Failure \u2013 non positive offset",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        },
+        {
+          "text": "If the count does not match for a certain date or dates, please follow the below\nvalue for Product\ns",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 175.5
+    },
+    {
+      "id": "Q08",
+      "question": "What are the steps in the Core OHIP Installation Process?",
+      "category": "procedure",
+      "expected_verdict": "DIRECT or MIXED",
+      "actual_verdict": "PARTIAL",
+      "direct_count": 5,
+      "inferred_count": 0,
+      "unsupported_count": 1,
+      "should_abstain": false,
+      "adjusted_confidence": 0.4166666666666667,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000010-CH-000010",
+          "document_id": "DOC-000010",
+          "score": 0.7,
+          "team": "ICS",
+          "text_preview": " of migration. Once the above steps are completed the task status should be marked as completed. Onc"
+        },
+        {
+          "chunk_id": "DOC-000011-CH-000010",
+          "document_id": "DOC-000011",
+          "score": 0.7,
+          "team": "ICS",
+          "text_preview": " of migration. Once the above steps are completed the task status should be marked as completed. Onc"
+        },
+        {
+          "chunk_id": "DOC-000012-CH-000010",
+          "document_id": "DOC-000012",
+          "score": 0.7,
+          "team": "ICS",
+          "text_preview": " of migration. Once the above steps are completed the task status should be marked as completed. Onc"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence:  of migration.",
+          "classification": "UNSUPPORTED",
+          "confidence": 0.0,
+          "reasoning": "No evidence supports this claim"
+        },
+        {
+          "text": "Once the above steps are completed the task status should be marked as\ncompleted.",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 6 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Once the orchestrator job is complete the property will move to \u2018Data Capture\nMode\u2019\nNote \u2013 Check wit",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Once the above steps are completed the task status should be marked as\ncompleted.",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 6 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Once the orchestrator job is complete the property will move to \u2018Data Capture\nMode\u2019\nNote \u2013 Check wit",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Once the above steps are completed the task status sho...",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 6 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 240.0
+    },
+    {
+      "id": "Q09",
+      "question": "How does the CP Migration process work?",
+      "category": "procedure",
+      "expected_verdict": "DIRECT or MIXED",
+      "actual_verdict": "PASS",
+      "direct_count": 3,
+      "inferred_count": 0,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.6,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000051-CH-000005",
+          "document_id": "DOC-000051",
+          "score": 0.714,
+          "team": "ICS",
+          "text_preview": "iate action further based on success/failure 5 Exit Criteria Decision Upload is successfully complet"
+        },
+        {
+          "chunk_id": "DOC-000052-CH-000005",
+          "document_id": "DOC-000052",
+          "score": 0.714,
+          "team": "ICS",
+          "text_preview": "iate action further based on success/failure 5 Exit Criteria Decision Upload is successfully complet"
+        },
+        {
+          "chunk_id": "DOC-000053-CH-000005",
+          "document_id": "DOC-000053",
+          "score": 0.714,
+          "team": "ICS",
+          "text_preview": "iate action further based on success/failure 5 Exit Criteria Decision Upload is successfully complet"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: iate action further based on\nsuccess/failure\n5 Exit Criteria\nDecision U",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        },
+        {
+          "text": "+1\nTagged on: Decision Decisions to Opera Cloud using OCP through Core\nOHIP OCP OHIP Opera Cloud iat",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        },
+        {
+          "text": "+1\nTagged on: Decision Decisions to Opera Cloud using OCP through Core\nOHIP OCP OHIP Opera Cloud iat",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 175.1
+    },
+    {
+      "id": "10",
+      "question": "What is the Service Recovery Procedure?",
+      "category": "procedure",
+      "expected_verdict": "DIRECT or MIXED",
+      "actual_verdict": "PASS",
+      "direct_count": 2,
+      "inferred_count": 1,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.4666666666666666,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000007-CH-000003",
+          "document_id": "DOC-000007",
+          "score": 0.833,
+          "team": "UNKNOWN",
+          "text_preview": " team! \u2013 User.id: null \u2013 Workcontext: null] at Ranjit on Service Recovery deployment.job.war//com.id"
+        },
+        {
+          "chunk_id": "DOC-000013-CH-000001",
+          "document_id": "DOC-000013",
+          "score": 0.833,
+          "team": "ROA",
+          "text_preview": "Agile Rates \u2013 Configuration and Analytics Introduction, Objective & Audience  This document covers t"
+        },
+        {
+          "chunk_id": "DOC-000016-CH-000003",
+          "document_id": "DOC-000016",
+          "score": 0.833,
+          "team": "ICS",
+          "text_preview": "ker Failure \u2013 non positive offset value for Product There are 2 versions of it Ranjit on Hilton/Proc"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence:  team!",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (60%) but no explicit support language found"
+        },
+        {
+          "text": "\u2013 User.id: null \u2013 Workcontext: null]\nat Ranjit on Service Recovery\ndeployment.job.war//com.ideas.tet",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 6 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Procedure \u2013\ndoInvoke(UpdateIntegrationSetti Agile Rates \u2013 Configuration and Analytics\nIntroduction, ",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 140.8
+    },
+    {
+      "id": "11",
+      "question": "Who is responsible for FOLS processing?",
+      "category": "ownership",
+      "expected_verdict": "DIRECT or MIXED",
+      "actual_verdict": "PASS",
+      "direct_count": 1,
+      "inferred_count": 1,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.4,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000085-CH-000004",
+          "document_id": "DOC-000085",
+          "score": 0.833,
+          "team": "SPM",
+          "text_preview": " Admin Team, who is also in charge of sending the initial FULL export to IDeaS. Ranjit on Accor Clie"
+        },
+        {
+          "chunk_id": "DOC-000023-CH-000001",
+          "document_id": "DOC-000023",
+          "score": 0.667,
+          "team": "SPM",
+          "text_preview": "Charter to Full uploads in the IDeaS RMS paradigm Full decision upload \u2013 This type of task is typica"
+        },
+        {
+          "chunk_id": "DOC-000024-CH-000001",
+          "document_id": "DOC-000024",
+          "score": 0.667,
+          "team": "SPM",
+          "text_preview": "Charter to Full uploads in the IDeaS RMS paradigm Full decision upload \u2013 This type of task is typica"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence:  Admin Team, who is also in\ncharge of sending the initial FULL export t",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Ranjit on Accor Client\nHandling Process Guide\nIncident on FULL export:\nIDeaS is responsible for conf",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (94%) but no explicit support language found"
+        }
+      ],
+      "latency_ms": 145.4
+    },
+    {
+      "id": "12",
+      "question": "Who handles Agent to Agent Migration?",
+      "category": "ownership",
+      "expected_verdict": "DIRECT or MIXED",
+      "actual_verdict": "PASS",
+      "direct_count": 2,
+      "inferred_count": 0,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.6,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000231-CH-000001",
+          "document_id": "DOC-000231",
+          "score": 0.833,
+          "team": "IT",
+          "text_preview": "G3: Rate Shopping Vendor Switch Submitted by:  Rehan Shaikh Karl Lobo Overview HLTN/hiltonEnableSmal"
+        },
+        {
+          "chunk_id": "DOC-000232-CH-000001",
+          "document_id": "DOC-000232",
+          "score": 0.833,
+          "team": "IT",
+          "text_preview": "G3: Rate Shopping Vendor Switch Submitted by:  Rehan Shaikh Karl Lobo Overview HLTN/hiltonEnableSmal"
+        },
+        {
+          "chunk_id": "DOC-000029-CH-000002",
+          "document_id": "DOC-000029",
+          "score": 0.667,
+          "team": "IT",
+          "text_preview": ". 1.3 Intended Audience Recent Comments The target audience for this document is the entire team mem"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: G3: Rate Shopping Vendor Switch\nSubmitted by: \nRehan Shaikh\nKarl Lobo\nO",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "3 Intended Audience Recent Comments\nThe target audience for this ...",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 176.4
+    },
+    {
+      "id": "13",
+      "question": "Which team manages the ACCOR FOLS Daily Audit Process?",
+      "category": "ownership",
+      "expected_verdict": "DIRECT or MIXED",
+      "actual_verdict": "PASS",
+      "direct_count": 2,
+      "inferred_count": 2,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.4,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000004-CH-000001",
+          "document_id": "DOC-000004",
+          "score": 0.667,
+          "team": "IT",
+          "text_preview": "ACCOR FOLS Daily Audit Process Objective:  To ensure timely and accurate auditing of ACCOR FOLS data"
+        },
+        {
+          "chunk_id": "DOC-000004-CH-000004",
+          "document_id": "DOC-000004",
+          "score": 0.667,
+          "team": "IT",
+          "text_preview": "es are found, escalate immediately to Shift Leads for resolution. Step 9: Report Findings Consolidat"
+        },
+        {
+          "chunk_id": "DOC-000085-CH-000001",
+          "document_id": "DOC-000085",
+          "score": 0.667,
+          "team": "SPM",
+          "text_preview": "FOLS \u2013 Support Matrix for IDeaS G3 RMS Exports Below is an overview of agreement with Accor and  IDe"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: ACCOR FOLS Daily Audit Process\nObjective: \nTo ensure timely and accurat",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (88%) but no explicit support language found"
+        },
+        {
+          "text": "Audit Schedu es are found, escalate immediately to Shift Leads for\nresolution.",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (89%) but no explicit support language found"
+        },
+        {
+          "text": "Step 9: Report Findings\nConsolidate all audit data into an Excel or presentable format.",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Share the final audit report on the designated FOLS \u2013 Support Matrix for IDeaS G3 RMS Exports\nBelow ",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 200.9
+    },
+    {
+      "id": "14",
+      "question": "What does the SPM team handle?",
+      "category": "team",
+      "expected_verdict": "MIXED or DIRECT",
+      "actual_verdict": "PASS",
+      "direct_count": 3,
+      "inferred_count": 1,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.49999999999999994,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000646-CH-000002",
+          "document_id": "DOC-000646",
+          "score": 0.833,
+          "team": "UNKNOWN",
+          "text_preview": " Automation   Process Governance and Audit NCP/Pro-Mo - how is this adding value Yogi/Ranjit   How m"
+        },
+        {
+          "chunk_id": "DOC-000648-CH-000004",
+          "document_id": "DOC-000648",
+          "score": 0.833,
+          "team": "UNKNOWN",
+          "text_preview": "assigned ? department Managers NaT   Does the lead have the processes / understanding? department Ma"
+        },
+        {
+          "chunk_id": "DOC-000082-CH-000001",
+          "document_id": "DOC-000082",
+          "score": 0.667,
+          "team": "UNKNOWN",
+          "text_preview": "FINDING OUT KEY CONTACTS IN SFDC POST PROJECT HEARTBEAT FINDING OUT KEY CONTACTS IN SFDC POST PROJEC"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence:  Automation \n Process Governance and Audit NCP/Pro-Mo - how is this add",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Add numbers/data on the slide (From lists taken from ROA/ICS/SPM assigned ?",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "department Managers NaT \n Does the lead have the processes / understanding?",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "department Managers NaT \n Onboarding Plan NaT \n Measurement system to show value in the onboarding C",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (95%) but no explicit support language found"
+        }
+      ],
+      "latency_ms": 161.5
+    },
+    {
+      "id": "15",
+      "question": "What does the ICS team handle?",
+      "category": "team",
+      "expected_verdict": "MIXED or DIRECT",
+      "actual_verdict": "PASS",
+      "direct_count": 1,
+      "inferred_count": 1,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.4,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000646-CH-000002",
+          "document_id": "DOC-000646",
+          "score": 0.833,
+          "team": "UNKNOWN",
+          "text_preview": " Automation   Process Governance and Audit NCP/Pro-Mo - how is this adding value Yogi/Ranjit   How m"
+        },
+        {
+          "chunk_id": "DOC-000013-CH-000001",
+          "document_id": "DOC-000013",
+          "score": 0.667,
+          "team": "ROA",
+          "text_preview": "Agile Rates \u2013 Configuration and Analytics Introduction, Objective & Audience  This document covers t"
+        },
+        {
+          "chunk_id": "DOC-000048-CH-000018",
+          "document_id": "DOC-000048",
+          "score": 0.667,
+          "team": "SPM",
+          "text_preview": " be applied and at what percentage This means that the Tax percentage from Configure > Property Spec"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence:  Automation \n Process Governance and Audit NCP/Pro-Mo - how is this add",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Add numbers/data on the slide (From lists taken from ROA/ICS/SPM Agile Rates \u2013 Configuration and Ana",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (91%) but no explicit support language found"
+        }
+      ],
+      "latency_ms": 151.0
+    },
+    {
+      "id": "16",
+      "question": "What does the SDOPS team handle?",
+      "category": "team",
+      "expected_verdict": "MIXED or DIRECT",
+      "actual_verdict": "PASS",
+      "direct_count": 4,
+      "inferred_count": 1,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.52,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000082-CH-000001",
+          "document_id": "DOC-000082",
+          "score": 0.667,
+          "team": "UNKNOWN",
+          "text_preview": "FINDING OUT KEY CONTACTS IN SFDC POST PROJECT HEARTBEAT FINDING OUT KEY CONTACTS IN SFDC POST PROJEC"
+        },
+        {
+          "chunk_id": "DOC-000574-CH-000002",
+          "document_id": "DOC-000574",
+          "score": 0.667,
+          "team": "UNKNOWN",
+          "text_preview": "he requirements 2. Work Experience Please tell us a little about your previous work experience. How "
+        },
+        {
+          "chunk_id": "DOC-000574-CH-000003",
+          "document_id": "DOC-000574",
+          "score": 0.667,
+          "team": "UNKNOWN",
+          "text_preview": "6. Ability to work in a team environment What are the candidates expectations of their direct superv"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: FINDING OUT KEY CONTACTS IN SFDC POST PROJECT HEARTBEAT\nFINDING OUT KEY",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (82%) but no explicit support language found"
+        },
+        {
+          "text": "Work Experience\nPlease tell us a little about your previous work experience.",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "How does the candidate\u2019s previous job experience relate to the __________________ role?",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 4 chunk(s) with explicit support language"
+        },
+        {
+          "text": "What additional  6.",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 5 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Ability to work in a team environment\nWhat are the candidates expe...",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 8 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 154.4
+    },
+    {
+      "id": "17",
+      "question": "What does the ROA team handle?",
+      "category": "team",
+      "expected_verdict": "MIXED or DIRECT",
+      "actual_verdict": "PASS",
+      "direct_count": 6,
+      "inferred_count": 0,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.6,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000646-CH-000002",
+          "document_id": "DOC-000646",
+          "score": 0.833,
+          "team": "UNKNOWN",
+          "text_preview": " Automation   Process Governance and Audit NCP/Pro-Mo - how is this adding value Yogi/Ranjit   How m"
+        },
+        {
+          "chunk_id": "CH-000017",
+          "document_id": "DOC-000401",
+          "score": 0.667,
+          "team": "ROA",
+          "text_preview": " 2. Choose an approach to pricing children amongst the below. 3. A] If pricing is done by \u2018Child Age"
+        },
+        {
+          "chunk_id": "DOC-000056-CH-000007",
+          "document_id": "DOC-000056",
+          "score": 0.667,
+          "team": "ROA",
+          "text_preview": "ations per day? The maximum number of optimizations per day that will be supported is 8. Is there a "
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence:  Automation \n Process Governance and Audit NCP/Pro-Mo - how is this add",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Add numbers/data on the slide (From lists taken from ROA/ICS/SPM",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Choose an approach to pricing children amongst the below.",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "A] If pricing is done by \u2018Child Age bucket\u2019, then the client will define pricing for\neach child buck",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Please note that currently only ations per day?",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "The maximum number of optimizations per day that will...",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 164.9
+    },
+    {
+      "id": "18",
+      "question": "How many HR policy documents are in the knowledge base?",
+      "category": "count",
+      "expected_verdict": "MAYBE",
+      "actual_verdict": "PASS",
+      "direct_count": 5,
+      "inferred_count": 0,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.6,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "CH-000068",
+          "document_id": "DOC-000065",
+          "score": 0.7,
+          "team": "HR",
+          "text_preview": "ce and/or disciplinary records to support your decision. References When we terminate employees, we "
+        },
+        {
+          "chunk_id": "DOC-000063-CH-000003",
+          "document_id": "DOC-000063",
+          "score": 0.7,
+          "team": "HR",
+          "text_preview": "are entitled for II class A/C travel by train or equivalent amount for airfare. Household Items The "
+        },
+        {
+          "chunk_id": "DOC-000065-CH-000068",
+          "document_id": "DOC-000065",
+          "score": 0.7,
+          "team": "HR",
+          "text_preview": "ce and/or disciplinary records to support your decision. References When we terminate employees, we "
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: ce and/or disciplinary records to support your decision.",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "References\nWhen we terminate employees, we may provide references for those who leave in good\nstandi",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        },
+        {
+          "text": "This means that employees shouldn\u2019t hav are entitled for II class A/C travel by train or equivalent ",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Household Items\nThe location expenditure will be paid at actuals for domestic household items and ve",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        },
+        {
+          "text": "References\nW...",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 237.5
+    },
+    {
+      "id": "19",
+      "question": "What systems are involved in the G3 data flow?",
+      "category": "cross_document",
+      "expected_verdict": "MIXED or DIRECT",
+      "actual_verdict": "PASS",
+      "direct_count": 1,
+      "inferred_count": 0,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.6,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000098-CH-000001",
+          "document_id": "DOC-000098",
+          "score": 0.778,
+          "team": "SPM",
+          "text_preview": "G3 \u2013 Data Feeds G3 \u2013 Data Feeds  Below is the full documentation that gives overview of datafeeds an"
+        },
+        {
+          "chunk_id": "DOC-000116-CH-000004",
+          "document_id": "DOC-000116",
+          "score": 0.778,
+          "team": "SPM",
+          "text_preview": "eaning say a property X is in Decision delivery mode and experiencing an issue then it would appear "
+        },
+        {
+          "chunk_id": "DOC-000502-CH-000002",
+          "document_id": "DOC-000502",
+          "score": 0.778,
+          "team": "UNKNOWN",
+          "text_preview": "ent insists on removing duplicate groups: Step-by-Step Process Classify the Request ICS / ISM marks "
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: G3 \u2013 Data Feeds\nG3 \u2013 Data Feeds \nBelow is the full documentation that g",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 193.7
+    },
+    {
+      "id": "20",
+      "question": "How do SPM and ICS collaborate on property onboarding?",
+      "category": "cross_document",
+      "expected_verdict": "MIXED",
+      "actual_verdict": "PARTIAL",
+      "direct_count": 0,
+      "inferred_count": 3,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.20000000000000004,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000603-CH-000008",
+          "document_id": "DOC-000603",
+          "score": 0.778,
+          "team": "UNKNOWN",
+          "text_preview": ".  G3_CARE:Necessary criteria based rest calls while doing G3_CARE monitoring  G3_CARE:Solution for "
+        },
+        {
+          "chunk_id": "CH-000021",
+          "document_id": "DOC-000399",
+          "score": 0.667,
+          "team": "ICS",
+          "text_preview": "uring the monitoring phase, then this task can be marked as completed. Task 27 \u2013 Delete property cod"
+        },
+        {
+          "chunk_id": "DOC-000010-CH-000003",
+          "document_id": "DOC-000010",
+          "score": 0.667,
+          "team": "ICS",
+          "text_preview": "n Description ICS Installation, Configuration & Support ROA Revenue Optimization Analyst SPM Systems"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: .",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (60%) but no explicit support language found"
+        },
+        {
+          "text": "G3_CARE:Necessary criteria based rest calls while doing G3_CARE monitoring\n G3_CARE:Solution for G3_",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (96%) but no explicit support language found"
+        },
+        {
+          "text": "Task 27 \u2013 Delete property code from NGI Vendor\nConfig\nICS team should remove the OXI configuration f",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (96%) but no explicit support language found"
+        }
+      ],
+      "latency_ms": 217.4
+    },
+    {
+      "id": "21",
+      "question": "What teams are involved with G3?",
+      "category": "cross_team",
+      "expected_verdict": "MIXED",
+      "actual_verdict": "PASS",
+      "direct_count": 4,
+      "inferred_count": 1,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.52,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000082-CH-000001",
+          "document_id": "DOC-000082",
+          "score": 0.667,
+          "team": "UNKNOWN",
+          "text_preview": "FINDING OUT KEY CONTACTS IN SFDC POST PROJECT HEARTBEAT FINDING OUT KEY CONTACTS IN SFDC POST PROJEC"
+        },
+        {
+          "chunk_id": "DOC-000574-CH-000003",
+          "document_id": "DOC-000574",
+          "score": 0.667,
+          "team": "UNKNOWN",
+          "text_preview": "6. Ability to work in a team environment What are the candidates expectations of their direct superv"
+        },
+        {
+          "chunk_id": "DOC-000574-CH-000004",
+          "document_id": "DOC-000574",
+          "score": 0.667,
+          "team": "UNKNOWN",
+          "text_preview": "Basic 10. Technical knowledge What technical skills does the client possess ? Is the candidate comfo"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: FINDING OUT KEY CONTACTS IN SFDC POST PROJECT HEARTBEAT\nFINDING OUT KEY",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (81%) but no explicit support language found"
+        },
+        {
+          "text": "Ability to work in a team environment\nWhat are the candidates expectations of their direct superviso",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 6 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Colleagues ?",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 8 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Is the candidate able to develop and maintain the multiple cross functional and Basic",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Technical knowledge\nWhat technical skills does the client p...",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 7 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 160.7
+    },
+    {
+      "id": "22",
+      "question": "Which teams work with OHIP?",
+      "category": "cross_team",
+      "expected_verdict": "MIXED",
+      "actual_verdict": "PASS",
+      "direct_count": 4,
+      "inferred_count": 2,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.4666666666666666,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000243-CH-000007",
+          "document_id": "DOC-000243",
+          "score": 0.8,
+          "team": "UNKNOWN",
+          "text_preview": "inesV1 5 Equal Opportunity IDeaS values team work and facilitates a work culture of high performing "
+        },
+        {
+          "chunk_id": "DOC-000258-CH-000003",
+          "document_id": "DOC-000258",
+          "score": 0.8,
+          "team": "UNKNOWN",
+          "text_preview": "ature.lowestOptimizationDecisionCheck \u2022 If we need to provide information to client that which price"
+        },
+        {
+          "chunk_id": "DOC-000259-CH-000003",
+          "document_id": "DOC-000259",
+          "score": 0.8,
+          "team": "UNKNOWN",
+          "text_preview": "ature.lowestOptimizationDecisionCheck \u2022 If we need to provide information to client that which price"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: inesV1 5\nEqual Opportunity\nIDeaS values team work and facilitates a wor",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (88%) but no explicit support language found"
+        },
+        {
+          "text": "Every employee\nis expected to respect human dignity and display sensitivity towards needs & a ature.",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (100%) but no explicit support language found"
+        },
+        {
+          "text": "If we need to provide information to client that which prices are set to floor or\nceiling.",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "This information can be retrieved using below queries saved on CMA",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "ature.lowestOptimizationDecisionCheck",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "If we need to provide informa...",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 6 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 131.8
+    },
+    {
+      "id": "23",
+      "question": "What is the relationship between G3 and RMS?",
+      "category": "graph_relationship",
+      "expected_verdict": "MIXED or DIRECT",
+      "actual_verdict": "PASS",
+      "direct_count": 5,
+      "inferred_count": 3,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.45,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000056-CH-000007",
+          "document_id": "DOC-000056",
+          "score": 0.75,
+          "team": "ROA",
+          "text_preview": "ations per day? The maximum number of optimizations per day that will be supported is 8. Is there a "
+        },
+        {
+          "chunk_id": "DOC-000187-CH-000010",
+          "document_id": "DOC-000187",
+          "score": 0.75,
+          "team": "UNKNOWN",
+          "text_preview": " in the CRS, and restrictions will be generated against these. In Vendor Integration Mapping, select"
+        },
+        {
+          "chunk_id": "DOC-000188-CH-000010",
+          "document_id": "DOC-000188",
+          "score": 0.75,
+          "team": "UNKNOWN",
+          "text_preview": " in the CRS, and restrictions will be generated against these. In Vendor Integration Mapping, select"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: ations per day?",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "The maximum number of optimizations per day that will be supported is 8.",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Is there a minimum time gap between optimizations?",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "If so, what is it?",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "60 minutes between system optimizations.",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "in the CRS, and\nrestrictions will be generated against these.",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (100%) but no explicit support language found"
+        },
+        {
+          "text": "In Vendor Integration Mapping, select the PMS rate code, then enter the equivalent\nCRS Rate Code.",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (100%) but no explicit support language found"
+        },
+        {
+          "text": "You can apply this mapping either with   in the CRS, and\nrestrictions will be generated against thes",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (100%) but no explicit support language found"
+        }
+      ],
+      "latency_ms": 207.1
+    },
+    {
+      "id": "24",
+      "question": "How many employees does IDeaS have?",
+      "category": "insufficient_evidence",
+      "expected_verdict": "ABSTAIN",
+      "actual_verdict": "PASS",
+      "direct_count": 4,
+      "inferred_count": 0,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.6,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000074-CH-000001",
+          "document_id": "DOC-000074",
+          "score": 0.667,
+          "team": "HR",
+          "text_preview": "Day Care Reimbursement FAQ\u2019s 1. Who are eligible to claim the Day care reimbursement? Ans \u2013 Only ful"
+        },
+        {
+          "chunk_id": "DOC-000128-CH-000001",
+          "document_id": "DOC-000128",
+          "score": 0.667,
+          "team": "ROA",
+          "text_preview": "G3 \u2013 Rates appear for many of the competitors but not for one or some of the competitors in Change R"
+        },
+        {
+          "chunk_id": "DOC-000600-CH-000001",
+          "document_id": "DOC-000600",
+          "score": 0.667,
+          "team": "UNKNOWN",
+          "text_preview": "--- Sheet: ICS_G3 ---  G3_ICS:Reports discrepancy  G3_ICS:PMS report versus G3 report  G3_ICS:Discre"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: Day Care Reimbursement FAQ\u2019s",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Who are eligible to claim the Day care reimbursement?",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Ans \u2013 Only full-time Employees of IDeaS India are eligible to avail this benefit.",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "If both the parents are\nworking  G3 \u2013 Rates appear for many of the competitors but not for one or so",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 150.7
+    },
+    {
+      "id": "25",
+      "question": "What is the company's annual revenue?",
+      "category": "insufficient_evidence",
+      "expected_verdict": "ABSTAIN",
+      "actual_verdict": "PASS",
+      "direct_count": 6,
+      "inferred_count": 0,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.6,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "CH-000040",
+          "document_id": "DOC-000065",
+          "score": 0.667,
+          "team": "HR",
+          "text_preview": "their team members when they deserve them. There won\u2019t be any forced ranking or other comparison bet"
+        },
+        {
+          "chunk_id": "DOC-000065-CH-000040",
+          "document_id": "DOC-000065",
+          "score": 0.667,
+          "team": "HR",
+          "text_preview": "their team members when they deserve them. There won\u2019t be any forced ranking or other comparison bet"
+        },
+        {
+          "chunk_id": "DOC-000073-CH-000001",
+          "document_id": "DOC-000073",
+          "score": 0.667,
+          "team": "HR",
+          "text_preview": "Annual Health Checkup Reimbursement FAQ\u2019s 1. Who are eligible to claim the Annual Health Checkup rei"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: their team\nmembers when they deserve them.",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        },
+        {
+          "text": "There won\u2019t be any forced ranking or other\ncomparison between employees, as our goal is to help all ",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "\u25a0 Instructed their team\nmembers when they deserve them.",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        },
+        {
+          "text": "There won\u2019t be any forced ranking or other\ncomparison between employees, as our goal is to help all ",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "\u25a0 Instructed Annual Health Checkup Reimbursement FAQ\u2019s",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Who are eligible to clai...",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 171.3
+    },
+    {
+      "id": "26",
+      "question": "What is the pricing for G3 RMS licensing?",
+      "category": "insufficient_evidence",
+      "expected_verdict": "ABSTAIN",
+      "actual_verdict": "PASS",
+      "direct_count": 3,
+      "inferred_count": 1,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.49999999999999994,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "CH-000017",
+          "document_id": "DOC-000401",
+          "score": 0.875,
+          "team": "ROA",
+          "text_preview": " 2. Choose an approach to pricing children amongst the below. 3. A] If pricing is done by \u2018Child Age"
+        },
+        {
+          "chunk_id": "DOC-000013-CH-000001",
+          "document_id": "DOC-000013",
+          "score": 0.875,
+          "team": "ROA",
+          "text_preview": "Agile Rates \u2013 Configuration and Analytics Introduction, Objective & Audience  This document covers t"
+        },
+        {
+          "chunk_id": "DOC-000401-CH-000001",
+          "document_id": "DOC-000401",
+          "score": 0.875,
+          "team": "ROA",
+          "text_preview": "Per Person Pricing Introduction and Objective  This document served as a resource for Service Delive"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence:",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (50%) but no explicit support language found"
+        },
+        {
+          "text": "Choose an approach to pricing children amongst the below.",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        },
+        {
+          "text": "A] If pricing is done by \u2018Child Age bucket\u2019, then the client will define pricing for\neach child buck",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Please note that currently only Agile Rates \u2013 Configuration and Analytics\nIntroduction, Objective & ",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 199.5
+    },
+    {
+      "id": "27",
+      "question": "What is the implementation cost of OHIP?",
+      "category": "mention_vs_answer",
+      "expected_verdict": "ABSTAIN",
+      "actual_verdict": "PASS",
+      "direct_count": 3,
+      "inferred_count": 0,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.6,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000045-CH-000002",
+          "document_id": "DOC-000045",
+          "score": 0.714,
+          "team": "ICS",
+          "text_preview": "e Hilton/Processing Failure \u2013 non positive offset value for The target audience for this document is"
+        },
+        {
+          "chunk_id": "DOC-000046-CH-000002",
+          "document_id": "DOC-000046",
+          "score": 0.714,
+          "team": "ICS",
+          "text_preview": "e Hilton/Processing Failure \u2013 non positive offset value for The target audience for this document is"
+        },
+        {
+          "chunk_id": "DOC-000047-CH-000002",
+          "document_id": "DOC-000047",
+          "score": 0.714,
+          "team": "ICS",
+          "text_preview": "e Hilton/Processing Failure \u2013 non positive offset value for The target audience for this document is"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: e\nHilton/Processing Failure \u2013\nnon positive offset value for\nThe target ",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        },
+        {
+          "text": "\u2013 Project Manager, Project  e\nHilton/Processing Failure \u2013\nnon positive offset value for\nThe target a",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        },
+        {
+          "text": "\u2013 Project Manager, Project  e\nHilton/Processing Failure \u2013\nnon positive offset value for\nThe targe...",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 4 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 155.4
+    },
+    {
+      "id": "28",
+      "question": "What training materials exist for the HR team?",
+      "category": "mention_vs_answer",
+      "expected_verdict": "ABSTAIN or MAYBE",
+      "actual_verdict": "PASS",
+      "direct_count": 2,
+      "inferred_count": 1,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.4666666666666666,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000013-CH-000016",
+          "document_id": "DOC-000013",
+          "score": 0.625,
+          "team": "ROA",
+          "text_preview": "e specific Outbound system for activating Agile Rates Scoping how to view this \u2013 QA is working on th"
+        },
+        {
+          "chunk_id": "DOC-000143-CH-000005",
+          "document_id": "DOC-000143",
+          "score": 0.625,
+          "team": "UNKNOWN",
+          "text_preview": " this is returned by the client it should be updated . Identify the Reservation_Name_ID\u2019s and use th"
+        },
+        {
+          "chunk_id": "DOC-000573-CH-000002",
+          "document_id": "DOC-000573",
+          "score": 0.625,
+          "team": "UNKNOWN",
+          "text_preview": "pes Discontinued Room Types What happens next: Once the completed mapping sheet is submitted:  The s"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: e specific Outbound system for activating Agile Rates\nScoping how to vi",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (90%) but no explicit support language found"
+        },
+        {
+          "text": "Education & Help\nWhere Agile rates functional  this is returned by the client it should be updated .",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Identify the\nReservation_Name_ID\u2019s and use the CMA query \u201cUpdate Room Type\ncolumns for Reservations ",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 202.5
+    },
+    {
+      "id": "29",
+      "question": "What is the Data Flow issue with OHIP?",
+      "category": "direct_factual",
+      "expected_verdict": "DIRECT or MIXED",
+      "actual_verdict": "PASS",
+      "direct_count": 3,
+      "inferred_count": 0,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.6,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000023-CH-000003",
+          "document_id": "DOC-000023",
+          "score": 0.875,
+          "team": "SPM",
+          "text_preview": "w , for the which the hotel has subscribed to as the decision window. Meaning , in the example above"
+        },
+        {
+          "chunk_id": "DOC-000024-CH-000003",
+          "document_id": "DOC-000024",
+          "score": 0.875,
+          "team": "SPM",
+          "text_preview": "w , for the which the hotel has subscribed to as the decision window. Meaning , in the example above"
+        },
+        {
+          "chunk_id": "DOC-000025-CH-000003",
+          "document_id": "DOC-000025",
+          "score": 0.875,
+          "team": "SPM",
+          "text_preview": "w , for the which the hotel has subscribed to as the decision window. Meaning , in the example above"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: w , for the which the hotel has subscribed to as the decision\nwindow.",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Meaning , in the example above if , Four Seasons Sydney sells HLTN/Handling Error for SAS\n365 days i",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Meaning , in the example above if , Four Seasons Sydney sells HLTN/Handling Error for SAS\n365 days i",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 167.6
+    },
+    {
+      "id": "30",
+      "question": "How does Dynamic Optimization work in G3?",
+      "category": "direct_factual",
+      "expected_verdict": "DIRECT or MIXED",
+      "actual_verdict": "PASS",
+      "direct_count": 2,
+      "inferred_count": 2,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.4,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000056-CH-000005",
+          "document_id": "DOC-000056",
+          "score": 0.857,
+          "team": "ROA",
+          "text_preview": "es, please raise this via Teams channel / SFDC\u2019s. Point of Contact (Technology team) : Team Heisenbe"
+        },
+        {
+          "chunk_id": "DOC-000325-CH-000001",
+          "document_id": "DOC-000325",
+          "score": 0.857,
+          "team": "SPM",
+          "text_preview": "How to search which rate shopping file was processed last in G3? How to search which rate shopping f"
+        },
+        {
+          "chunk_id": "DOC-000476-CH-000001",
+          "document_id": "DOC-000476",
+          "score": 0.857,
+          "team": "SPM",
+          "text_preview": "Troubleshooting : Show me feature Not working in G3 RMS Typical troubleshooting charter if Show me f"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: es, please raise this via Teams channel / SFDC\u2019s.",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Point of Contact (Technology team) : Team Heisenberg (Sendhil, Rohan, Mehal, Atul)\nProduct team : Ma",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (96%) but no explicit support language found"
+        },
+        {
+          "text": "How to search which rate shopping file was processed \nlast in G3?",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Login to the correct node : Prod1 (for Hilton properties) or Prod 2 ( Troubleshooting : Show me feat",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (90%) but no explicit support language found"
+        }
+      ],
+      "latency_ms": 152.6
+    },
+    {
+      "id": "31",
+      "question": "How do you enable monitoring for a G3 property?",
+      "category": "configuration",
+      "expected_verdict": "DIRECT or MIXED",
+      "actual_verdict": "PARTIAL",
+      "direct_count": 6,
+      "inferred_count": 1,
+      "unsupported_count": 1,
+      "should_abstain": false,
+      "adjusted_confidence": 0.4125,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000103-CH-000004",
+          "document_id": "DOC-000103",
+          "score": 0.889,
+          "team": "UNKNOWN",
+          "text_preview": " CPM. Select any authorization groups if advised as well Verify the details once again to make sure "
+        },
+        {
+          "chunk_id": "DOC-000105-CH-000001",
+          "document_id": "DOC-000105",
+          "score": 0.889,
+          "team": "SDOPS",
+          "text_preview": "G3 : How to enable/disable monitoring for a Property? G3 : How to enable/disable monitoring for a Pr"
+        },
+        {
+          "chunk_id": "DOC-000307-CH-000003",
+          "document_id": "DOC-000307",
+          "score": 0.889,
+          "team": "UNKNOWN",
+          "text_preview": "national\u201d or \u201cScandic\u201d (Character limit is 40 characters) [Client Code] is a shorter name such as \u201cL"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: \nCPM.",
+          "classification": "UNSUPPORTED",
+          "confidence": 0.0,
+          "reasoning": "No evidence supports this claim"
+        },
+        {
+          "text": "Select any authorization groups if advised as well\nVerify the details once again to make sure that t",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (100%) but no explicit support language found"
+        },
+        {
+          "text": "Hit create .",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Once create is completed email noti G3 : How to enable/disable monitoring for a Property?",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "G3 : How to enable/disable monitoring for a Property?",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Go to Support >Configuration> Property Tab.",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Select correct property under property tab.",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Ref national\u201d or \u201cScandic\u201d (Character limit is 40 characters)\n[Client Cod...",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 202.1
+    },
+    {
+      "id": "32",
+      "question": "How is the Room Type Offset configured in G3 RMS?",
+      "category": "configuration",
+      "expected_verdict": "DIRECT or MIXED",
+      "actual_verdict": "PASS",
+      "direct_count": 5,
+      "inferred_count": 0,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.6,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000250-CH-000003",
+          "document_id": "DOC-000250",
+          "score": 0.9,
+          "team": "UNKNOWN",
+          "text_preview": "rocessing list which is configured in CurtisC. Failure \u2013 non positive offset 9. If the count does no"
+        },
+        {
+          "chunk_id": "DOC-000251-CH-000003",
+          "document_id": "DOC-000251",
+          "score": 0.9,
+          "team": "UNKNOWN",
+          "text_preview": "rocessing list which is configured in CurtisC. Failure \u2013 non positive offset 9. If the count does no"
+        },
+        {
+          "chunk_id": "DOC-000401-CH-000005",
+          "document_id": "DOC-000401",
+          "score": 0.9,
+          "team": "ROA",
+          "text_preview": "occupancy bucket for each Forecast Group and Room Class combination; based on the occupancy buckets "
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: rocessing\nlist which is configured in CurtisC.",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Failure \u2013 non positive offset",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 4 chunk(s) with explicit support language"
+        },
+        {
+          "text": "If the count does not match for a certain date or dates, please follow the below\nvalue for Product\ns",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Failure \u2013 non positive offset",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 4 chunk(s) with explicit support language"
+        },
+        {
+          "text": "If the count does not match for a certain date or dates, please follow the below\nvalue for Product\ns",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 217.2
+    },
+    {
+      "id": "33",
+      "question": "What is the Adoption Assistance Policy at IDeaS India?",
+      "category": "direct_factual",
+      "expected_verdict": "DIRECT or MIXED",
+      "actual_verdict": "PASS",
+      "direct_count": 3,
+      "inferred_count": 2,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.43999999999999995,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000009-CH-000001",
+          "document_id": "DOC-000009",
+          "score": 0.778,
+          "team": "HR",
+          "text_preview": "Adoption Assistance Policy April 2017 Version: 1 This document is the confidential and proprietary p"
+        },
+        {
+          "chunk_id": "DOC-000009-CH-000002",
+          "document_id": "DOC-000009",
+          "score": 0.778,
+          "team": "HR",
+          "text_preview": "................................................ 3 Practice ........................................"
+        },
+        {
+          "chunk_id": "DOC-000009-CH-000003",
+          "document_id": "DOC-000009",
+          "score": 0.667,
+          "team": "HR",
+          "text_preview": "\u2022 Legal Fee \u2022 Maternity connected medical expenses (child\u2019s biological mother) \u2022 Fees related to ado"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: Adoption\nAssistance Policy\nApril 2017\nVersion: 1\nThis document is the c",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "It may contain approaches,\ntechni ................................................",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "3\nPractice .........................................................................................",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "3\nDRIVING B \u2022 Legal Fee",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (100%) but no explicit support language found"
+        },
+        {
+          "text": "Maternity connected medical expenses (child\u2019s biologica...",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (83%) but no explicit support language found"
+        }
+      ],
+      "latency_ms": 240.0
+    },
+    {
+      "id": "34",
+      "question": "What is the Internal Job Posting Policy at IDeaS?",
+      "category": "direct_factual",
+      "expected_verdict": "DIRECT or MIXED",
+      "actual_verdict": "PASS",
+      "direct_count": 4,
+      "inferred_count": 0,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.6,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000350-CH-000001",
+          "document_id": "DOC-000350",
+          "score": 0.778,
+          "team": "HR",
+          "text_preview": "Internal Job Posting Policy October 2019 Version: 1 This document is the confidential and proprietar"
+        },
+        {
+          "chunk_id": "DOC-000350-CH-000002",
+          "document_id": "DOC-000350",
+          "score": 0.778,
+          "team": "HR",
+          "text_preview": "............................................................. 3 Posting a job internally ..........."
+        },
+        {
+          "chunk_id": "DOC-000350-CH-000003",
+          "document_id": "DOC-000350",
+          "score": 0.778,
+          "team": "HR",
+          "text_preview": "ing them advance their careers within our company whenever possible. Criteria : For a position to be"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: Internal Job\nPosting Policy\nOctober 2019\nVersion: 1\nThis document is th",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "It may contain approaches,\ntec .............................................................",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "3\nPosting a job internally .........................................................................",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        },
+        {
+          "text": "4\nE ing them advance their careers within our company whenever possible.",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 241.3
+    },
+    {
+      "id": "35",
+      "question": "How are alerts handled for REVENUE-STREAMS PROD?",
+      "category": "procedure",
+      "expected_verdict": "DIRECT or MIXED",
+      "actual_verdict": "PASS",
+      "direct_count": 2,
+      "inferred_count": 2,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.4,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000014-CH-000001",
+          "document_id": "DOC-000014",
+          "score": 0.714,
+          "team": "SDOPS",
+          "text_preview": "Alert Handling \u2013 Alert Name: Triggered: REVENUE-STREAMS PROD This document guides how to address ale"
+        },
+        {
+          "chunk_id": "DOC-000083-CH-000004",
+          "document_id": "DOC-000083",
+          "score": 0.571,
+          "team": "SPM",
+          "text_preview": "orm the step 4 to 9 till all the extracts are caught up till end date. Important Notes: 1. Do not st"
+        },
+        {
+          "chunk_id": "DOC-000098-CH-000002",
+          "document_id": "DOC-000098",
+          "score": 0.571,
+          "team": "SPM",
+          "text_preview": "ing Failures Due to of hotel performance, system performance and user engagement. Data Type Mismatch"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: Alert Handling \u2013 Alert Name: Triggered: REVENUE-STREAMS PROD\nThis docum",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Currently, we have two clients enabled for Re orm the step 4 to 9 till all the extracts are caught u",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (94%) but no explicit support language found"
+        },
+        {
+          "text": "Important Notes:",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (100%) but no explicit support language found"
+        },
+        {
+          "text": "Do not start catchup for same property unless the already running\nFOLSCatchupJob is completed for th",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 197.5
+    },
+    {
+      "id": "36",
+      "question": "What programming language is G3 written in?",
+      "category": "insufficient_evidence",
+      "expected_verdict": "ABSTAIN",
+      "actual_verdict": "PASS",
+      "direct_count": 2,
+      "inferred_count": 3,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.36,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000110-CH-000006",
+          "document_id": "DOC-000110",
+          "score": 0.571,
+          "team": "SPM",
+          "text_preview": " G3 SPM M escalation so that we can get the pending remote task marked as complete from QA. Note \u2013 N"
+        },
+        {
+          "chunk_id": "CH-000017",
+          "document_id": "DOC-000401",
+          "score": 0.429,
+          "team": "ROA",
+          "text_preview": " 2. Choose an approach to pricing children amongst the below. 3. A] If pricing is done by \u2018Child Age"
+        },
+        {
+          "chunk_id": "DOC-000007-CH-000004",
+          "document_id": "DOC-000007",
+          "score": 0.429,
+          "team": "UNKNOWN",
+          "text_preview": " vendor integration mapping page as follows Observe that OXI is NOT seen as an integration. So what "
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence:  G3 SPM M escalation so that we can get the\npending remote task marked ",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (90%) but no explicit support language found"
+        },
+        {
+          "text": "Note \u2013 Now we have a CMA query Check Opera Remote Task Stats this will allow us\nto check the remote ",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (100%) but no explicit support language found"
+        },
+        {
+          "text": "Choose an approach to pricing children amongst the below.",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "A] If pricing is done by \u2018Child Age bucket\u2019, then the client will define pricing for\neach child buck",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Please note that currently only  vendor integration mapping page\nas follows\nObserve that OXI is NOT ",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (93%) but no explicit support language found"
+        }
+      ],
+      "latency_ms": 179.4
+    },
+    {
+      "id": "37",
+      "question": "How many properties use G3 RMS globally?",
+      "category": "insufficient_evidence",
+      "expected_verdict": "ABSTAIN",
+      "actual_verdict": "PASS",
+      "direct_count": 3,
+      "inferred_count": 1,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.49999999999999994,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "CH-000014",
+          "document_id": "DOC-000401",
+          "score": 0.714,
+          "team": "ROA",
+          "text_preview": "deally be added in the project phase: Rooms Configuration / Pricing Configuration. Back End Configur"
+        },
+        {
+          "chunk_id": "DOC-000116-CH-000001",
+          "document_id": "DOC-000116",
+          "score": 0.714,
+          "team": "SPM",
+          "text_preview": "G3 \u2013 Monitor by Exception Charter Process to monitoring  Description Monitoring for G3 product is do"
+        },
+        {
+          "chunk_id": "DOC-000180-CH-000013",
+          "document_id": "DOC-000180",
+          "score": 0.714,
+          "team": "SPM",
+          "text_preview": "o the standard build. The Client will be responsible for reviewing system forecasts and decisions th"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: deally be added in the project phase:\nRooms Configuration / Pricing Con",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Back End Configuration (IDeaS)\nActivation of Per Person Pricing:",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Support -> Configuration \u2013 parameter for this fun G3 \u2013 Monitor by Exception Charter\nProcess to monit",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (97%) but no explicit support language found"
+        },
+        {
+          "text": "The Client will be responsible for reviewing sy...",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 5 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 181.5
+    },
+    {
+      "id": "38",
+      "question": "What is the SLA for OHIP installation?",
+      "category": "insufficient_evidence",
+      "expected_verdict": "ABSTAIN",
+      "actual_verdict": "PASS",
+      "direct_count": 1,
+      "inferred_count": 1,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.4,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000007-CH-000004",
+          "document_id": "DOC-000007",
+          "score": 0.714,
+          "team": "UNKNOWN",
+          "text_preview": " vendor integration mapping page as follows Observe that OXI is NOT seen as an integration. So what "
+        },
+        {
+          "chunk_id": "DOC-000035-CH-000003",
+          "document_id": "DOC-000035",
+          "score": 0.714,
+          "team": "ICS",
+          "text_preview": "ss Guide \u2705 Expected Page Output Once the page loads successfully, you will see the User Registration"
+        },
+        {
+          "chunk_id": "DOC-000035-CH-000011",
+          "document_id": "DOC-000035",
+          "score": 0.714,
+          "team": "ICS",
+          "text_preview": "1 with the actual Property Code \u2705 Step 2: Expected Output Format You should receive a response simil"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence:  vendor integration mapping page\nas follows\nObserve that OXI is NOT see",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (80%) but no explicit support language found"
+        },
+        {
+          "text": "So what you should do is simply Add the client and the property and resume the job\nand it should res",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 179.1
+    },
+    {
+      "id": "39",
+      "question": "What is the G3 Data Feed Configuration process?",
+      "category": "direct_factual",
+      "expected_verdict": "DIRECT or MIXED",
+      "actual_verdict": "PASS",
+      "direct_count": 4,
+      "inferred_count": 0,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.6,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000013-CH-000001",
+          "document_id": "DOC-000013",
+          "score": 0.75,
+          "team": "ROA",
+          "text_preview": "Agile Rates \u2013 Configuration and Analytics Introduction, Objective & Audience  This document covers t"
+        },
+        {
+          "chunk_id": "DOC-000032-CH-000003",
+          "document_id": "DOC-000032",
+          "score": 0.75,
+          "team": "SPM",
+          "text_preview": "figurations. IDeaSOperaAgent Service in 2. ICS completes Add Property \u201cStopping\u201d State 3. ICS comple"
+        },
+        {
+          "chunk_id": "DOC-000088-CH-000001",
+          "document_id": "DOC-000088",
+          "score": 0.75,
+          "team": "IT",
+          "text_preview": "G2 to G3 Rate Shopping Transition- OTA Insights Overview  This document gives us an overview of the "
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: Agile Rates \u2013 Configuration and Analytics\nIntroduction, Objective & Aud",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "IDeaSOperaAgent Service in",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 7 chunk(s) with explicit support language"
+        },
+        {
+          "text": "ICS completes Add Property\n\u201cStopping\u201d State",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "ICS completes Agent Installation [or other PMS installation\nprocess] and creates the history extract",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 177.6
+    },
+    {
+      "id": "40",
+      "question": "What teams are responsible for G3 Data Feed Configuration, and what evidence supports that?",
+      "category": "cross_team_with_evidence",
+      "expected_verdict": "MIXED",
+      "actual_verdict": "PARTIAL",
+      "direct_count": 0,
+      "inferred_count": 1,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.2,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000082-CH-000001",
+          "document_id": "DOC-000082",
+          "score": 0.571,
+          "team": "UNKNOWN",
+          "text_preview": "FINDING OUT KEY CONTACTS IN SFDC POST PROJECT HEARTBEAT FINDING OUT KEY CONTACTS IN SFDC POST PROJEC"
+        },
+        {
+          "chunk_id": "DOC-000098-CH-000001",
+          "document_id": "DOC-000098",
+          "score": 0.571,
+          "team": "SPM",
+          "text_preview": "G3 \u2013 Data Feeds G3 \u2013 Data Feeds  Below is the full documentation that gives overview of datafeeds an"
+        },
+        {
+          "chunk_id": "DOC-000098-CH-000002",
+          "document_id": "DOC-000098",
+          "score": 0.571,
+          "team": "SPM",
+          "text_preview": "ing Failures Due to of hotel performance, system performance and user engagement. Data Type Mismatch"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: FINDING OUT KEY CONTACTS IN SFDC POST PROJECT HEARTBEAT\nFINDING OUT KEY",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (92%) but no explicit support language found"
+        }
+      ],
+      "latency_ms": 324.0
+    },
+    {
+      "id": "41",
+      "question": "What are the steps to resolve 'Not enough leg demand memory allocated' errors in G3?",
+      "category": "procedure",
+      "expected_verdict": "DIRECT or MIXED",
+      "actual_verdict": "PASS",
+      "direct_count": 1,
+      "inferred_count": 0,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.6,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000108-CH-000001",
+          "document_id": "DOC-000108",
+          "score": 0.733,
+          "team": "ROA",
+          "text_preview": "G3 : How to resolve \u2013 \u201cNot enough leg demand memory allocated\u201d type errors Typically for Hilton GRO "
+        },
+        {
+          "chunk_id": "DOC-000109-CH-000001",
+          "document_id": "DOC-000109",
+          "score": 0.733,
+          "team": "ROA",
+          "text_preview": "G3 : How to resolve \u2013 \u201cNot enough leg demand memory allocated\u201d type errors Typically for Hilton GRO "
+        },
+        {
+          "chunk_id": "DOC-000106-CH-000002",
+          "document_id": "DOC-000106",
+          "score": 0.667,
+          "team": "IT",
+          "text_preview": "ccor Client Handling Process Guide Please ensure you select the correct chain and the user id . Once"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: G3 : How to resolve \u2013 \u201cNot enough leg demand memory allocated\u201d type err",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 319.9
+    },
+    {
+      "id": "42",
+      "question": "How does the Demand 360 Monitoring Process work?",
+      "category": "procedure",
+      "expected_verdict": "DIRECT or MIXED",
+      "actual_verdict": "PASS",
+      "direct_count": 5,
+      "inferred_count": 0,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.6,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000056-CH-000005",
+          "document_id": "DOC-000056",
+          "score": 0.75,
+          "team": "ROA",
+          "text_preview": "es, please raise this via Teams channel / SFDC\u2019s. Point of Contact (Technology team) : Team Heisenbe"
+        },
+        {
+          "chunk_id": "DOC-000056-CH-000006",
+          "document_id": "DOC-000056",
+          "score": 0.75,
+          "team": "ROA",
+          "text_preview": "y data that will initially trigger optimization. Rate shop or other data inputs (such as Demand360) "
+        },
+        {
+          "chunk_id": "DOC-000040-CH-000003",
+          "document_id": "DOC-000040",
+          "score": 0.625,
+          "team": "UNKNOWN",
+          "text_preview": " Accor Client Handling Process Guide 2. Click on \"Search\" 3. If all the files are received it should"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: es, please raise this via Teams channel / SFDC\u2019s.",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Point of Contact (Technology team) : Team Heisenberg (Sendhil, Rohan, Mehal, Atul)\nProduct team : Ma",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Rate shop or\nother data inputs (such as Demand360) will not trigger optimization, nor will new\ndata ",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Click on \"Search\"",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "If all t...",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 197.4
+    },
+    {
+      "id": "43",
+      "question": "What is the Agile Rates Configuration process?",
+      "category": "procedure",
+      "expected_verdict": "DIRECT or MIXED",
+      "actual_verdict": "PASS",
+      "direct_count": 1,
+      "inferred_count": 0,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.6,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000013-CH-000001",
+          "document_id": "DOC-000013",
+          "score": 0.857,
+          "team": "ROA",
+          "text_preview": "Agile Rates \u2013 Configuration and Analytics Introduction, Objective & Audience  This document covers t"
+        },
+        {
+          "chunk_id": "DOC-000013-CH-000011",
+          "document_id": "DOC-000013",
+          "score": 0.857,
+          "team": "ROA",
+          "text_preview": "ile in Decision Delivery: see section \u2018Including Agile Rates outputs in Decision Upload\u2019 later in do"
+        },
+        {
+          "chunk_id": "DOC-000048-CH-000018",
+          "document_id": "DOC-000048",
+          "score": 0.857,
+          "team": "SPM",
+          "text_preview": " be applied and at what percentage This means that the Tax percentage from Configure > Property Spec"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: Agile Rates \u2013 Configuration and Analytics\nIntroduction, Objective & Aud",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 162.3
+    },
+    {
+      "id": "44",
+      "question": "What is the CPM team responsible for?",
+      "category": "team",
+      "expected_verdict": "MIXED or DIRECT",
+      "actual_verdict": "PASS",
+      "direct_count": 4,
+      "inferred_count": 1,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.52,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "CH-000040",
+          "document_id": "DOC-000065",
+          "score": 0.714,
+          "team": "HR",
+          "text_preview": "their team members when they deserve them. There won\u2019t be any forced ranking or other comparison bet"
+        },
+        {
+          "chunk_id": "DOC-000065-CH-000040",
+          "document_id": "DOC-000065",
+          "score": 0.714,
+          "team": "HR",
+          "text_preview": "their team members when they deserve them. There won\u2019t be any forced ranking or other comparison bet"
+        },
+        {
+          "chunk_id": "DOC-000082-CH-000001",
+          "document_id": "DOC-000082",
+          "score": 0.714,
+          "team": "UNKNOWN",
+          "text_preview": "FINDING OUT KEY CONTACTS IN SFDC POST PROJECT HEARTBEAT FINDING OUT KEY CONTACTS IN SFDC POST PROJEC"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: their team\nmembers when they deserve them.",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "There won\u2019t be any forced ranking or other\ncomparison between employees, as our goal is to help all ",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "\u25a0 Instructed their team\nmembers when they deserve them.",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "There won\u2019t be any forced ranking or other\ncomparison between employees, as our goal is to help all ",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "\u25a0 Instructed FINDING OUT KEY CONTACTS IN SFDC POST PROJECT HEARTBEAT\nFINDING OUT K...",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (91%) but no explicit support language found"
+        }
+      ],
+      "latency_ms": 182.9
+    },
+    {
+      "id": "45",
+      "question": "What types of issues does the IT team handle?",
+      "category": "team",
+      "expected_verdict": "MIXED or DIRECT",
+      "actual_verdict": "PASS",
+      "direct_count": 4,
+      "inferred_count": 1,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.52,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000082-CH-000001",
+          "document_id": "DOC-000082",
+          "score": 0.778,
+          "team": "UNKNOWN",
+          "text_preview": "FINDING OUT KEY CONTACTS IN SFDC POST PROJECT HEARTBEAT FINDING OUT KEY CONTACTS IN SFDC POST PROJEC"
+        },
+        {
+          "chunk_id": "DOC-000574-CH-000002",
+          "document_id": "DOC-000574",
+          "score": 0.778,
+          "team": "UNKNOWN",
+          "text_preview": "he requirements 2. Work Experience Please tell us a little about your previous work experience. How "
+        },
+        {
+          "chunk_id": "DOC-000574-CH-000004",
+          "document_id": "DOC-000574",
+          "score": 0.778,
+          "team": "UNKNOWN",
+          "text_preview": "Basic 10. Technical knowledge What technical skills does the client possess ? Is the candidate comfo"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: FINDING OUT KEY CONTACTS IN SFDC POST PROJECT HEARTBEAT\nFINDING OUT KEY",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (82%) but no explicit support language found"
+        },
+        {
+          "text": "Work Experience\nPlease tell us a little about your previous work experience.",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "How does the candidate\u2019s previous job experience relate to the __________________ role?",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        },
+        {
+          "text": "What additional  Basic",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 6 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Technical knowledge\nWhat technical skills does the client p...",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 5 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 196.9
+    },
+    {
+      "id": "46",
+      "question": "Is OHIP installation simple and requires no configuration?",
+      "category": "misleading",
+      "expected_verdict": "MAYBE",
+      "actual_verdict": "PASS",
+      "direct_count": 2,
+      "inferred_count": 1,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.4666666666666666,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000016-CH-000025",
+          "document_id": "DOC-000016",
+          "score": 0.75,
+          "team": "ICS",
+          "text_preview": ".war//org.springframework.batch.core.launch.support.SimpleJobLauncher$1.run(SimpleJobLauncher.jav a:"
+        },
+        {
+          "chunk_id": "DOC-000392-CH-000006",
+          "document_id": "DOC-000392",
+          "score": 0.75,
+          "team": "ICS",
+          "text_preview": "ers etc. Proprietary & Confidential PROCESS DOCUMENT ORS/OPMS FOR OHIP EMULATOR 5 1.5 Abbreviation A"
+        },
+        {
+          "chunk_id": "DOC-000005-CH-000002",
+          "document_id": "DOC-000005",
+          "score": 0.625,
+          "team": "SPM",
+          "text_preview": " via email to: Dynamic Optimization Global.RevenueManagement@accor.com HLTN/Handling Error for SAS A"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: .war//org.springframework.batch.core.launch.support.SimpleJobLauncher$1",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (70%) but no explicit support language found"
+        },
+        {
+          "text": "Proprietary & Confidential\nPROCESS DOCUMENT ORS/OPMS FOR OHIP EMULATOR 5",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        },
+        {
+          "text": "5 Abbreviation\nAbbreviation Description\nICS Installation, Configuration & Support\nORS Opera Reservat",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 227.3
+    },
+    {
+      "id": "47",
+      "question": "What is the Atlantis Bahamas Integration Landscape?",
+      "category": "direct_factual",
+      "expected_verdict": "DIRECT or MIXED",
+      "actual_verdict": "PASS",
+      "direct_count": 1,
+      "inferred_count": 0,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.6,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000016-CH-000001",
+          "document_id": "DOC-000016",
+          "score": 0.714,
+          "team": "ICS",
+          "text_preview": "Atlantis Bahamas Integration Landscape and guidance for support page Summary  Atlantis Integration F"
+        },
+        {
+          "chunk_id": "DOC-000016-CH-000003",
+          "document_id": "DOC-000016",
+          "score": 0.714,
+          "team": "ICS",
+          "text_preview": "ker Failure \u2013 non positive offset value for Product There are 2 versions of it Ranjit on Hilton/Proc"
+        },
+        {
+          "chunk_id": "DOC-000035-CH-000018",
+          "document_id": "DOC-000035",
+          "score": 0.714,
+          "team": "ICS",
+          "text_preview": "rty type: STD Property: Select a date range starting 2 years before the current date and ending 1 ye"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: Atlantis Bahamas Integration Landscape and guidance for support page\nSu",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 185.9
+    },
+    {
+      "id": "48",
+      "question": "What is the Connectivity details document about?",
+      "category": "direct_factual",
+      "expected_verdict": "DIRECT or MIXED",
+      "actual_verdict": "PARTIAL",
+      "direct_count": 0,
+      "inferred_count": 2,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.2,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000013-CH-000011",
+          "document_id": "DOC-000013",
+          "score": 0.714,
+          "team": "ROA",
+          "text_preview": "ile in Decision Delivery: see section \u2018Including Agile Rates outputs in Decision Upload\u2019 later in do"
+        },
+        {
+          "chunk_id": "DOC-000016-CH-000013",
+          "document_id": "DOC-000016",
+          "score": 0.714,
+          "team": "ICS",
+          "text_preview": "t would signal that it is for HBSi and if it does NOT begin with 9 then its Synxis. Outbound Details"
+        },
+        {
+          "chunk_id": "DOC-000034-CH-000001",
+          "document_id": "DOC-000034",
+          "score": 0.714,
+          "team": "ICS",
+          "text_preview": "Connectivity details Project Heartbeat was undertaken as a key deliverable for IDeaS strategic goals"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: ile in Decision Delivery: see section \u2018Including Agile Rates outputs\nin",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (92%) but no explicit support language found"
+        },
+        {
+          "text": "Outbound Details: ATL_Outbound Details\nFinal Room Type Vendor Mapping: Atlantis Tower Room Type Vend",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (90%) but no explicit support language found"
+        }
+      ],
+      "latency_ms": 182.8
+    },
+    {
+      "id": "49",
+      "question": "How does G3 monitoring interact with email notifications?",
+      "category": "cross_document",
+      "expected_verdict": "DIRECT or MIXED",
+      "actual_verdict": "PARTIAL",
+      "direct_count": 0,
+      "inferred_count": 1,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.2,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000099-CH-000002",
+          "document_id": "DOC-000099",
+          "score": 0.75,
+          "team": "IT",
+          "text_preview": "g Failure \u2013 non positive offset value for Product Ranjit on Service Recovery Procedure \u2013 IDeaSOperaA"
+        },
+        {
+          "chunk_id": "DOC-000406-CH-000001",
+          "document_id": "DOC-000406",
+          "score": 0.75,
+          "team": "SPM",
+          "text_preview": "Precaution to be undertaken before issuing email to client for HTNG type decision upload failures Cu"
+        },
+        {
+          "chunk_id": "CH-000005",
+          "document_id": "DOC-000478",
+          "score": 0.625,
+          "team": "SPM",
+          "text_preview": "maller chunks for easier processing so any file is suffixed with a _o or _1 denominates that it is f"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: g\nFailure \u2013 non positive offset\nvalue for Product\nRanjit on Service Rec",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (93%) but no explicit support language found"
+        }
+      ],
+      "latency_ms": 196.4
+    },
+    {
+      "id": "50",
+      "question": "What is the governance of emails issued from the G3 monitoring framework?",
+      "category": "direct_factual",
+      "expected_verdict": "DIRECT or MIXED",
+      "actual_verdict": "PARTIAL",
+      "direct_count": 0,
+      "inferred_count": 2,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.2,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000244-CH-000001",
+          "document_id": "DOC-000244",
+          "score": 0.833,
+          "team": "SDOPS",
+          "text_preview": "Governance of emails issued from G3 monitoring framework G3 solution now allows users to issue email"
+        },
+        {
+          "chunk_id": "DOC-000373-CH-000001",
+          "document_id": "DOC-000373",
+          "score": 0.833,
+          "team": "ICS",
+          "text_preview": "NGI and HTNG Overview and its processing flow Hi All,  The recording is all about the NGI and HTNG o"
+        },
+        {
+          "chunk_id": "DOC-000603-CH-000009",
+          "document_id": "DOC-000603",
+          "score": 0.833,
+          "team": "UNKNOWN",
+          "text_preview": "2 Release 27th Aug 2018  G3_CARE:Governance of emails issued from G3_CARE monitoring framework  G3_C"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: Governance of emails issued from G3 monitoring framework\nG3 solution no",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (94%) but no explicit support language found"
+        },
+        {
+          "text": "You\nwill get an idea about the complete processing flow\nNGI and HTN 2 Release 27th Aug 2018\n G3_CARE",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (90%) but no explicit support language found"
+        }
+      ],
+      "latency_ms": 263.9
+    },
+    {
+      "id": "51",
+      "question": "What is the Benefit Measurement Job Monitoring process?",
+      "category": "procedure",
+      "expected_verdict": "DIRECT or MIXED",
+      "actual_verdict": "PARTIAL",
+      "direct_count": 0,
+      "inferred_count": 1,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.2,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000017-CH-000001",
+          "document_id": "DOC-000017",
+          "score": 0.75,
+          "team": "HR",
+          "text_preview": "Benefit Measurement Job Monitoring Please follow the given process to action the below jobs across a"
+        },
+        {
+          "chunk_id": "DOC-000017-CH-000005",
+          "document_id": "DOC-000017",
+          "score": 0.75,
+          "team": "HR",
+          "text_preview": "rentMessageId=1694332072205&teamName=IDeaS%20On- Call&channelName=G3&createdTime=1694332072205&allow"
+        },
+        {
+          "chunk_id": "DOC-000018-CH-000001",
+          "document_id": "DOC-000018",
+          "score": 0.75,
+          "team": "HR",
+          "text_preview": "Benefit Measurement Job Monitoring Please follow the given process to action the below jobs across a"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: Benefit Measurement Job Monitoring\nPlease follow the given process to a",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (88%) but no explicit support language found"
+        }
+      ],
+      "latency_ms": 228.0
+    },
+    {
+      "id": "52",
+      "question": "How does the Hyatt Property Monitoring work?",
+      "category": "direct_factual",
+      "expected_verdict": "DIRECT or MIXED",
+      "actual_verdict": "PASS",
+      "direct_count": 3,
+      "inferred_count": 0,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.6,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000099-CH-000002",
+          "document_id": "DOC-000099",
+          "score": 0.714,
+          "team": "IT",
+          "text_preview": "g Failure \u2013 non positive offset value for Product Ranjit on Service Recovery Procedure \u2013 IDeaSOperaA"
+        },
+        {
+          "chunk_id": "DOC-000331-CH-000001",
+          "document_id": "DOC-000331",
+          "score": 0.714,
+          "team": "IT",
+          "text_preview": "HYI/Weekly Intervention Analysis activity Hello Team,  This document will guide you through the acti"
+        },
+        {
+          "chunk_id": "DOC-000378-CH-000006",
+          "document_id": "DOC-000378",
+          "score": 0.714,
+          "team": "ICS",
+          "text_preview": " between the Emulator and Agent. ([Agent and Emulator](https://workflowy.com/#/3f2bcf2d84ec)) \u2013 Agen"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: g\nFailure \u2013 non positive offset\nvalue for Product\nRanjit on Service Rec",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "This activity aims to identify and analyze the interventions w  between the Emulator and Agent.",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "([Agent and Emulator](https://workfl...",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 160.0
+    },
+    {
+      "id": "53",
+      "question": "What is the Migration Project Planning Process?",
+      "category": "procedure",
+      "expected_verdict": "DIRECT or MIXED",
+      "actual_verdict": "PASS",
+      "direct_count": 6,
+      "inferred_count": 0,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.6,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000364-CH-000013",
+          "document_id": "DOC-000364",
+          "score": 0.857,
+          "team": "CPM",
+          "text_preview": "worked well? \u2756 What did not work well? \u2756 Areas of improvement \u2756 Plan for next wave Outputs from the "
+        },
+        {
+          "chunk_id": "DOC-000364-CH-000005",
+          "document_id": "DOC-000364",
+          "score": 0.714,
+          "team": "CPM",
+          "text_preview": "...................................................................................................."
+        },
+        {
+          "chunk_id": "DOC-000364-CH-000006",
+          "document_id": "DOC-000364",
+          "score": 0.714,
+          "team": "CPM",
+          "text_preview": "t will mark the completion of the project planning phase. The WBS & Risk Log_Project Name.xlsx docum"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: worked well?",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "\u2756 What did not work well?",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "\u2756 Areas of improvement\n\u2756 Plan for next wave\nOutputs from the retrospect will be used as an input for",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "6\nExit Criteria .................................................................",
+          "classification": "DIRECT",
+          "confidence": 0.9,
+          "reasoning": "Found 2 chunk(s) with explicit support language"
+        },
+        {
+          "text": "t will mark the completion of the project planning phase.",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 3 chunk(s) with explicit support language"
+        },
+        {
+          "text": "The WBS &\nR...",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 6 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 190.8
+    },
+    {
+      "id": "54",
+      "question": "What is the Accor Client Handling Process?",
+      "category": "procedure",
+      "expected_verdict": "DIRECT or MIXED",
+      "actual_verdict": "PASS",
+      "direct_count": 2,
+      "inferred_count": 1,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.4666666666666666,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000007-CH-000003",
+          "document_id": "DOC-000007",
+          "score": 0.857,
+          "team": "UNKNOWN",
+          "text_preview": " team! \u2013 User.id: null \u2013 Workcontext: null] at Ranjit on Service Recovery deployment.job.war//com.id"
+        },
+        {
+          "chunk_id": "DOC-000016-CH-000003",
+          "document_id": "DOC-000016",
+          "score": 0.857,
+          "team": "ICS",
+          "text_preview": "ker Failure \u2013 non positive offset value for Product There are 2 versions of it Ranjit on Hilton/Proc"
+        },
+        {
+          "chunk_id": "DOC-000045-CH-000002",
+          "document_id": "DOC-000045",
+          "score": 0.857,
+          "team": "ICS",
+          "text_preview": "e Hilton/Processing Failure \u2013 non positive offset value for The target audience for this document is"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence:  team!",
+          "classification": "INFERRED",
+          "confidence": 0.25,
+          "reasoning": "Claim tokens co-occur in evidence (60%) but no explicit support language found"
+        },
+        {
+          "text": "\u2013 User.id: null \u2013 Workcontext: null]\nat Ranjit on Service Recovery\ndeployment.job.war//com.ideas.tet",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 5 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Procedure \u2013\ndoInvoke(UpdateIntegrationSetti ker\nFailure \u2013 non positive offset value for\nProduct\nTher",
+          "classification": "DIRECT",
+          "confidence": 1.0,
+          "reasoning": "Found 4 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 183.9
+    },
+    {
+      "id": "55",
+      "question": "How do you schedule a client WebEx for G2/G3 Installation?",
+      "category": "procedure",
+      "expected_verdict": "DIRECT or MIXED",
+      "actual_verdict": "PASS",
+      "direct_count": 4,
+      "inferred_count": 0,
+      "unsupported_count": 0,
+      "should_abstain": false,
+      "adjusted_confidence": 0.6,
+      "evidence_count": 10,
+      "top_chunks": [
+        {
+          "chunk_id": "DOC-000065-CH-000020",
+          "document_id": "DOC-000065",
+          "score": 0.7,
+          "team": "HR",
+          "text_preview": "igarettes and discard them in [outdoor ashtrays, cigarette urns.] \u25a0 Avoid smoking when you have sche"
+        },
+        {
+          "chunk_id": "DOC-000098-CH-000002",
+          "document_id": "DOC-000098",
+          "score": 0.7,
+          "team": "SPM",
+          "text_preview": "ing Failures Due to of hotel performance, system performance and user engagement. Data Type Mismatch"
+        },
+        {
+          "chunk_id": "DOC-000129-CH-000004",
+          "document_id": "DOC-000129",
+          "score": 0.7,
+          "team": "UNKNOWN",
+          "text_preview": "ote that the absence of any notes with G3 will result in an orange color Due to Data Type Mismatch i"
+        }
+      ],
+      "claims": [
+        {
+          "text": "Based on retrieved evidence: igarettes and discard them in [outdoor ashtrays, cigarette urns.]\n\u25a0 Avo",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "\u25a0 Avoid smoking near flammable objects and areas.",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Setting of ing Failures Due to\nof hotel performance, system performance and user engagement.",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        },
+        {
+          "text": "Data Type Mismatch for\nKey Activities for IDeaS G3 RMS Data Outputs\nMGM Resorts\nSupport enterprise r",
+          "classification": "DIRECT",
+          "confidence": 0.8,
+          "reasoning": "Found 1 chunk(s) with explicit support language"
+        }
+      ],
+      "latency_ms": 192.1
+    }
+  ],
+  "metrics": {
+    "verdict_distribution": {
+      "PASS": 47,
+      "PARTIAL": 8,
+      "FAIL": 0
+    },
+    "total_claims": 203,
+    "total_direct": 158,
+    "total_inferred": 43,
+    "total_unsupported": 2,
+    "unsupported_escapes": 0,
+    "latency_p50_ms": 183.93874168395996,
+    "latency_p95_ms": 263.9312744140625,
+    "latency_avg_ms": 190.50707383589312,
+    "avg_confidence": 0.49077272727272725
+  }
+}
