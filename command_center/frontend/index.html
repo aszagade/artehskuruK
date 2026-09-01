@@ -267,6 +267,7 @@ body { font-family:'Segoe UI',system-ui,-apple-system,sans-serif; background:var
       <div class="nav-item" onclick="switchView('explore')">Explore</div>
       <div class="nav-item" onclick="switchView('map')">Map</div>
       <div class="nav-item" onclick="switchView('ask')">Ask</div>
+      <div class="nav-item" onclick="switchView('processes')">Processes</div>
       <div class="nav-item" onclick="switchView('health')">Health</div>
       <div class="nav-item" onclick="switchView('upload')">Upload</div>
     </div>
@@ -396,6 +397,21 @@ body { font-family:'Segoe UI',system-ui,-apple-system,sans-serif; background:var
   </div>
 
   <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- VIEW: PROCESSES -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <div class="view" id="view-processes">
+    <div class="section">
+      <div class="section-title">Process Intelligence</div>
+      <div id="process-stats" style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap"></div>
+      <div id="process-list"></div>
+    </div>
+    <div class="section" id="process-detail-section" style="display:none">
+      <div class="section-title">Process Detail</div>
+      <div id="process-detail"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
   <!-- VIEW: HEALTH -->
   <!-- ═══════════════════════════════════════════════════════════════ -->
   <div class="view" id="view-health">
@@ -495,6 +511,7 @@ function switchView(name){
   if(name==='overview') loadOverview();
   if(name==='explore') loadSources();
   if(name==='map') loadKnowledgeMap();
+  if(name==='processes') loadProcesses();
   if(name==='health') loadHealth();
 }
 
@@ -785,6 +802,133 @@ function filterMap(type, btn){
   document.querySelectorAll('.map-filter').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   if(window.Graph3D) Graph3D.filterByType(type);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 9b. PROCESS INTELLIGENCE
+// ═══════════════════════════════════════════════════════════════
+async function loadProcesses(){
+  const stats = document.getElementById('process-stats');
+  const list = document.getElementById('process-list');
+  stats.innerHTML = '<div style="color:var(--text3)">Loading...</div>';
+  list.innerHTML = '';
+  try {
+    const [statsR, listR] = await Promise.all([
+      fetch(API+'/processes/stats').then(r=>r.json()).catch(()=>({})),
+      fetch(API+'/processes?limit=50').then(r=>r.json()).catch(()=>({processes:[]})),
+    ]);
+    // Stats cards
+    const q = statsR.by_quality || {};
+    stats.innerHTML = `
+      <div class="card"><div class="icon">⚙️</div><div class="value">${statsR.total_processes||0}</div><div class="label">Processes</div></div>
+      <div class="card"><div class="icon">📋</div><div class="value">${statsR.total_steps||0}</div><div class="label">Steps</div><div class="sub">${statsR.explicit_steps||0} explicit</div></div>
+      <div class="card"><div class="icon">✅</div><div class="value">${q.verified||0}</div><div class="label">Verified</div></div>
+      <div class="card"><div class="icon">🔍</div><div class="value">${q.partially_verified||0}</div><div class="label">Partial</div></div>
+      <div class="card"><div class="icon">💡</div><div class="value">${q.inferred||0}</div><div class="label">Inferred</div></div>
+      <div class="card"><div class="icon">⚠️</div><div class="value">${statsR.total_gaps||0}</div><div class="label">Gaps</div></div>
+    `;
+    // Process list
+    const procs = listR.processes || [];
+    if(procs.length === 0) {
+      list.innerHTML = '<div style="padding:20px;color:var(--text3);text-align:center">No processes discovered yet. Run <code>POST /api/processes/discover</code> to scan the corpus.</div>';
+      return;
+    }
+    list.innerHTML = procs.map(p => {
+      const qColor = p.quality==='verified'?'var(--green)':p.quality==='partially_verified'?'var(--yellow)':p.quality==='inferred'?'var(--purple)':'var(--text3)';
+      return `<div class="source-card" style="cursor:pointer" onclick="loadProcessDetail('${p.process_id}')">
+        <div class="source-icon">⚙️</div>
+        <div class="source-info">
+          <div class="source-name">${esc(p.name)}</div>
+          <div class="source-type">${p.steps} steps · ${p.team||'—'} · ${p.system||'—'}</div>
+        </div>
+        <div class="source-status" style="background:${qColor}22;color:${qColor}">${p.quality}</div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    stats.innerHTML = '<div style="color:var(--red)">Unable to load processes</div>';
+  }
+}
+
+async function loadProcessDetail(processId) {
+  const section = document.getElementById('process-detail-section');
+  const detail = document.getElementById('process-detail');
+  section.style.display = 'block';
+  detail.innerHTML = '<div style="color:var(--text3)">Loading...</div>';
+  try {
+    const [procR, evidenceR, gapsR] = await Promise.all([
+      fetch(API+'/processes/'+encodeURIComponent(processId)).then(r=>r.json()),
+      fetch(API+'/processes/'+encodeURIComponent(processId)+'/evidence').then(r=>r.json()).catch(()=>({evidence:[]})),
+      fetch(API+'/processes/'+encodeURIComponent(processId)+'/gaps').then(r=>r.json()).catch(()=>({gaps:[]})),
+    ]);
+    const steps = procR.steps || [];
+    const evidence = evidenceR.evidence || [];
+    const gaps = gapsR.gaps || [];
+
+    let html = `<div style="margin-bottom:12px">
+      <div style="font-size:16px;font-weight:700;color:var(--accent)">${esc(procR.name)}</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px">${esc(procR.description||'').substring(0,200)}</div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <span class="badge ${procR.quality==='verified'?'confident':procR.quality==='partially_verified'?'moderate':'low'}">${procR.quality}</span>
+        ${procR.team?'<span class="badge org">'+esc(procR.team)+'</span>':''}
+        ${procR.system?'<span class="badge strategy">'+esc(procR.system)+'</span>':''}
+        <span class="badge">${steps.length} steps</span>
+      </div>
+    </div>`;
+
+    // Trigger/Outcome
+    if(procR.trigger_text) html += `<div style="margin-bottom:8px;padding:8px 12px;background:var(--bg3);border-radius:6px;border-left:3px solid var(--yellow)"><span style="color:var(--yellow);font-size:10px;font-weight:600">TRIGGER</span><div style="font-size:11px;color:var(--text2);margin-top:2px">${esc(procR.trigger_text)}</div></div>`;
+
+    // Steps timeline
+    html += '<div style="margin:12px 0">';
+    steps.forEach((s,i) => {
+      const elColor = s.evidence_level==='explicit'?'var(--green)':s.evidence_level==='inferred'?'var(--yellow)':'var(--text3)';
+      html += `<div style="display:flex;gap:10px;margin-bottom:8px;padding:8px 12px;background:var(--bg3);border-radius:6px;border-left:3px solid ${elColor}">
+        <div style="font-size:12px;font-weight:700;color:${elColor};min-width:24px">${s.sequence}</div>
+        <div style="flex:1">
+          <div style="font-size:12px;color:var(--text)">${esc(s.description)}</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px">
+            ${s.actor_team?'<span style="color:var(--green)">Team: '+esc(s.actor_team)+'</span> · ':''}
+            ${s.system?'<span style="color:var(--accent)">System: '+esc(s.system)+'</span> · ':''}
+            <span style="color:${elColor}">${s.evidence_level}</span> · ${(s.confidence*100).toFixed(0)}%
+          </div>
+        </div>
+        <span style="font-size:9px;padding:2px 6px;border-radius:4px;background:${elColor}22;color:${elColor}">${s.validation_status}</span>
+      </div>`;
+    });
+    html += '</div>';
+
+    // Outcome
+    if(procR.outcome) html += `<div style="margin-bottom:8px;padding:8px 12px;background:var(--bg3);border-radius:6px;border-left:3px solid var(--green)"><span style="color:var(--green);font-size:10px;font-weight:600">OUTCOME</span><div style="font-size:11px;color:var(--text2);margin-top:2px">${esc(procR.outcome)}</div></div>`;
+
+    // Gaps
+    if(gaps.length > 0) {
+      html += '<div style="margin-top:12px"><div style="font-size:11px;color:var(--text3);font-weight:600;margin-bottom:6px">⚠️ STRUCTURAL GAPS</div>';
+      gaps.forEach(g => {
+        const sev = g.severity==='high'?'var(--red)':g.severity==='medium'?'var(--yellow)':'var(--text3)';
+        html += `<div style="padding:6px 10px;margin-bottom:4px;background:var(--bg3);border-radius:4px;border-left:3px solid ${sev}"><span style="font-size:10px;color:${sev}">${g.gap_type}</span> <span style="font-size:11px;color:var(--text2)">${esc(g.description)}</span></div>`;
+      });
+      html += '</div>';
+    }
+
+    // Evidence
+    if(evidence.length > 0) {
+      html += '<div style="margin-top:12px"><div style="font-size:11px;color:var(--text3);font-weight:600;margin-bottom:6px">📋 EVIDENCE</div>';
+      evidence.forEach(e => {
+        const el = e.evidence_level==='explicit'?'var(--green)':'var(--yellow)';
+        html += `<div style="padding:6px 10px;margin-bottom:4px;background:var(--bg3);border-radius:4px;font-size:10px">
+          <span style="color:${el}">[${e.evidence_level}]</span> 
+          <span style="color:var(--text2)">"${esc((e.evidence_text||'').substring(0,120))}"</span>
+          <span style="color:var(--text3)"> — ${esc(e.source_document||'')}</span>
+        </div>`;
+      });
+      html += '</div>';
+    }
+
+    detail.innerHTML = html;
+    section.scrollIntoView({behavior:'smooth'});
+  } catch(e) {
+    detail.innerHTML = '<div style="color:var(--red)">Unable to load process detail</div>';
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════

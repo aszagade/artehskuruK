@@ -105,6 +105,7 @@ from command_center.backend.routers import (
     knowledge,
     auth,
     explorer,
+    processes,
 )
 
 app.include_router(auth.router)
@@ -117,6 +118,7 @@ app.include_router(connectors.router)
 app.include_router(org.router)
 app.include_router(knowledge.router)
 app.include_router(explorer.router)
+app.include_router(processes.router)
 
 
 # -----------------------------------------------------------------------
