@@ -1093,6 +1093,24 @@ class KnowledgeFabric:
                 finally:
                     conn.close()
 
+            # Record document authority from source provenance
+            try:
+                from kurukshetra.sources.authority import AuthorityStore
+                auth_store = AuthorityStore()
+                source_id = source_doc.provenance.source_id or "filesystem"
+                # Look up source-level default authority
+                source_authority = auth_store.get_source_authority(source_id)
+                from kurukshetra.sources.authority import AuthorityLevel
+                authority_name = source_authority.name.lower() if source_authority != AuthorityLevel.UNKNOWN else "operational"
+                auth_store.record_document_authority(
+                    document_id=result.document_id,
+                    source_id=source_id,
+                    authority_level=authority_name,
+                    authority_evidence=f"Ingested from source '{source_id}' (type: {source_doc.provenance.source_type.value})",
+                )
+            except Exception as e:
+                logger.debug(f"Authority recording failed for {result.document_id}: {e}")
+
             return FabricIngestResult(
                 document_id=result.document_id,
                 source_path=source_doc.provenance.source_path,

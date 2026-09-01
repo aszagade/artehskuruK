@@ -46,6 +46,8 @@ from .salesforce_transport import (
     SFRecord,
 )
 from .salesforce_mock import SalesforceMockAdapter
+from .persistent_registry import PersistentSourceRegistry, SourceRecord, SyncStateRecord
+from .authority import AuthorityStore, AuthorityLevel, DocumentAuthority, AuthorityConflict
 
 __all__ = [
     "SourceDocument",
@@ -57,6 +59,13 @@ __all__ = [
     "DocumentProvenance",
     "SourceAdapter",
     "SourceAdapterRegistry",
+    "PersistentSourceRegistry",
+    "SourceRecord",
+    "SyncStateRecord",
+    "AuthorityStore",
+    "AuthorityLevel",
+    "DocumentAuthority",
+    "AuthorityConflict",
     "SalesforceAdapter",
     "SalesforceTransport",
     "MockSalesforceTransport",

@@ -419,11 +419,27 @@ class AnswerGenerator:
 
     def _build_evidence(self, results: list[RetrievalResult]) -> list[EvidenceItem]:
         """Convert retrieval results to evidence items."""
+        # Batch-fetch authority for all evidence documents
+        doc_ids = list({r.document_id for r in results})
+        authority_map = {}
+        try:
+            from kurukshetra.sources.authority import AuthorityStore
+            auth_store = AuthorityStore()
+            authority_map = auth_store.get_authority_for_documents(doc_ids)
+        except Exception:
+            pass  # Graceful fallback if authority store unavailable
+
         evidence = []
         for rank, r in enumerate(results, 1):
             if r.score < MIN_SCORE_THRESHOLD:
                 continue
             source_path = r.metadata.get("source_path", "")
+            # Merge authority metadata into evidence metadata
+            merged_metadata = dict(r.metadata)
+            if r.document_id in authority_map:
+                auth = authority_map[r.document_id]
+                merged_metadata["_authority_level"] = auth.authority_level.name
+                merged_metadata["_authority_source"] = auth.source_id
             evidence.append(EvidenceItem(
                 chunk_id=r.chunk_id,
                 document_id=r.document_id,
@@ -431,7 +447,7 @@ class AnswerGenerator:
                 text=r.text,
                 score=r.score,
                 rank=rank,
-                metadata=r.metadata,
+                metadata=merged_metadata,
             ))
         return evidence
 
@@ -820,6 +836,19 @@ class AnswerGenerator:
                             f"Version conflict: {doc_ids[i]} ({max_a}) vs "
                             f"{doc_ids[j]} ({max_b}) — may contain outdated information"
                         )
+
+        # 3. Authority-level conflicts
+        try:
+            from kurukshetra.sources.authority import AuthorityStore
+            auth_store = AuthorityStore()
+            doc_ids = list(by_doc.keys())
+            auth_conflicts = auth_store.detect_authority_conflicts(
+                entity_name="evidence", evidence_docs=doc_ids
+            )
+            for ac in auth_conflicts[:3]:
+                conflicts.append(auth_store.format_conflict_for_answer(ac))
+        except Exception:
+            pass  # Graceful fallback
 
         return conflicts[:5]  # Limit conflict count
 

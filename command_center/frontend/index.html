@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SANJAYA — Knowledge Explorer</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <style>
 :root {
   --bg: #050810; --bg2: #0a0f18; --bg3: #0f1620; --bg4: #151d2b; --bg5: #1a2538;
@@ -337,29 +339,36 @@ body { font-family:'Segoe UI',system-ui,-apple-system,sans-serif; background:var
   <div class="view" id="view-map">
     <div class="section">
       <div class="section-title">Knowledge Map</div>
-      <div style="display:flex;gap:8px;margin-bottom:12px">
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
         <button class="btn-sm map-filter active" data-filter="all" onclick="filterMap('all',this)">All</button>
         <button class="btn-sm map-filter" data-filter="system" onclick="filterMap('system',this)">Systems</button>
         <button class="btn-sm map-filter" data-filter="team" onclick="filterMap('team',this)">Teams</button>
-        <button class="btn-sm map-filter" data-filter="document" onclick="filterMap('document',this)">Documents</button>
+        <button class="btn-sm map-filter" data-filter="process" onclick="filterMap('process',this)">Processes</button>
         <button class="btn-sm map-filter" data-filter="concept" onclick="filterMap('concept',this)">Concepts</button>
+        <button class="btn-sm map-filter" data-filter="configuration" onclick="filterMap('configuration',this)">Config</button>
+        <span style="flex:1"></span>
+        <button class="btn-sm" id="btn-3d" onclick="Graph3D.setMode('3d')" style="color:var(--accent)">3D</button>
+        <button class="btn-sm" id="btn-2d" onclick="Graph3D.setMode('2d')">2D</button>
+        <input type="text" id="graph-search" placeholder="Search graph..." style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:4px 10px;border-radius:6px;font-size:10px;width:150px" onkeyup="Graph3D.search(this.value)">
       </div>
-      <div class="map-container scan-pulse">
-        <canvas class="map-canvas" id="map-canvas"></canvas>
-        <div class="map-info" id="map-info">
-          <div class="map-info-title" id="map-info-title"></div>
-          <div class="map-info-type" id="map-info-type"></div>
-          <div id="map-info-detail" style="margin-top:6px;font-size:11px;color:var(--text2)"></div>
-        </div>
-        <div class="map-legend">
-          <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>System</div>
-          <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Team</div>
-          <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div>Document</div>
-          <div class="legend-item"><div class="legend-dot" style="background:var(--purple)"></div>Concept</div>
+      <div style="display:flex;gap:12px">
+        <div class="map-container scan-pulse" id="graph-container" style="flex:1;height:500px;position:relative">
+          <div class="map-info" id="map-info">
+          </div>
+          <div class="map-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#00d4ff"></div>System</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#00ff88"></div>Team</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#ffaa00"></div>Document</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#aa66ff"></div>Concept</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#ff6644"></div>Process</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#00e5c0"></div>Config</div>
+          </div>
+          <div id="graph-stats" style="position:absolute;top:12px;right:12px;background:rgba(10,15,24,0.9);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-size:10px;color:var(--text3)"></div>
         </div>
       </div>
     </div>
   </div>
+  <script src="/graph3d.js"></script>
 
   <!-- ═══════════════════════════════════════════════════════════════ -->
   <!-- VIEW: ASK SANJAYA -->
@@ -758,140 +767,25 @@ async function loadGaps(){
 // 3. KNOWLEDGE MAP
 // ═══════════════════════════════════════════════════════════════
 async function loadKnowledgeMap(){
-  const canvas = document.getElementById('map-canvas');
-  const ctx = canvas.getContext('2d');
-  canvas.width = canvas.parentElement.clientWidth;
-  canvas.height = canvas.parentElement.clientHeight;
-
+  if(!window.Graph3D) return;
+  Graph3D.init('graph-container');
+  Graph3D.load();
+  // Update stats
   try {
-    const [entR, teamR] = await Promise.all([
-      fetch(API+'/graph/entities?limit=50').then(r=>r.json()).catch(()=>({entities:[]})),
-      fetch(API+'/knowledge/state').then(r=>r.json()).catch(()=>({teams_represented:[]})),
-    ]);
-
-    const entities = entR.entities || [];
-    const teams = (teamR.teams_represented || []).slice(0,8);
-
-    // Build nodes
-    mapData = { nodes: [], edges: [] };
-
-    // Add team nodes
-    teams.forEach((t,i) => {
-      const angle = (i/teams.length)*Math.PI*2;
-      mapData.nodes.push({
-        id: 'team_'+t, name: t, type: 'team',
-        x: canvas.width/2 + Math.cos(angle)*140,
-        y: canvas.height/2 + Math.sin(angle)*140,
-        r: 18,
-      });
-    });
-
-    // Add entity nodes (systems/concepts)
-    const typeColors = { system:'system', product:'system', tool:'system', concept:'concept', process:'concept' };
-    entities.slice(0,30).forEach((e,i) => {
-      const angle = (i/30)*Math.PI*2 + 0.5;
-      const dist = 60 + Math.random()*120;
-      mapData.nodes.push({
-        id: e.id, name: e.name, type: typeColors[e.entity_type]||'concept',
-        x: canvas.width/2 + Math.cos(angle)*dist,
-        y: canvas.height/2 + Math.sin(angle)*dist,
-        r: 12, entity: e,
-      });
-      // Connect to a random team
-      if(teams.length) {
-        mapData.edges.push({
-          from: e.id, to: 'team_'+teams[i%teams.length],
-        });
-      }
-    });
-
-    drawMap(ctx, canvas);
-  } catch(e) {
-    ctx.fillStyle = '#556677';
-    ctx.font = '14px Segoe UI';
-    ctx.fillText('Unable to load knowledge map', 20, 40);
-  }
-}
-
-function drawMap(ctx, canvas){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  const colors = { system:'rgba(0,212,255,0.6)', team:'rgba(0,255,136,0.6)', document:'rgba(255,170,0,0.6)', concept:'rgba(170,102,255,0.6)' };
-  const nodeMap = {};
-  mapData.nodes.forEach(n => nodeMap[n.id] = n);
-
-  // Draw edges
-  ctx.strokeStyle = 'rgba(30,45,61,0.5)';
-  ctx.lineWidth = 1;
-  mapData.edges.forEach(e => {
-    const from = nodeMap[e.from], to = nodeMap[e.to];
-    if(!from || !to) return;
-    if(mapFilter!=='all' && from.type!==mapFilter && to.type!==mapFilter) return;
-    ctx.beginPath();
-    ctx.moveTo(from.x, from.y);
-    ctx.lineTo(to.x, to.y);
-    ctx.stroke();
-  });
-
-  // Draw nodes
-  mapData.nodes.forEach(n => {
-    if(mapFilter!=='all' && n.type!==mapFilter) return;
-    const col = colors[n.type]||colors.concept;
-    ctx.beginPath();
-    ctx.arc(n.x, n.y, n.r, 0, Math.PI*2);
-    ctx.fillStyle = col.replace('0.6','0.15');
-    ctx.fill();
-    ctx.strokeStyle = col;
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
-    // Label
-    ctx.fillStyle = '#dce4ec';
-    ctx.font = `${n.type==='team'?'bold ':''}${n.type==='team'?11:10}px Segoe UI`;
-    ctx.textAlign = 'center';
-    ctx.fillText(n.name.length>14?n.name.substring(0,12)+'…':n.name, n.x, n.y+n.r+12);
-  });
-
-  // Center label
-  ctx.fillStyle = 'rgba(0,212,255,0.4)';
-  ctx.font = '10px Segoe UI';
-  ctx.textAlign = 'center';
-  ctx.fillText('SANJAYA Knowledge Brain', canvas.width/2, canvas.height-12);
+    const stats = await fetch(API+'/graph/visualization?limit=1').then(r=>r.json()).catch(()=>null);
+    if(stats && stats.meta) {
+      document.getElementById('graph-stats').innerHTML =
+        `<span style="color:var(--accent)">${stats.meta.totalNodes}</span> nodes · ` +
+        `<span style="color:var(--green)">${stats.meta.totalEdges}</span> edges`;
+    }
+  } catch(e) {}
 }
 
 function filterMap(type, btn){
-  mapFilter = type;
   document.querySelectorAll('.map-filter').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  const canvas = document.getElementById('map-canvas');
-  drawMap(canvas.getContext('2d'), canvas);
+  if(window.Graph3D) Graph3D.filterByType(type);
 }
-
-// Map click handler
-document.addEventListener('DOMContentLoaded', () => {
-  const canvas = document.getElementById('map-canvas');
-  canvas.addEventListener('click', (e) => {
-    if(!mapData) return;
-    const rect = canvas.getBoundingClientRect();
-    const mx = e.clientX - rect.left, my = e.clientY - rect.top;
-    const nodeMap = {};
-    mapData.nodes.forEach(n => {
-      const dx = mx-n.x, dy = my-n.y;
-      if(Math.sqrt(dx*dx+dy*dy) < n.r+4) nodeMap[n.id] = n;
-    });
-    const hit = Object.values(nodeMap)[0];
-    const info = document.getElementById('map-info');
-    if(hit) {
-      document.getElementById('map-info-title').textContent = hit.name;
-      document.getElementById('map-info-type').textContent = hit.type.toUpperCase();
-      document.getElementById('map-info-detail').textContent = hit.entity ?
-        `Type: ${hit.entity.entity_type || 'unknown'} | Quality: ${hit.entity.quality_score || '—'}` : '';
-      info.classList.add('visible');
-    } else {
-      info.classList.remove('visible');
-    }
-  });
-});
 
 // ═══════════════════════════════════════════════════════════════
 // 10. HEALTH

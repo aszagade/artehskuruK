@@ -178,6 +178,13 @@ async def serve_frontend():
     return FileResponse(FRONTEND_DIR / "index.html")
 
 
+@app.get("/graph3d.js", include_in_schema=False)
+async def serve_graph3d_js():
+    """Serve the 3D graph visualization module."""
+    from fastapi.responses import FileResponse
+    return FileResponse(FRONTEND_DIR / "graph3d.js", media_type="application/javascript")
+
+
 # -----------------------------------------------------------------------
 # Entry point
 # -----------------------------------------------------------------------
