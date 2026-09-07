@@ -377,6 +377,7 @@ class SalesforceHTTPTransport(SalesforceTransport):
         self._username = username or os.environ.get("SF_USERNAME", "")
         self._password = password or os.environ.get("SF_PASSWORD", "")
         self._security_token = security_token or os.environ.get("SF_SECURITY_TOKEN", "")
+        self._access_token_config = os.environ.get("SF_ACCESS_TOKEN", "")
         self._client_id = client_id or os.environ.get("SF_CLIENT_ID", "")
         self._client_secret = client_secret or os.environ.get("SF_CLIENT_SECRET", "")
         self._api_version = api_version
@@ -404,10 +405,27 @@ class SalesforceHTTPTransport(SalesforceTransport):
         if _requests is None:
             raise ImportError("'requests' package required for SalesforceHTTPTransport. Install with: pip install requests")
 
-        if not self._username or not self._password:
+        # Explicit access-token mode (primarily for compatibility/testing).
+        # This token is not refreshable; production should use a refreshable
+        # OAuth credential lifecycle instead.
+        if self._access_token_config:
+            self._access_token = self._access_token_config
+            self._session = _requests.Session()
+            self._session.headers.update({
+                "Authorization": f"Bearer {self._access_token}",
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            })
+            self._connected = True
+            logger.info("Connected to Salesforce using configured access token.")
+            return True
+
+        if not self._access_token_config and (
+            not self._username or not self._password
+        ):
             raise ValueError(
-                "Salesforce credentials required. Set SF_USERNAME and SF_PASSWORD "
-                "environment variables, or pass username/password to constructor."
+                "Salesforce credentials required. Set SF_ACCESS_TOKEN, "
+                "or SF_USERNAME and SF_PASSWORD."
             )
 
         token_url = f"{self._instance_url}/services/oauth2/token"

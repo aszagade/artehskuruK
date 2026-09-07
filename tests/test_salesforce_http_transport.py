@@ -155,6 +155,28 @@ class TestSalesforceHTTPTransportAuth(unittest.TestCase):
         # Instance URL should be updated from token response
         self.assertEqual(t._instance_url, "https://test.salesforce.com")
 
+    @patch.dict(os.environ, {"SF_ACCESS_TOKEN": "test_access_token"}, clear=False)
+    @patch("kurukshetra.sources.salesforce_transport._requests.Session")
+    def test_connect_with_access_token(self, mock_session_cls):
+        mock_session = MagicMock()
+        mock_session_cls.return_value = mock_session
+
+        t = SalesforceHTTPTransport(
+            instance_url="https://test.salesforce.com",
+        )
+
+        result = t.connect()
+
+        self.assertTrue(result)
+        self.assertTrue(t._connected)
+        self.assertEqual(t._access_token, "test_access_token")
+        mock_session.headers.update.assert_called_once_with({
+            "Authorization": "Bearer test_access_token",
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+        })
+        mock_session.post.assert_not_called()
+
     def test_connect_missing_credentials(self):
         t = SalesforceHTTPTransport()
         with self.assertRaises(ValueError):

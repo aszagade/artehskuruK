@@ -1,0 +1,12 @@
+{
+  "questions": 11,
+  "abstention_baseline": "3/3",
+  "abstention_authority": "3/3",
+  "answer_baseline": "0/8",
+  "answer_authority": "0/8",
+  "authority_metadata_present": 0,
+  "conflicts_baseline": 0,
+  "conflicts_authority": 0,
+  "avg_latency_baseline_ms": 662.3,
+  "avg_latency_authority_ms": 149.7
+}

@@ -106,6 +106,7 @@ from command_center.backend.routers import (
     auth,
     explorer,
     processes,
+    confluence,
 )
 
 app.include_router(auth.router)
@@ -119,6 +120,7 @@ app.include_router(org.router)
 app.include_router(knowledge.router)
 app.include_router(explorer.router)
 app.include_router(processes.router)
+app.include_router(confluence.router)
 
 
 # -----------------------------------------------------------------------
