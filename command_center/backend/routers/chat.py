@@ -55,6 +55,11 @@ class FeedbackRequest(BaseModel):
     is_correct: bool
     user_id: str = "api-user"
     comments: str = ""
+    episode_id: Optional[str] = Field(
+        default=None,
+        description="episode_id from a prior /api/ask response, if this feedback "
+                    "is about that specific answer (enables episodic-memory feedback)",
+    )
 
 
 class FeedbackResponse(BaseModel):
@@ -161,6 +166,18 @@ async def submit_feedback(request: FeedbackRequest):
         except Exception:
             pass  # Evaluation tracking is non-critical
 
+        # 3. Record in EpisodicMemory, if this feedback references a specific
+        # past answer (episode_id, returned by /api/ask). Episode-level
+        # feedback ("was this whole answer correct") is coarser than the
+        # chunk-level feedback FeedbackLoop already handles above — it does
+        # not adjust retrieval scores, only the episode's own record.
+        if request.episode_id:
+            try:
+                from kurukshetra.agent.memory_store import EpisodicMemory
+                EpisodicMemory().record_feedback(request.episode_id, request.is_correct)
+            except Exception:
+                pass  # Episodic memory is non-critical
+
         return FeedbackResponse(
             feedback_id=entry.feedback_id,
             status="recorded",
@@ -214,6 +231,37 @@ class ClaimVerificationResponse(BaseModel):
     reasoning: str = ""
 
 
+class RecalledEpisodeResponse(BaseModel):
+    """A past interaction recalled from episodic memory as similar to this query."""
+    episode_id: str
+    query: str
+    answer_snippet: str
+    confidence: float
+    abstained: bool
+    timestamp: float
+
+
+class CreatedTaskResponse(BaseModel):
+    """A reminder/task created because this query explicitly asked for one
+    (e.g. "remind me to..."). Never created from an ordinary question."""
+    task_id: str
+    description: str
+    created_at: float
+    due_at: Optional[float] = None
+
+
+class MatchedProcedureResponse(BaseModel):
+    """A known process (Process Intelligence) matching this query — summary
+    only; fetch GET /api/processes/{process_id} for full steps/gaps."""
+    process_id: str
+    name: str
+    description: str = ""
+    team: Optional[str] = None
+    quality: str = "unknown"
+    confidence: float = 0.0
+    step_count: int = 0
+
+
 class AskResponse(BaseModel):
     """Evidence-grounded answer response."""
     query: str
@@ -240,6 +288,26 @@ class AskResponse(BaseModel):
     inferred_claims: int = 0
     unsupported_claims: int = 0
     claim_verifications: list[ClaimVerificationResponse] = []
+    episode_id: Optional[str] = Field(
+        default=None,
+        description="Episodic memory record id for this interaction — pass it back "
+                    "in /api/feedback to record feedback against this specific answer",
+    )
+    recalled_episodes: list[RecalledEpisodeResponse] = Field(
+        default_factory=list,
+        description="Past interactions with a similar query, recalled from episodic "
+                    "memory. Recall only — never influences this answer's content.",
+    )
+    matched_procedures: list[MatchedProcedureResponse] = Field(
+        default_factory=list,
+        description="Known processes (Process Intelligence) matching this query. "
+                    "Diagnostic context only — never influences this answer's content.",
+    )
+    created_task: Optional[CreatedTaskResponse] = Field(
+        default=None,
+        description="Set only if this query explicitly requested a reminder/future "
+                    "task (e.g. 'remind me to...'). Never invented from a question.",
+    )
 
 
 @router.post("/ask", response_model=AskResponse)
@@ -345,6 +413,27 @@ async def ask_evidence_grounded(
             unique_documents=agentic_result.unique_documents,
             mention_vs_answer_detected=agentic_result.mention_vs_answer_detected,
             verification_passed=agentic_result.verification_passed,
+            episode_id=agentic_result.episode_id,
+            recalled_episodes=[
+                RecalledEpisodeResponse(**ep) for ep in agentic_result.recalled_episodes
+            ],
+            matched_procedures=[
+                MatchedProcedureResponse(
+                    process_id=p["process_id"],
+                    name=p["name"],
+                    description=p.get("description") or "",
+                    team=p.get("team"),
+                    quality=p.get("quality") or "unknown",
+                    confidence=p.get("confidence") or 0.0,
+                    step_count=p.get("step_count") or 0,
+                )
+                for p in agentic_result.matched_procedures
+            ],
+            created_task=(
+                CreatedTaskResponse(**agentic_result.created_task)
+                if agentic_result.created_task
+                else None
+            ),
         )
 
         # Add claim-level verification data
@@ -393,5 +482,58 @@ async def get_recommendations():
             for r in recs
         ]
 
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# -----------------------------------------------------------------------
+# Prospective Memory — pending reminders/tasks (Mission C)
+# -----------------------------------------------------------------------
+# Tasks are created only as a side effect of /api/ask detecting an
+# explicit reminder request (see AgenticSANJAYA._detect_and_record_task) —
+# there is no endpoint to create one directly, matching the "never
+# invents/accepts arbitrary tasks outside an explicit user request"
+# contract ProspectiveMemory has always had.
+
+class PendingTaskResponse(BaseModel):
+    """A pending (not yet completed) reminder/task."""
+    task_id: str
+    description: str
+    requested_by: str
+    created_at: float
+    due_at: Optional[float] = None
+    source_query: str
+
+
+@router.get("/tasks/pending", response_model=list[PendingTaskResponse])
+async def list_pending_tasks():
+    """List pending reminders/tasks created via explicit user request."""
+    try:
+        from kurukshetra.agent.memory_store import ProspectiveMemory
+
+        tasks = ProspectiveMemory().get_pending_tasks()
+        return [
+            PendingTaskResponse(
+                task_id=t.task_id,
+                description=t.description,
+                requested_by=t.requested_by,
+                created_at=t.created_at,
+                due_at=t.due_at,
+                source_query=t.source_query,
+            )
+            for t in tasks
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/tasks/{task_id}/complete")
+async def complete_task(task_id: str):
+    """Mark a reminder/task as completed."""
+    try:
+        from kurukshetra.agent.memory_store import ProspectiveMemory
+
+        ProspectiveMemory().complete_task(task_id)
+        return {"task_id": task_id, "status": "completed"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -40,12 +40,23 @@ cache/
 .ipynb_checkpoints/
 
 # ---------- RAG / Vector Databases ----------
-vector_store/
-embeddings/
-chroma_db/
-qdrant_storage/
-faiss_index/
-llama_index_storage/
+# Root-anchored (leading /): these are generated cache directories at the
+# repo root, not source code. (A bare `embeddings/` here previously also
+# matched kurukshetra/embeddings/, a real source directory 8 call sites
+# depend on — root-anchoring this batch keeps that from happening again to
+# anything else.)
+/vector_store/
+/embeddings/
+/chroma_db/
+/qdrant_storage/
+/faiss_index/
+/llama_index_storage/
+
+# kurukshetra/embeddings/ (BGEEmbedding) — local build-only, not pushed to
+# the shared repo by request. Note: this means kurukshetra/retrieval and
+# kurukshetra/agent will not import on a fresh checkout without it present
+# locally — add it back manually if you need to run/test those modules.
+kurukshetra/embeddings/
 
 # ---------- Parsed / Generated Knowledge ----------
 extracted_text/

@@ -379,105 +379,35 @@ class ProceduralMemory:
     """
     Validated organizational workflows and procedures.
 
-    Extracts and stores reusable procedures from authoritative documents.
-    Procedures are extracted during ingestion from documents that contain
-    workflow/process steps.
+    Adapter over kurukshetra.process.intelligence (Mission 3.58's Process
+    Intelligence system), which already extracts real, evidence-backed
+    processes — with steps, triggers, actors, and structural gap detection
+    — from the corpus (182+ processes / 1,569+ steps on the real corpus as
+    of Mission 3.58). This class does NOT maintain its own store: the
+    original standalone `procedural_memory` table it used to own had zero
+    production data — `store_procedure()` had no callers outside its own
+    unit test — while Process Intelligence is real and already wired to
+    ingestion. Same pattern SemanticMemory already uses for the knowledge
+    graph: wrap the authoritative store, don't duplicate it. See
+    docs/MISSION_B_PROCEDURAL_MEMORY_ADAPTER.md.
     """
 
-    def __init__(self) -> None:
-        self._ensure_table()
+    def find_procedure(self, query: str, limit: int = 5) -> list[dict]:
+        """Find processes matching a query (summary rows — no steps/gaps;
+        use get_procedure(process_id) for full detail)."""
+        from kurukshetra.process.intelligence import search_processes
+        return search_processes(query, limit=limit)
 
-    def _ensure_table(self) -> None:
-        conn = get_connection()
-        conn.execute("""
-            CREATE TABLE IF NOT EXISTS procedural_memory (
-                procedure_id TEXT PRIMARY KEY,
-                name TEXT,
-                description TEXT,
-                source_document_id TEXT,
-                source_path TEXT,
-                team TEXT,
-                steps TEXT,
-                validated BOOLEAN DEFAULT FALSE,
-                confidence DOUBLE DEFAULT 0.0,
-                created_at DOUBLE,
-                updated_at DOUBLE
-            )
-        """)
-        conn.close()
+    def get_procedure(self, process_id: str) -> Optional[dict]:
+        """Full detail for one process, including its steps and any
+        detected structural gaps (no_owner, no_successor, etc.)."""
+        from kurukshetra.process.intelligence import get_process
+        return get_process(process_id)
 
-    def store_procedure(
-        self,
-        name: str,
-        description: str,
-        source_document_id: str,
-        source_path: str,
-        team: str,
-        steps: list[str],
-        validated: bool = False,
-        confidence: float = 0.5,
-    ) -> str:
-        """Store a procedure extracted from a document."""
-        proc_id = f"PROC-{uuid.uuid4().hex[:12]}"
-        now = time.time()
-        conn = get_connection()
-        conn.execute(
-            """INSERT OR REPLACE INTO procedural_memory
-            (procedure_id, name, description, source_document_id, source_path,
-             team, steps, validated, confidence, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            (proc_id, name, description, source_document_id, source_path,
-             team, json.dumps(steps), validated, confidence, now, now),
-        )
-        conn.close()
-        return proc_id
-
-    def find_procedure(self, query: str) -> list[dict]:
-        """Find procedures matching a query."""
-        conn = get_connection()
-        keywords = [w.lower() for w in query.split() if len(w) > 3]
-        if not keywords:
-            conn.close()
-            return []
-
-        conditions = " OR ".join(["LOWER(name) LIKE ? OR LOWER(description) LIKE ?" for _ in keywords])
-        params = []
-        for kw in keywords:
-            params.extend([f"%{kw}%", f"%{kw}%"])
-
-        rows = conn.execute(
-            f"""SELECT procedure_id, name, description, source_document_id,
-                team, steps, validated, confidence
-            FROM procedural_memory
-            WHERE {conditions}
-            ORDER BY confidence DESC
-            LIMIT 5""",
-            params,
-        ).fetchall()
-        conn.close()
-        return [
-            {"id": r[0], "name": r[1], "description": r[2],
-             "source": r[3], "team": r[4], "steps": json.loads(r[5] or "[]"),
-             "validated": r[6], "confidence": r[7]}
-            for r in rows
-        ]
-
-    def get_all_procedures(self) -> list[dict]:
-        """Get all stored procedures."""
-        conn = get_connection()
-        rows = conn.execute(
-            """SELECT procedure_id, name, description, source_document_id,
-                team, steps, validated, confidence
-            FROM procedural_memory
-            ORDER BY confidence DESC"""
-        ).fetchall()
-        conn.close()
-        return [
-            {"id": r[0], "name": r[1], "description": r[2],
-             "source": r[3], "team": r[4], "steps": json.loads(r[5] or "[]"),
-             "validated": r[6], "confidence": r[7]}
-            for r in rows
-        ]
+    def get_all_procedures(self, team: Optional[str] = None, limit: int = 50) -> list[dict]:
+        """List known processes, optionally filtered by team."""
+        from kurukshetra.process.intelligence import list_processes
+        return list_processes(team=team, limit=limit)
 
 
 # ==================================================================
@@ -579,18 +509,33 @@ class ProspectiveMemory:
         return True
 
     def detect_reminder_request(self, query: str) -> Optional[str]:
-        """Detect if a query is requesting a future reminder/task."""
+        """Detect if a query is EXPLICITLY requesting a future reminder/task.
+
+        Deliberately conservative — this is the enforcement point for "never
+        invents tasks" (CLAUDE.md §4 / this module's own contract). The
+        original pattern set matched bare temporal words ("tomorrow",
+        "later", "next week") and the bare word "schedule" on their own,
+        which fires on ordinary factual questions with no reminder intent
+        at all — confirmed as real false positives before this fix
+        (Mission C): "What is the deployment schedule for G3?" and "What is
+        the maintenance window tomorrow?" both used to match. A temporal
+        word alone is not evidence of an explicit request; only an
+        imperative reminder/follow-up phrase is.
+        """
         import re
         reminder_patterns = [
-            re.compile(r"\b(remind me|remember to|don't forget|schedule|set a reminder)\b", re.IGNORECASE),
-            re.compile(r"\b(next time|later|tomorrow|next week|next month)\b", re.IGNORECASE),
-            re.compile(r"\b(follow up|check back|come back to)\b", re.IGNORECASE),
+            re.compile(
+                r"\b(remind me|remember to|don't forget to|set a reminder|schedule a reminder)\b",
+                re.IGNORECASE,
+            ),
+            re.compile(r"\b(follow up on|check back on|come back to)\b", re.IGNORECASE),
         ]
         for pattern in reminder_patterns:
             if pattern.search(query):
                 # Extract the task description
                 task_match = re.search(
-                    r"(?:remind me to|remember to|don't forget to|schedule)\s+(.+?)(?:\.|$)",
+                    r"(?:remind me to|remember to|don't forget to|follow up on|"
+                    r"check back on|come back to)\s+(.+?)(?:\.|$)",
                     query, re.IGNORECASE,
                 )
                 if task_match:

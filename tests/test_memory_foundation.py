@@ -158,40 +158,83 @@ class TestSemanticMemory(unittest.TestCase):
 
 
 class TestProceduralMemory(unittest.TestCase):
-    """Test procedural memory (validated workflows)."""
+    """Test procedural memory — an adapter over Process Intelligence
+    (kurukshetra.process.intelligence), not its own store (Mission B).
+    Fixtures use the same ensure_process_tables()/persist_process() setup
+    as tests/test_process_intelligence.py, for a real, evidence-shaped
+    process rather than a synthetic procedural_memory row."""
 
-    def test_store_procedure(self):
-        from kurukshetra.agent.memory_store import ProceduralMemory
-        pm = ProceduralMemory()
-        proc_id = pm.store_procedure(
-            name="G3 Property Installation",
-            description="Steps to install a new property in G3 RMS",
-            source_document_id="DOC-000160",
-            source_path="docs/install.pdf",
-            team="spm",
-            steps=["Step 1: Submit request", "Step 2: Configure system", "Step 3: Validate"],
-            validated=True,
-            confidence=0.9,
+    def _make_process(self, name=None, description="Steps to install a new property in G3 RMS"):
+        from kurukshetra.process.intelligence import (
+            ensure_process_tables, persist_process, ProcessDefinition, ProcessStep,
         )
-        self.assertIsNotNone(proc_id)
-        self.assertTrue(proc_id.startswith("PROC-"))
+        import uuid
+        ensure_process_tables()
+        process_id = f"PROC-TEST-{uuid.uuid4().hex[:8]}"
+        # Default name must be unique per call — the shared, session-persistent
+        # DuckDB accumulates rows across every test method that calls this
+        # fixture, and keyword-LIKE matching on generic words ("property",
+        # "installation") means a fixed default name collides across tests
+        # (found this the hard way: a tie on confidence between two
+        # identically-named rows made assertions on found[0] flaky).
+        if name is None:
+            name = f"Zzqproc{uuid.uuid4().hex[:10]} Property Installation"
+        proc = ProcessDefinition(
+            process_id=process_id,
+            name=name,
+            description=description,
+            source_documents=["DOC-000160"],
+            confidence=0.9,
+            team="spm",
+            steps=[
+                ProcessStep(
+                    step_id=f"{process_id}-S1", process_id=process_id, sequence=1,
+                    description="Submit request", actor_team="spm",
+                ),
+                ProcessStep(
+                    step_id=f"{process_id}-S2", process_id=process_id, sequence=2,
+                    description="Configure system", actor_team="spm",
+                ),
+            ],
+        )
+        persist_process(proc)
+        return process_id, name
 
-    def test_find_procedure(self):
+    def test_find_procedure_matches_real_process_intelligence_data(self):
         from kurukshetra.agent.memory_store import ProceduralMemory
+        _, name = self._make_process()
         pm = ProceduralMemory()
-        pm.store_procedure(
-            name="G3 Property Installation",
-            description="Steps to install a new property in G3 RMS",
-            source_document_id="DOC-000160",
-            source_path="docs/install.pdf",
-            team="spm",
-            steps=["Step 1", "Step 2"],
-            validated=True,
-            confidence=0.9,
-        )
-        found = pm.find_procedure("How to install a property in G3")
-        self.assertGreater(len(found), 0)
-        self.assertEqual(found[0]["name"], "G3 Property Installation")
+        # Keyword matching is OR-across-words (see search_processes), so a
+        # query mixing one unique word with generic ones ("property",
+        # "installation") can also match unrelated rows sharing only the
+        # generic words — including stale rows from earlier local test
+        # runs in this shared DuckDB. Assert membership, not strict top-of-
+        # list position: confidence ties have no guaranteed secondary sort.
+        found = pm.find_procedure(name, limit=20)
+        self.assertIn(name, [p["name"] for p in found])
+
+    def test_get_procedure_returns_steps_and_gaps(self):
+        from kurukshetra.agent.memory_store import ProceduralMemory
+        process_id, _ = self._make_process()
+        pm = ProceduralMemory()
+        detail = pm.get_procedure(process_id)
+        self.assertIsNotNone(detail)
+        self.assertIn("steps", detail)
+        self.assertIn("gaps", detail)
+        self.assertEqual(len(detail["steps"]), 2)
+
+    def test_get_all_procedures_filters_by_team(self):
+        from kurukshetra.agent.memory_store import ProceduralMemory
+        import uuid
+        _, name = self._make_process(name=f"Zzqproc{uuid.uuid4().hex[:10]} Team Filter Test")
+        pm = ProceduralMemory()
+        results = pm.get_all_procedures(team="spm")
+        self.assertTrue(any(p["name"] == name for p in results))
+
+    def test_no_longer_owns_a_standalone_table(self):
+        """Guard against regressing back to a parallel, unpopulated store."""
+        from kurukshetra.agent.memory_store import ProceduralMemory
+        self.assertFalse(hasattr(ProceduralMemory, "store_procedure"))
 
 
 class TestProspectiveMemory(unittest.TestCase):
@@ -238,6 +281,44 @@ class TestProspectiveMemory(unittest.TestCase):
         pm = ProspectiveMemory()
         result = pm.detect_reminder_request("What is G3 RMS?")
         self.assertIsNone(result)
+
+    def test_no_false_positive_on_bare_temporal_words(self):
+        """Regression guard (Mission C): bare temporal words ("tomorrow",
+        "next week", "later") and the bare word "schedule" used to trigger
+        detection on their own — real false positives on ordinary factual
+        questions, confirmed live before this fix. A temporal word alone is
+        not an explicit reminder request."""
+        from kurukshetra.agent.memory_store import ProspectiveMemory
+        pm = ProspectiveMemory()
+        should_not_trigger = [
+            "What is the deployment schedule for G3?",
+            "What is the maintenance window tomorrow?",
+            "What happened later in the incident timeline?",
+            "What is the release schedule for next month?",
+            "What documents describe the follow up process for ICS?",
+        ]
+        for query in should_not_trigger:
+            self.assertIsNone(
+                pm.detect_reminder_request(query),
+                f"False positive on: {query!r}",
+            )
+
+    def test_explicit_reminder_phrases_still_detected(self):
+        """The tightened patterns must still catch genuine requests."""
+        from kurukshetra.agent.memory_store import ProspectiveMemory
+        pm = ProspectiveMemory()
+        should_trigger = [
+            "Remind me to check G3 status tomorrow",
+            "Please remember to escalate this ticket",
+            "Don't forget to update the glossary",
+            "Set a reminder for the G3 rollout",
+            "Follow up on the SFDC ticket next week",
+        ]
+        for query in should_trigger:
+            self.assertIsNotNone(
+                pm.detect_reminder_request(query),
+                f"Missed a genuine reminder request: {query!r}",
+            )
 
 
 class TestKnowledgeSourceAttribution(unittest.TestCase):

@@ -119,6 +119,10 @@ class AgenticResult:
     verification_passed: bool
     claim_verification: object = None  # VerificationResult from EvidenceClaimVerifier
     sufficiency_gate: object = None  # GateResult from EvidenceSufficiencyGate
+    episode_id: Optional[str] = None  # Episodic memory record for this interaction
+    recalled_episodes: list[dict] = field(default_factory=list)  # Similar past interactions
+    matched_procedures: list[dict] = field(default_factory=list)  # Matching known processes
+    created_task: Optional[dict] = None  # A reminder/task created by this query, if any
 
 
 class EvidenceSufficiencyChecker:
@@ -270,6 +274,25 @@ class AgenticSANJAYA:
         except ImportError:
             self.sufficiency_gate = None
         self.sufficiency_checker = EvidenceSufficiencyChecker()
+        try:
+            from kurukshetra.agent.memory_store import EpisodicMemory
+            self.episodic_memory = EpisodicMemory()
+        except Exception:
+            # Episodic memory is a recall/audit aid, never load-bearing for
+            # answering — never let its absence break the agent.
+            self.episodic_memory = None
+        try:
+            from kurukshetra.agent.memory_store import ProceduralMemory
+            self.procedural_memory = ProceduralMemory()
+        except Exception:
+            # Same non-load-bearing contract as episodic memory above.
+            self.procedural_memory = None
+        try:
+            from kurukshetra.agent.memory_store import ProspectiveMemory
+            self.prospective_memory = ProspectiveMemory()
+        except Exception:
+            # Same non-load-bearing contract as episodic memory above.
+            self.prospective_memory = None
 
     def _wrap_with_feedback(self, retriever):
         """Wrap retriever with FeedbackAwareRetriever if available."""
@@ -281,6 +304,128 @@ class AgenticSANJAYA:
         except Exception:
             return retriever
 
+    def _recall_similar_episodes(self, query: str) -> list[dict]:
+        """Recall past interactions with a similar query, for the caller to
+        surface as context ("SANJAYA recalls a similar past interaction").
+
+        Read-only: never influences retrieval, ranking, or the answer itself
+        — that's FeedbackAwareRetriever's job (chunk-level score adjustment,
+        already validated in Mission 3.47). Episodic memory is recall, not
+        a second scoring mechanism.
+        """
+        if self.episodic_memory is None:
+            return []
+        try:
+            episodes = self.episodic_memory.find_similar_queries(query, limit=3)
+        except Exception:
+            return []
+        return [
+            {
+                "episode_id": e.episode_id,
+                "query": e.query,
+                "answer_snippet": e.answer[:200],
+                "confidence": e.confidence,
+                "abstained": e.abstained,
+                "timestamp": e.timestamp,
+            }
+            for e in episodes
+        ]
+
+    def _find_matching_procedures(self, query: str) -> list[dict]:
+        """Surface known, evidence-backed processes (Process Intelligence)
+        matching this query — e.g. "how do I install G3" can point at a
+        real, gap-annotated procedure instead of only prose reconstructed
+        from retrieved chunks.
+
+        Additive diagnostic context only, same contract as
+        _recall_similar_episodes above: never merged into evidence,
+        generation, or confidence. Mission B deliberately scoped it this
+        way — feeding procedure steps into the LLM synthesis pipeline is a
+        bigger, separate decision (see docs/MISSION_B_*.md "Not Done").
+        """
+        if self.procedural_memory is None:
+            return []
+        try:
+            return self.procedural_memory.find_procedure(query, limit=3)
+        except Exception:
+            return []
+
+    def _detect_and_record_task(self, query: str) -> Optional[dict]:
+        """If this query EXPLICITLY asks for a future reminder/task
+        ("remind me to...", "don't forget to...", "follow up on..."),
+        record it. Returns the created task as a dict, or None.
+
+        CRITICAL — never invents a task (CLAUDE.md §4, this repo's core
+        governance rule, applied here to memory the same way SEAL applies
+        it to glossary terms): only ProspectiveMemory.detect_reminder_request()'s
+        explicit, conservative pattern match can create a task; nothing
+        here infers intent beyond that. Mission C tightened that detector
+        specifically because its original bare-temporal-word patterns
+        ("tomorrow", "next week", "schedule") fired on ordinary factual
+        questions with no reminder intent at all — an implicit inference
+        masquerading as an explicit request, exactly what this rule
+        forbids. See docs/MISSION_C_PROSPECTIVE_MEMORY_WIRING.md.
+
+        Additive: side effect only (a row written to prospective_memory),
+        never alters retrieval, evidence, generation, or confidence — same
+        contract as episodic recall and procedural matching above. If the
+        query was ALSO a real question, SANJAYA still answers it
+        (or abstains) exactly as it would have without this check.
+        """
+        if self.prospective_memory is None:
+            return None
+        try:
+            description = self.prospective_memory.detect_reminder_request(query)
+            if not description:
+                return None
+            task = self.prospective_memory.add_task(
+                description=description,
+                source_query=query,
+            )
+        except Exception:
+            return None
+        return {
+            "task_id": task.task_id,
+            "description": task.description,
+            "created_at": task.created_at,
+            "due_at": task.due_at,
+        }
+
+    def _record_episode(
+        self,
+        query: str,
+        answer_result: AnswerResult,
+        evidence: list[EvidenceItem],
+        duration_ms: float,
+    ) -> Optional[str]:
+        """Persist this interaction to episodic memory. Best-effort: a
+        storage failure here must never fail the actual answer."""
+        if self.episodic_memory is None:
+            return None
+        try:
+            from kurukshetra.agent.memory_store import KnowledgeSource
+
+            raw_source = getattr(answer_result, "knowledge_source", "unknown") or "unknown"
+            try:
+                source = KnowledgeSource(raw_source)
+            except ValueError:
+                # e.g. "mixed" has no direct KnowledgeSource member yet
+                source = KnowledgeSource.UNKNOWN
+
+            episode = self.episodic_memory.record_episode(
+                query=query,
+                answer=answer_result.answer or "",
+                confidence=answer_result.confidence,
+                abstained=answer_result.abstained,
+                evidence_doc_ids=list({e.document_id for e in evidence}),
+                knowledge_sources=[source],
+                duration_ms=duration_ms,
+            )
+            return episode.episode_id
+        except Exception:
+            logger.warning("Episodic memory record_episode failed", exc_info=True)
+            return None
+
     def ask(self, query: str) -> AgenticResult:
         """
         Process a question through the agentic pipeline.
@@ -290,6 +435,9 @@ class AgenticSANJAYA:
         total_start = time.time()
         rounds: list[RetrievalRound] = []
         mention_vs_answer_detected = False
+        recalled_episodes = self._recall_similar_episodes(query)
+        matched_procedures = self._find_matching_procedures(query)
+        created_task = self._detect_and_record_task(query)
 
         # Phase 1: Plan
         plan = self._create_plan(query)
@@ -491,6 +639,9 @@ class AgenticSANJAYA:
             except Exception:
                 pass  # Never fail because of verification
 
+        total_elapsed_ms = (time.time() - total_start) * 1000
+        episode_id = self._record_episode(query, answer_result, all_evidence, total_elapsed_ms)
+
         return AgenticResult(
             answer_result=answer_result,
             rounds=rounds,
@@ -501,6 +652,10 @@ class AgenticSANJAYA:
             mention_vs_answer_detected=mention_vs_answer_detected,
             verification_passed=verification_passed,
             claim_verification=claim_verification,
+            episode_id=episode_id,
+            recalled_episodes=recalled_episodes,
+            matched_procedures=matched_procedures,
+            created_task=created_task,
         )
 
     def _record_evaluation_signals(

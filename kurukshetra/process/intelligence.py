@@ -808,6 +808,43 @@ def list_processes(
     return result
 
 
+def search_processes(query: str, limit: int = 5) -> list[dict]:
+    """Find discovered processes matching a free-text query.
+
+    Keyword LIKE search over name/description, same style already used
+    elsewhere in this codebase (kurukshetra/agent/memory_store.py's
+    find_similar_queries/find_procedure) — no new search infrastructure.
+    This was the one query shape processes lacked (list_processes only
+    filters by exact team/quality); added so "how do I install G3" style
+    questions can find a matching process by content, not just browse by
+    team. Ordered by confidence, so higher-quality processes surface first.
+    """
+    conn = get_connection()
+    # Strip surrounding punctuation ("marker?" -> "marker") so a naturally
+    # phrased question still keyword-matches stored names/descriptions.
+    raw_words = re.findall(r"[A-Za-z0-9]+", query.lower())
+    keywords = [w for w in raw_words if len(w) > 3]
+    if not keywords:
+        conn.close()
+        return []
+
+    conditions = " OR ".join(
+        ["LOWER(name) LIKE ? OR LOWER(description) LIKE ?" for _ in keywords]
+    )
+    params: list = []
+    for kw in keywords:
+        params.extend([f"%{kw}%", f"%{kw}%"])
+
+    rows = conn.execute(
+        f"SELECT * FROM processes WHERE {conditions} ORDER BY confidence DESC LIMIT ?",
+        params + [limit],
+    ).fetchall()
+    cols = [d[0] for d in conn.execute("SELECT * FROM processes LIMIT 0").description]
+    result = [dict(zip(cols, r)) for r in rows]
+    conn.close()
+    return result
+
+
 def get_process_stats() -> dict:
     """Get process intelligence statistics."""
     conn = get_connection()
