@@ -46,6 +46,26 @@
   let canvas2d, ctx2d;
   let animFrame;
 
+  // Smooth camera animation (custom lightweight lerp, no extra library —
+  // a single active animation state so focusing a node then immediately
+  // deselecting never leaves two moves fighting each other).
+  let cameraAnim = null;
+  let defaultCameraPos = { x: 0, y: 0, z: 400 };
+  const defaultTarget = { x: 0, y: 0, z: 0 };
+  let hoveredMesh = null; // for smooth hover scale-up
+
+  // Rotate world-space -> the graph's own local space, correcting for
+  // whatever ambient rotation has accumulated, so focusNode() always
+  // flies to where a node actually is right now, not where it was when
+  // the layout was first computed.
+  function getWorldPos(nodeId) {
+    const p = nodePositions[nodeId];
+    if (!p || !nodeGroup) return p || null;
+    const angle = nodeGroup.rotation.y;
+    const cos = Math.cos(angle), sin = Math.sin(angle);
+    return { x: p.x * cos + p.z * sin, y: p.y, z: -p.x * sin + p.z * cos };
+  }
+
   // ─── Public API ────────────────────────────────────────────────────────
 
   window.Graph3D = {
@@ -98,9 +118,9 @@
     if (typeof THREE.OrbitControls !== "undefined") {
       controls = new THREE.OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
-      controls.dampingFactor = 0.08;
+      controls.dampingFactor = 0.1;
       controls.rotateSpeed = 0.5;
-      controls.zoomSpeed = 0.8;
+      controls.zoomSpeed = 1.1;
       controls.minDistance = 50;
       controls.maxDistance = 1000;
     }
@@ -122,9 +142,11 @@
     scene.add(ambient);
     const point = new THREE.PointLight(0x00d4ff, 0.5, 1000);
     point.position.set(200, 200, 200);
+    point.userData = { orbitRadius: 240, orbitSpeed: 0.3 };
     scene.add(point);
     const point2 = new THREE.PointLight(0x00ff88, 0.3, 800);
     point2.position.set(-200, -100, -200);
+    point2.userData = { orbitRadius: 210, orbitSpeed: -0.22 };
     scene.add(point2);
 
     // Events
@@ -137,8 +159,87 @@
 
   function animate() {
     animFrame = requestAnimationFrame(animate);
+    const t = performance.now() * 0.001;
+
+    if (cameraAnim) stepCameraAnim();
     if (controls) controls.update();
+
+    // Ambient motion so the graph never looks frozen: the whole graph
+    // slowly turns as a rigid body (nodes and edges rotate together, so
+    // nothing detaches) while nothing is selected — paused while a node
+    // is focused so it doesn't drift out from under the camera.
+    if (nodeGroup && edgeGroup && !selectedNode) {
+      nodeGroup.rotation.y += 0.0009;
+      edgeGroup.rotation.y += 0.0009;
+    }
+
+    // Breathing glow + gentle emissive pulse per node, and a smooth
+    // scale-up on hover — all pure material/scale tweaks, so positions
+    // (and therefore the edges attached to them) are never touched.
+    if (nodeGroup) {
+      nodeGroup.children.forEach((child) => {
+        if (child.userData?.isGlow) {
+          const pulse = 0.85 + Math.sin(t * 1.4 + child.userData.phase) * 0.15;
+          child.material.opacity = 0.15 * pulse;
+          const s = child.userData.baseScale * (0.92 + Math.sin(t * 1.4 + child.userData.phase) * 0.08);
+          child.scale.set(s, s, 1);
+        } else if (child.userData?.nodeId) {
+          const targetScale = child.userData.hovered ? 1.35 : 1;
+          child.scale.x += (targetScale - child.scale.x) * 0.15;
+          child.scale.y += (targetScale - child.scale.y) * 0.15;
+          child.scale.z += (targetScale - child.scale.z) * 0.15;
+          if (child.material) {
+            child.material.emissiveIntensity = 0.2 + Math.sin(t * 1.1 + child.userData.phase) * 0.08;
+          }
+        }
+      });
+    }
+
+    // Slow orbiting point lights add a subtle shifting highlight across
+    // the glowing spheres instead of flat, static lighting.
+    if (scene) {
+      scene.children.forEach((c) => {
+        if (!c.isPointLight) return;
+        const r = c.userData?.orbitRadius || 220;
+        const speed = c.userData?.orbitSpeed || 0.3;
+        c.position.x = Math.sin(t * speed) * r;
+        c.position.z = Math.cos(t * speed) * r;
+      });
+    }
+
     if (renderer && scene && camera) renderer.render(scene, camera);
+  }
+
+  // Ease-in-out lerp toward the target camera position/orbit-target,
+  // overwriting any animation already in flight so rapid focus/deselect
+  // clicks never leave two moves fighting each other (that fighting was
+  // what made zooming feel slow before).
+  function animateCameraTo(toPos, toTarget, duration) {
+    if (!camera) return;
+    cameraAnim = {
+      fromPos: { x: camera.position.x, y: camera.position.y, z: camera.position.z },
+      toPos,
+      fromTarget: controls
+        ? { x: controls.target.x, y: controls.target.y, z: controls.target.z }
+        : { x: 0, y: 0, z: 0 },
+      toTarget,
+      start: performance.now(),
+      duration,
+    };
+  }
+
+  function stepCameraAnim() {
+    const t = Math.min(1, (performance.now() - cameraAnim.start) / cameraAnim.duration);
+    const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+    camera.position.x = cameraAnim.fromPos.x + (cameraAnim.toPos.x - cameraAnim.fromPos.x) * ease;
+    camera.position.y = cameraAnim.fromPos.y + (cameraAnim.toPos.y - cameraAnim.fromPos.y) * ease;
+    camera.position.z = cameraAnim.fromPos.z + (cameraAnim.toPos.z - cameraAnim.fromPos.z) * ease;
+    if (controls) {
+      controls.target.x = cameraAnim.fromTarget.x + (cameraAnim.toTarget.x - cameraAnim.fromTarget.x) * ease;
+      controls.target.y = cameraAnim.fromTarget.y + (cameraAnim.toTarget.y - cameraAnim.fromTarget.y) * ease;
+      controls.target.z = cameraAnim.fromTarget.z + (cameraAnim.toTarget.z - cameraAnim.fromTarget.z) * ease;
+    }
+    if (t >= 1) cameraAnim = null;
   }
 
   function onResize() {
@@ -182,12 +283,16 @@
     if (intersects.length > 0) {
       const obj = intersects[0].object;
       if (obj.userData && obj.userData.nodeId) {
+        if (hoveredMesh && hoveredMesh !== obj) hoveredMesh.userData.hovered = false;
+        hoveredMesh = obj;
+        obj.userData.hovered = true;
         renderer.domElement.style.cursor = "pointer";
         const node = graphData?.nodes.find((n) => n.id === obj.userData.nodeId);
         if (node) showTooltip(node, e.clientX, e.clientY);
         return;
       }
     }
+    if (hoveredMesh) { hoveredMesh.userData.hovered = false; hoveredMesh = null; }
     renderer.domElement.style.cursor = "default";
     hideTooltip();
   }
@@ -350,7 +455,7 @@
       });
       const mesh = new THREE.Mesh(geom, mat);
       mesh.position.set(pos.x, pos.y, pos.z);
-      mesh.userData = { nodeId: node.id, nodeType: node.type };
+      mesh.userData = { nodeId: node.id, nodeType: node.type, phase: Math.random() * Math.PI * 2, hovered: false };
       nodeGroup.add(mesh);
 
       // Glow sprite
@@ -362,10 +467,12 @@
       const sprite = new THREE.Sprite(spriteMat);
       sprite.position.set(pos.x, pos.y, pos.z);
       sprite.scale.set(size * 3, size * 3, 1);
+      sprite.userData = { isGlow: true, baseScale: size * 3, phase: Math.random() * Math.PI * 2 };
       nodeGroup.add(sprite);
     });
 
     // Center camera
+    defaultCameraPos = { x: 0, y: 0, z: radius * 1.5 };
     camera.position.set(0, 0, radius * 1.5);
     if (controls) {
       controls.target.set(0, 0, 0);
@@ -538,6 +645,11 @@
   function deselectNode() {
     selectedNode = null;
     hideNodePanel();
+    // Smoothly return to the full-graph overview instead of leaving the
+    // camera wherever the last focus left it.
+    if (currentMode === "3d" && controls) {
+      animateCameraTo(defaultCameraPos, defaultTarget, 600);
+    }
   }
 
   // ─── Filtering ─────────────────────────────────────────────────────────
@@ -602,13 +714,15 @@
   }
 
   function focusNode(nodeId) {
-    const pos = nodePositions[nodeId];
+    const pos = currentMode === "3d" ? getWorldPos(nodeId) : nodePositions[nodeId];
     if (!pos) return;
 
     if (currentMode === "3d" && controls) {
-      controls.target.set(pos.x, pos.y, pos.z);
-      camera.position.set(pos.x + 100, pos.y + 50, pos.z + 100);
-      controls.update();
+      animateCameraTo(
+        { x: pos.x + 100, y: pos.y + 50, z: pos.z + 100 },
+        { x: pos.x, y: pos.y, z: pos.z },
+        700
+      );
     }
     selectNode(nodeId);
   }
@@ -639,6 +753,8 @@
 
   function destroy3D() {
     if (animFrame) cancelAnimationFrame(animFrame);
+    cameraAnim = null;
+    hoveredMesh = null;
     if (renderer) {
       renderer.dispose();
       renderer.domElement?.remove();

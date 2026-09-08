@@ -353,7 +353,8 @@ body { font-family:'Segoe UI',system-ui,-apple-system,sans-serif; background:var
         <input type="text" id="graph-search" placeholder="Search graph..." style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:4px 10px;border-radius:6px;font-size:10px;width:150px" onkeyup="Graph3D.search(this.value)">
       </div>
       <div style="display:flex;gap:12px">
-        <div class="map-container scan-pulse" id="graph-container" style="flex:1;height:500px;position:relative">
+        <div style="flex:1;height:500px;position:relative">
+          <div class="map-container scan-pulse" id="graph-container" style="width:100%;height:100%"></div>
           <div class="map-info" id="map-info">
           </div>
           <div class="map-legend">
