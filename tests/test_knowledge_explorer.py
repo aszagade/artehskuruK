@@ -142,6 +142,19 @@ class TestExplorerMemory(unittest.TestCase):
         self.assertEqual(d2["user_id"], "bob")
         print(f"  [OK] Memory is user-scoped: alice vs bob")
 
+    def test_episodic_procedural_prospective_report_active(self):
+        """Missions A/B/C wired these into the live path (were
+        partial/foundation before); the Health dashboard's Memory
+        Inspector must reflect that, not the stale Mission 3.43 labels."""
+        from fastapi.testclient import TestClient
+        from command_center.backend.main import app
+        client = TestClient(app)
+        data = client.get("/api/memory/summary").json()
+        self.assertEqual(data["episodic_memory"]["status"], "active")
+        self.assertEqual(data["procedural_memory"]["status"], "active")
+        self.assertEqual(data["prospective_memory"]["status"], "active")
+        print(f"  [OK] episodic/procedural/prospective all report 'active'")
+
 
 class TestExplorerGaps(unittest.TestCase):
     """/api/knowledge/gaps returns gap analysis."""

@@ -435,7 +435,30 @@ async def get_health_detail():
 
 @router.get("/api/memory/summary")
 async def get_memory_summary(user_id: str = "anonymous"):
-    """Get user-scoped memory summary. Never expose other users' data."""
+    """Memory summary for the Health dashboard's Memory Inspector.
+
+    episodic/procedural/prospective were "partial"/"foundation" here since
+    Mission 3.43 built the memory_store.py classes but nothing in the live
+    request path ever called them (confirmed by tracing every caller —
+    see docs/MISSION_A_EPISODIC_MEMORY_WIRING.md). Missions A/B/C wired
+    all three into AgenticSANJAYA.ask() for real, so this endpoint is
+    updated to match: status="active" for all three, and — the actual
+    bug, not just a stale label — the data queries below now read the
+    real memory_store.py tables, not a same-named-concept-but-different
+    system (episodic previously queried `rag_feedback`, which is
+    FeedbackLoop's table, not EpisodicMemory's — see MEMORY.md's decision
+    log for why those are deliberately separate systems).
+
+    NOTE on `user_id`: accepted for API-shape compatibility and used for
+    the response envelope, but episodic/prospective items are NOT actually
+    filtered by it (see the inline comments below) — AgenticSANJAYA.ask()
+    doesn't thread a real caller identity into record_episode()/add_task()
+    yet, so every row carries a generic class-default identity regardless
+    of who asked. Filtering on user_id today would silently return zero
+    rows for any real caller, which is worse than showing unfiltered
+    recent activity, not more private. Threading a real user_id all the
+    way through is flagged as follow-up work, not done here.
+    """
     summary = MemorySummary(
         user_id=user_id,
         working_memory={
@@ -443,42 +466,70 @@ async def get_memory_summary(user_id: str = "anonymous"):
             "description": "Current conversation context",
             "items": [],
         },
-        episodic_memory={"status": "partial", "description": "Past interactions", "items": []},
+        episodic_memory={"status": "active", "description": "Past interactions and outcomes", "items": []},
         semantic_memory={"status": "active", "description": "Organizational knowledge"},
-        procedural_memory={"status": "foundation", "description": "Validated workflows"},
-        prospective_memory={"status": "foundation", "description": "Future tasks"},
+        procedural_memory={"status": "active", "description": "Validated workflows (Process Intelligence)", "items": []},
+        prospective_memory={"status": "active", "description": "Explicitly requested future tasks", "items": []},
         external_memory={"status": "active", "description": "Knowledge Fabric retrieval"},
     )
 
-    # Populate episodic memory with recent interactions for this user
+    # Episodic memory — real interaction history.
+    #
+    # NOT filtered by user_id, even though this endpoint is nominally
+    # user-scoped: AgenticSANJAYA.ask() (Mission A) doesn't receive a real
+    # caller identity today — every episode is recorded with the class
+    # default user_id="system", regardless of who actually asked. Filtering
+    # on the request's user_id here would therefore always return zero
+    # rows for any real caller (a misleading "still not really active"
+    # regression, not a privacy improvement — nothing is bucketed by an
+    # actual per-user identity yet to filter BY). Showing recent activity
+    # unfiltered is the honest behavior until a future mission threads a
+    # real user_id from the API layer through AgenticSANJAYA.ask() into
+    # record_episode()/add_task() — flagged here rather than silently
+    # left broken.
     try:
-        from kurukshetra.registry.database import get_connection
-        conn = get_connection()
-        try:
-            rows = conn.execute("""
-                SELECT query, answer, rating, created_at
-                FROM rag_feedback
-                WHERE user_id = ?
-                ORDER BY created_at DESC
-                LIMIT 10
-            """, (user_id,)).fetchall()
-            summary.episodic_memory["items"] = [
-                {"query": r[0], "outcome": "positive" if r[2] and r[2] > 0 else "negative", "timestamp": str(r[3])}
-                for r in rows
-            ]
-        except Exception:
-            pass
+        from kurukshetra.agent.memory_store import EpisodicMemory
 
-        # Count user interactions
-        try:
-            count = conn.execute(
-                "SELECT COUNT(*) FROM rag_feedback WHERE user_id = ?", (user_id,)
-            ).fetchone()[0]
-            summary.episodic_memory["total_interactions"] = count
-        except Exception:
-            pass
+        em = EpisodicMemory()
+        summary.episodic_memory["items"] = [
+            {
+                "query": e.query,
+                "outcome": "abstained" if e.abstained else "answered",
+                "timestamp": str(e.timestamp),
+            }
+            for e in em.get_recent_episodes(limit=10)
+        ]
+        summary.episodic_memory["total_interactions"] = em.get_feedback_stats().get("total", 0)
+    except Exception:
+        pass
 
-        conn.close()
+    # Procedural memory — real Process Intelligence data (not user-scoped;
+    # procedures are organizational knowledge, not per-user history).
+    try:
+        from kurukshetra.agent.memory_store import ProceduralMemory
+
+        procedures = ProceduralMemory().get_all_procedures(limit=10)
+        summary.procedural_memory["items"] = [
+            {"query": p.get("name", ""), "outcome": p.get("quality", "unknown")}
+            for p in procedures[:3]
+        ]
+        summary.procedural_memory["total_procedures"] = len(procedures)
+    except Exception:
+        pass
+
+    # Prospective memory — real pending tasks. Not filtered by user_id, for
+    # the same reason as episodic memory above: AgenticSANJAYA never passes
+    # a real requested_by into add_task() today, so every task carries the
+    # class default ("user") regardless of who asked — filtering here would
+    # just always show zero, not protect anyone's data.
+    try:
+        from kurukshetra.agent.memory_store import ProspectiveMemory
+
+        tasks = ProspectiveMemory().get_pending_tasks()
+        summary.prospective_memory["items"] = [
+            {"query": t.description, "outcome": "pending"} for t in tasks[:3]
+        ]
+        summary.prospective_memory["total_pending"] = len(tasks)
     except Exception:
         pass
 
