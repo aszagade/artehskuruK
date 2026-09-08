@@ -10,6 +10,14 @@ This starts:
   1. FastAPI backend on port 8000
   2. Inbox watcher polling every 5 seconds
 
+Registered SQL agent-extraction sources (Care/ICS) are NOT auto-synced —
+by design, registering a source only proves connectivity (health check);
+it does not chunk/embed anything. Run scripts/sync_agent_extraction_sources.py
+by hand (or via an external scheduler) whenever you actually want that
+data pulled into the knowledge graph. See
+kurukshetra/sources/agent_extraction_adapter.py's sync_registered_sources()
+if you want to wire up automatic syncing later.
+
 Place documents in knowledge/inbox/ to trigger ingestion.
 """
 
@@ -69,7 +77,7 @@ def main() -> None:
     print("  Drop a document into knowledge/inbox/ to start.")
     print()
 
-    # Start watcher in background thread
+    # Start inbox watcher in background thread
     watcher_thread = threading.Thread(target=run_watcher, daemon=True)
     watcher_thread.start()
 

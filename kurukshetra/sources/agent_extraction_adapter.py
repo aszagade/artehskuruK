@@ -368,3 +368,84 @@ def load_registered_adapters() -> list["AgentExtractionAdapter"]:
         except Exception as exc:
             logger.error("Failed to construct adapter for %s: %s", record.source_id, exc)
     return adapters
+
+
+def sync_registered_sources(source_id: Optional[str] = None) -> list[dict]:
+    """Sync every enabled `sql_agent_extraction` source through the Knowledge
+    Fabric (chunking, graph entity/relationship extraction, SEAL) and record
+    the outcome back into the persistent registry.
+
+    The single shared implementation behind scripts/sync_agent_extraction_sources.py
+    (its only caller today, manual/on-demand) — adding a source or changing
+    sync behavior only ever means editing this function, never the script.
+    Nothing in kurukshetra/runtime/__main__.py calls this automatically;
+    there is no scheduler for it yet. A future caller (a background thread,
+    an API-triggered sync, a scheduled task) can reuse this function
+    directly instead of duplicating the sync loop.
+
+    Requires AGENT_DB_USER / AGENT_DB_PASSWORD in the environment; returns
+    an empty list (logs a warning, does not raise) if they're missing, so a
+    background caller can skip a cycle without crashing.
+
+    Args:
+        source_id: sync only this source_id; default syncs every registered
+            sql_agent_extraction source.
+
+    Returns:
+        One result dict per synced source: source_id, new_documents,
+        updated_documents, deleted_documents, skipped, errors, total_time_ms.
+    """
+    import os
+
+    if not os.environ.get("AGENT_DB_USER") or not os.environ.get("AGENT_DB_PASSWORD"):
+        logger.warning(
+            "AGENT_DB_USER / AGENT_DB_PASSWORD not set — skipping agent "
+            "extraction sync this cycle."
+        )
+        return []
+
+    from kurukshetra.runtime.knowledge_watcher import KnowledgeWatcher
+    from .persistent_registry import PersistentSourceRegistry
+
+    adapters = load_registered_adapters()
+    if source_id:
+        adapters = [a for a in adapters if a.config["source_id"] == source_id]
+    if not adapters:
+        return []
+
+    registry = PersistentSourceRegistry()
+    watcher = KnowledgeWatcher()
+    results = []
+    try:
+        for adapter in adapters:
+            sid = adapter.config["source_id"]
+            health = adapter.health()
+            if not health.healthy:
+                logger.error("Skipping %s — health check failed: %s", sid, health.last_error)
+                registry.record_sync_result(source_id=sid, status="error", error=health.last_error)
+                results.append({"source_id": sid, "errors": [health.last_error]})
+                continue
+
+            logger.info("Syncing %s ...", sid)
+            result = watcher.sync_adapter(adapter)
+            status = "error" if result["errors"] else "success"
+            registry.record_sync_result(
+                source_id=sid,
+                status=status,
+                documents_found=result["new_documents"] + result["updated_documents"] + result["skipped"],
+                documents_new=result["new_documents"],
+                documents_changed=result["updated_documents"],
+                documents_removed=result["deleted_documents"],
+                error="; ".join(result["errors"])[:2000] if result["errors"] else "",
+            )
+            logger.info(
+                "  %s: %d new, %d updated, %d skipped, %d deleted, %d error(s) (%.0fms)",
+                sid, result["new_documents"], result["updated_documents"],
+                result["skipped"], result["deleted_documents"], len(result["errors"]),
+                result["total_time_ms"],
+            )
+            results.append(result)
+    finally:
+        watcher.close()
+
+    return results

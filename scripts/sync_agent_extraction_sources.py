@@ -2,11 +2,19 @@
 Sync Agent Extraction Sources
 ================================
 
-Generic runner: syncs every enabled `sql_agent_extraction` source
-registered via scripts/register_agent_extraction_sources.py through the
-normal Knowledge Fabric ingestion path (chunking, graph entity/relationship
-extraction, SEAL unknown-term detection — same pipeline every other
-source, and the 2D/3D knowledge graph, already goes through).
+CLI wrapper around kurukshetra.sources.agent_extraction_adapter.sync_registered_sources()
+— syncs every enabled `sql_agent_extraction` source registered via
+scripts/register_agent_extraction_sources.py through the normal Knowledge
+Fabric ingestion path (chunking, graph entity/relationship extraction, SEAL
+unknown-term detection — same pipeline every other source, and the 2D/3D
+knowledge graph, already goes through).
+
+The sync logic itself lives in sync_registered_sources() so it's reusable
+by anything that wants to trigger a sync — this script is the manual/
+on-demand entry point. There is currently NO automatic scheduler for it:
+`python -m kurukshetra.runtime` does not call sync_registered_sources()
+anywhere. Run this by hand, or wire it into an OS-level scheduled task
+(cron / Windows Task Scheduler) if you want it to run periodically.
 
 This file does NOT change when a new team/database is added — it reads
 whatever `load_registered_adapters()` finds in the persistent registry.
@@ -49,62 +57,31 @@ def main() -> int:
         )
         return 1
 
-    from kurukshetra.runtime.knowledge_watcher import KnowledgeWatcher
-    from kurukshetra.sources.agent_extraction_adapter import load_registered_adapters
-    from kurukshetra.sources.persistent_registry import PersistentSourceRegistry
+    from kurukshetra.sources.agent_extraction_adapter import (
+        load_registered_adapters,
+        sync_registered_sources,
+    )
 
-    adapters = load_registered_adapters()
     if args.source_id:
-        adapters = [a for a in adapters if a.config["source_id"] == args.source_id]
-        if not adapters:
+        known = {a.config["source_id"] for a in load_registered_adapters()}
+        if args.source_id not in known:
             logger.error("No enabled sql_agent_extraction source registered with id %r", args.source_id)
             return 1
-
-    if not adapters:
+    elif not load_registered_adapters():
         logger.warning(
             "No sql_agent_extraction sources registered. "
             "Run scripts/register_agent_extraction_sources.py first."
         )
         return 0
 
-    registry = PersistentSourceRegistry()
-    watcher = KnowledgeWatcher()
+    results = sync_registered_sources(source_id=args.source_id)
+
     exit_code = 0
-    try:
-        for adapter in adapters:
-            source_id = adapter.config["source_id"]
-            health = adapter.health()
-            if not health.healthy:
-                logger.error("Skipping %s — health check failed: %s", source_id, health.last_error)
-                registry.record_sync_result(source_id=source_id, status="error", error=health.last_error)
-                exit_code = 1
-                continue
-
-            logger.info("Syncing %s ...", source_id)
-            result = watcher.sync_adapter(adapter)
-            status = "error" if result["errors"] else "success"
-            registry.record_sync_result(
-                source_id=source_id,
-                status=status,
-                documents_found=result["new_documents"] + result["updated_documents"] + result["skipped"],
-                documents_new=result["new_documents"],
-                documents_changed=result["updated_documents"],
-                documents_removed=result["deleted_documents"],
-                error="; ".join(result["errors"])[:2000] if result["errors"] else "",
-            )
-            logger.info(
-                "  %s: %d new, %d updated, %d skipped, %d deleted, %d error(s) (%.0fms)",
-                source_id, result["new_documents"], result["updated_documents"],
-                result["skipped"], result["deleted_documents"], len(result["errors"]),
-                result["total_time_ms"],
-            )
-            if result["errors"]:
-                exit_code = 1
-                for err in result["errors"][:10]:
-                    logger.error("  error: %s", err)
-    finally:
-        watcher.close()
-
+    for result in results:
+        if result.get("errors"):
+            exit_code = 1
+            for err in result["errors"][:10]:
+                logger.error("  error: %s", err)
     return exit_code
 
 

@@ -295,3 +295,104 @@ class TestLoadRegisteredAdapters:
         )
 
         assert mod.load_registered_adapters() == []
+
+
+class TestSyncRegisteredSources:
+    """sync_registered_sources() — the shared periodic-sync entry point
+    used by both scripts/sync_agent_extraction_sources.py and the
+    runtime's background thread (kurukshetra/runtime/__main__.py)."""
+
+    def test_skips_when_credentials_missing(self, monkeypatch):
+        from kurukshetra.sources import agent_extraction_adapter as mod
+
+        monkeypatch.delenv("AGENT_DB_USER", raising=False)
+        monkeypatch.delenv("AGENT_DB_PASSWORD", raising=False)
+
+        assert mod.sync_registered_sources() == []
+
+    def test_syncs_each_healthy_adapter_and_records_result(self, monkeypatch):
+        from kurukshetra.sources import agent_extraction_adapter as mod
+
+        monkeypatch.setenv("AGENT_DB_USER", "test-user")
+        monkeypatch.setenv("AGENT_DB_PASSWORD", "test-pass")
+
+        adapter = AgentExtractionAdapter(config=_care_config(source_id="sync-test-src"))
+        adapter.transport.health_check = lambda: True
+        monkeypatch.setattr(mod, "load_registered_adapters", lambda: [adapter])
+
+        recorded = []
+
+        class FakeRegistry:
+            def record_sync_result(self, **kwargs):
+                recorded.append(kwargs)
+
+        monkeypatch.setattr(
+            "kurukshetra.sources.persistent_registry.PersistentSourceRegistry",
+            FakeRegistry,
+        )
+
+        class FakeWatcher:
+            def sync_adapter(self, adapter):
+                return {
+                    "source_id": adapter.config["source_id"],
+                    "new_documents": 3, "updated_documents": 1,
+                    "deleted_documents": 0, "skipped": 2, "errors": [],
+                    "total_time_ms": 12.5,
+                }
+
+            def close(self):
+                pass
+
+        monkeypatch.setattr(
+            "kurukshetra.runtime.knowledge_watcher.KnowledgeWatcher",
+            FakeWatcher,
+        )
+
+        results = mod.sync_registered_sources()
+
+        assert len(results) == 1
+        assert results[0]["source_id"] == "sync-test-src"
+        assert results[0]["new_documents"] == 3
+        assert len(recorded) == 1
+        assert recorded[0]["source_id"] == "sync-test-src"
+        assert recorded[0]["status"] == "success"
+        assert recorded[0]["documents_new"] == 3
+
+    def test_unhealthy_adapter_recorded_as_error_and_skipped(self, monkeypatch):
+        from kurukshetra.sources import agent_extraction_adapter as mod
+
+        monkeypatch.setenv("AGENT_DB_USER", "test-user")
+        monkeypatch.setenv("AGENT_DB_PASSWORD", "test-pass")
+
+        adapter = AgentExtractionAdapter(config=_care_config(source_id="unhealthy-src"))
+        adapter.transport.health_check = lambda: False
+        monkeypatch.setattr(mod, "load_registered_adapters", lambda: [adapter])
+
+        recorded = []
+
+        class FakeRegistry:
+            def record_sync_result(self, **kwargs):
+                recorded.append(kwargs)
+
+        monkeypatch.setattr(
+            "kurukshetra.sources.persistent_registry.PersistentSourceRegistry",
+            FakeRegistry,
+        )
+
+        class FakeWatcher:
+            def sync_adapter(self, adapter):
+                raise AssertionError("sync_adapter should not be called for an unhealthy source")
+
+            def close(self):
+                pass
+
+        monkeypatch.setattr(
+            "kurukshetra.runtime.knowledge_watcher.KnowledgeWatcher",
+            FakeWatcher,
+        )
+
+        results = mod.sync_registered_sources()
+
+        assert len(results) == 1
+        assert results[0]["errors"]
+        assert recorded[0]["status"] == "error"

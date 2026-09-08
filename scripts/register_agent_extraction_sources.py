@@ -50,7 +50,6 @@ SOURCES: list[dict] = [
             "database": "CareAgent",
             "team": "care",
             "tables": [
-                {"name": "Care_Email_Extraction", "version_tag": "legacy", "cursor_column": None},
                 {"name": "Care_Email_Extraction_V3", "version_tag": "v3", "cursor_column": "last_updated_at"},
             ],
         },
@@ -70,7 +69,6 @@ SOURCES: list[dict] = [
             "database": "ICSAgent",
             "team": "ics",
             "tables": [
-                {"name": "ICS_Email_Extraction", "version_tag": "legacy", "cursor_column": None},
                 {"name": "ICS_Email_Extraction_V3", "version_tag": "v3", "cursor_column": "last_updated_at"},
             ],
         },
