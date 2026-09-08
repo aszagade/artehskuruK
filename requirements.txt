@@ -22,6 +22,11 @@ beautifulsoup4>=4.12.0
 aiohttp>=3.8.0
 async-timeout>=4.0.0
 
+# Enterprise source connectors
+pyodbc>=5.0.0   # SQL Server (Care/ICS agent extraction) — needs the
+                # "ODBC Driver 18 for SQL Server" system driver installed
+                # separately; pip alone doesn't provide it.
+
 # Testing
 pytest>=7.4.0
 httpx>=0.25.0
